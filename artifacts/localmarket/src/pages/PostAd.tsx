@@ -299,7 +299,7 @@ export default function PostAd() {
                           <RadioGroup
                             onValueChange={field.onChange}
                             value={field.value}
-                            className="grid grid-cols-3 gap-4"
+                            className="grid grid-cols-1 sm:grid-cols-3 gap-4"
                           >
                             <div>
                               <RadioGroupItem value="free" id="free" className="peer sr-only" />
@@ -408,7 +408,7 @@ export default function PostAd() {
                             <RadioGroup
                               onValueChange={(val) => field.onChange(Number(val))}
                               value={field.value ? String(field.value) : ""}
-                              className="grid grid-cols-3 gap-4"
+                              className="grid grid-cols-1 sm:grid-cols-3 gap-4"
                             >
                               {promotionPrices.filter(p => p.active).map((promo) => (
                                 <div key={promo.id}>

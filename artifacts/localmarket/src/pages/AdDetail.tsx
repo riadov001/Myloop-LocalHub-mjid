@@ -126,15 +126,15 @@ export default function AdDetail() {
                   <>
                     {ad?.contactEmail ? (
                       <Button className="w-full justify-start h-12" variant="outline" onClick={() => window.location.href = `mailto:${ad.contactEmail}`}>
-                        <Mail className="mr-3 h-5 w-5 text-primary" />
-                        {ad.contactEmail}
+                        <Mail className="mr-3 h-5 w-5 text-primary shrink-0" />
+                        <span className="truncate">{ad.contactEmail}</span>
                       </Button>
                     ) : null}
                     
                     {ad?.contactPhone ? (
                       <Button className="w-full justify-start h-12" variant="outline" onClick={() => window.location.href = `tel:${ad.contactPhone}`}>
-                        <Phone className="mr-3 h-5 w-5 text-primary" />
-                        {ad.contactPhone}
+                        <Phone className="mr-3 h-5 w-5 text-primary shrink-0" />
+                        <span className="truncate">{ad.contactPhone}</span>
                       </Button>
                     ) : null}
 

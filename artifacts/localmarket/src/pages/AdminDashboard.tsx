@@ -446,7 +446,7 @@ function AdminsTab() {
       )}
 
       <Card className="border-border/50">
-        <CardContent className="p-0">
+        <CardContent className="p-0 overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow>
@@ -635,7 +635,7 @@ function AnnoncesTab() {
       )}
 
       <Card className="border-border/50">
-        <CardContent className="p-0">
+        <CardContent className="p-0 overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow>
@@ -890,7 +890,7 @@ function PublicitesTab() {
       )}
 
       <Card className="border-border/50">
-        <CardContent className="p-0">
+        <CardContent className="p-0 overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow>
@@ -1028,7 +1028,7 @@ function CategoriesTab() {
             <Button onClick={handleCreate} disabled={createCategory.isPending}><Plus className="h-4 w-4 mr-1" /> Ajouter</Button>
           </div>
         </CardHeader>
-        <CardContent className="p-0">
+        <CardContent className="p-0 overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow>
@@ -1117,7 +1117,7 @@ function UnitesTab() {
             <Button onClick={handleCreate} disabled={createUnit.isPending}><Plus className="h-4 w-4 mr-1" /> Ajouter</Button>
           </div>
         </CardHeader>
-        <CardContent className="p-0">
+        <CardContent className="p-0 overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow>
@@ -1203,13 +1203,13 @@ function TarifsTab() {
       <Card className="border-border/50">
         <CardHeader className="bg-muted/30 border-b pb-4">
           <div className="flex gap-3 flex-wrap">
-            <Input placeholder="Durée (jours)" type="number" value={newDuration} onChange={(e) => setNewDuration(e.target.value)} className="w-32" />
-            <Input placeholder="Libellé (ex: 7 jours)" value={newLabel} onChange={(e) => setNewLabel(e.target.value)} className="flex-1 min-w-[140px]" />
-            <Input placeholder="Prix (ex: 9.90)" type="number" step="0.01" value={newPrice} onChange={(e) => setNewPrice(e.target.value)} className="w-32" />
-            <Button onClick={handleCreate} disabled={createPrice.isPending}><Plus className="h-4 w-4 mr-1" /> Ajouter</Button>
+            <Input placeholder="Durée (jours)" type="number" value={newDuration} onChange={(e) => setNewDuration(e.target.value)} className="w-full sm:w-32" />
+            <Input placeholder="Libellé (ex: 7 jours)" value={newLabel} onChange={(e) => setNewLabel(e.target.value)} className="w-full sm:flex-1 sm:min-w-[140px]" />
+            <Input placeholder="Prix (ex: 9.90)" type="number" step="0.01" value={newPrice} onChange={(e) => setNewPrice(e.target.value)} className="w-full sm:w-32" />
+            <Button onClick={handleCreate} disabled={createPrice.isPending} className="w-full sm:w-auto"><Plus className="h-4 w-4 mr-1" /> Ajouter</Button>
           </div>
         </CardHeader>
-        <CardContent className="p-0">
+        <CardContent className="p-0 overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow>
@@ -1375,7 +1375,7 @@ function PlansTab() {
       )}
 
       <Card className="border-border/50">
-        <CardContent className="p-0">
+        <CardContent className="p-0 overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow>
@@ -1575,7 +1575,7 @@ function BrandingTab() {
               <Label>URL du logo</Label>
               <Input placeholder="https://..." value={formState.logoUrl} onChange={(e) => setFormState({ ...formState, logoUrl: e.target.value })} />
             </div>
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               {[
                 { label: "Couleur Primaire", key: "primaryColor" as const },
                 { label: "Couleur d'Accent", key: "accentColor" as const },
