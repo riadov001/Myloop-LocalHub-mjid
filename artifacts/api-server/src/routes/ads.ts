@@ -58,8 +58,9 @@ router.get("/ads", async (req, res) => {
       );
     }
     if (query.quantity) {
+      const q = (query.quantity as string).toLowerCase();
       filtered = filtered.filter((a) =>
-        a.quantity?.toLowerCase().includes((query.quantity as string).toLowerCase())
+        (a.quantity ?? "").toLowerCase().includes(q)
       );
     }
     if (query.listingType) {
