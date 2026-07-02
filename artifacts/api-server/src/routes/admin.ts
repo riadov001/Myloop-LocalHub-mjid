@@ -6,8 +6,8 @@ import { AdminLoginBody } from "@workspace/api-zod";
 
 const router = Router();
 
-export const ROOT_EMAIL = "admin@localmarket.fr";
-export const ROOT_PASSWORD = "admin123";
+export const ROOT_EMAIL = "rbelmahi90@gmail.com";
+export const ROOT_PASSWORD = "Root@26!";
 export const ROOT_TOKEN = "localmarket-root-token-2026";
 export const ADMIN_TOKEN_PREFIX = "localmarket-admin-token-2026";
 

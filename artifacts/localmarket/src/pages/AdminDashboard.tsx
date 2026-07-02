@@ -25,7 +25,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import {
   CheckCircle2, XCircle, Trash2, Eye, EyeOff, Paintbrush, Loader2, Plus, Pencil,
-  Settings2, Star, Users, Shield, Crown, ToggleLeft, FileText, UserCheck,
+  Settings2, Star, Users, Shield, ToggleLeft, FileText, UserCheck,
   TrendingUp, Clock, Activity, AlertTriangle, CheckSquare, Square, Globe, Hash,
   Share2, Wrench, Key, ChevronDown, ChevronRight, CreditCard, Heart, RefreshCw,
   Megaphone, Image, Video, Link2, ArrowUp, ArrowDown, ExternalLink,
@@ -64,8 +64,8 @@ export default function AdminDashboard() {
         {activeTab === "admins" && role !== "root" && (
           <div className="flex flex-col items-center justify-center py-20 text-muted-foreground gap-3">
             <Shield className="h-10 w-10 text-amber-500" />
-            <p className="font-semibold text-lg">Accès réservé au Root Admin</p>
-            <p className="text-sm">Vous devez être connecté en tant que Root Admin pour gérer les comptes administrateurs.</p>
+            <p className="font-semibold text-lg">Accès réservé</p>
+            <p className="text-sm">Vous n'avez pas les droits pour accéder à cette section.</p>
           </div>
         )}
       </div>
@@ -196,7 +196,7 @@ function OverviewTab() {
                   </div>
                   <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
                     <span className="text-sm text-muted-foreground">Comptes admins actifs</span>
-                    <span className="font-bold">{(stats?.totalAdmins ?? 0) + 1} <span className="text-xs text-muted-foreground">(+root)</span></span>
+                    <span className="font-bold">{stats?.totalAdmins ?? 0}</span>
                   </div>
                 </div>
               </CardContent>
@@ -376,30 +376,13 @@ function AdminsTab() {
     <div className="space-y-6">
       <TabHeader
         title="Gestion des administrateurs"
-        description="Créez et gérez les comptes admin de la plateforme. Réservé au Root Admin."
+        description="Créez et gérez les comptes admin de la plateforme."
         action={
           <Button onClick={() => { cancel(); setShowForm(true); }} className="gap-2">
             <Plus className="h-4 w-4" /> Nouvel admin
           </Button>
         }
       />
-
-      {/* Root admin card (non-deletable) */}
-      <Card className="border-amber-200 bg-amber-50/30 dark:bg-amber-950/10 dark:border-amber-800">
-        <CardContent className="p-4 flex items-center gap-4">
-          <div className="h-10 w-10 rounded-full bg-amber-500/20 flex items-center justify-center shrink-0">
-            <Crown className="h-5 w-5 text-amber-500" />
-          </div>
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2">
-              <p className="font-semibold text-sm">Root Admin</p>
-              <Badge className="bg-amber-500/20 text-amber-700 border-amber-300 text-[10px]">ROOT</Badge>
-            </div>
-            <p className="text-xs text-muted-foreground">admin@localmarket.fr — Compte root hardcodé, toujours actif</p>
-          </div>
-          <Badge variant="outline" className="text-green-600 border-green-300 text-xs shrink-0">Actif</Badge>
-        </CardContent>
-      </Card>
 
       {showForm && (
         <Card className="border-primary/20">
@@ -426,7 +409,6 @@ function AdminsTab() {
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="admin">Administrateur</SelectItem>
-                    <SelectItem value="root">Root Admin</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -466,15 +448,9 @@ function AdminsTab() {
                   <TableCell className="font-medium">{a.name}</TableCell>
                   <TableCell className="text-muted-foreground text-sm">{a.email}</TableCell>
                   <TableCell>
-                    {a.role === "root" ? (
-                      <Badge className="bg-amber-500/20 text-amber-700 border-amber-300 text-xs gap-1">
-                        <Crown className="h-3 w-3" /> Root
-                      </Badge>
-                    ) : (
-                      <Badge variant="outline" className="text-xs gap-1">
-                        <Shield className="h-3 w-3" /> Admin
-                      </Badge>
-                    )}
+                    <Badge variant="outline" className="text-xs gap-1">
+                      <Shield className="h-3 w-3" /> Admin
+                    </Badge>
                   </TableCell>
                   <TableCell>
                     {a.isActive ? (

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
-import { Triangle, Lock, Loader2, Info } from "lucide-react";
+import { Triangle, Lock, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
@@ -11,8 +11,8 @@ import { useAdminLogin } from "@workspace/api-client-react";
 export default function AdminLogin() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
-  const [email, setEmail] = useState("admin@localmarket.fr");
-  const [password, setPassword] = useState("admin123");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
   const loginMutation = useAdminLogin();
 
@@ -42,18 +42,11 @@ export default function AdminLogin() {
           }
         },
         onError: () => {
-          if (email === "admin@localmarket.fr" && password === "admin123") {
-            localStorage.setItem("adminToken", "localmarket-root-token-2026");
-            localStorage.setItem("adminRole", "root");
-            toast({ title: "Connexion réussie" });
-            setLocation("/admin/dashboard");
-          } else {
-            toast({
-              title: "Erreur de connexion",
-              description: "Impossible de joindre le serveur. Vérifiez vos identifiants.",
-              variant: "destructive",
-            });
-          }
+          toast({
+            title: "Erreur de connexion",
+            description: "Impossible de joindre le serveur. Vérifiez vos identifiants.",
+            variant: "destructive",
+          });
         },
       }
     );
@@ -62,24 +55,6 @@ export default function AdminLogin() {
   return (
     <div className="min-h-[100dvh] flex items-center justify-center bg-background p-4">
       <div className="w-full max-w-md space-y-4">
-
-        {/* Encart credentials — visible et pré-rempli */}
-        <div className="rounded-xl border border-primary/30 bg-primary/10 p-4 flex gap-3">
-          <Info className="h-5 w-5 text-primary shrink-0 mt-0.5" />
-          <div className="space-y-1">
-            <p className="text-sm font-semibold text-foreground">Identifiants administrateur</p>
-            <div className="text-xs text-muted-foreground space-y-0.5">
-              <div className="flex gap-2">
-                <span className="text-muted-foreground/60 w-16">Email :</span>
-                <code className="text-primary font-mono font-semibold">admin@localmarket.fr</code>
-              </div>
-              <div className="flex gap-2">
-                <span className="text-muted-foreground/60 w-16">Mot de passe :</span>
-                <code className="text-primary font-mono font-semibold">admin123</code>
-              </div>
-            </div>
-          </div>
-        </div>
 
         <Card className="border-border/50 bg-card shadow-2xl shadow-black/40">
           <CardHeader className="space-y-4 items-center text-center pb-6">
@@ -101,7 +76,7 @@ export default function AdminLogin() {
                 <Input
                   id="email"
                   type="email"
-                  placeholder="admin@localmarket.fr"
+                  placeholder="exemple@email.fr"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required

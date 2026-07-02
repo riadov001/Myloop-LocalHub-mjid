@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import {
   LayoutDashboard, LogOut, Settings, Palette, List, Tag, Scale,
-  Star, Users, Shield, ToggleLeft, ChevronRight, Menu, X, Triangle, Crown, CreditCard, Megaphone,
+  Star, Users, Shield, ToggleLeft, ChevronRight, Menu, X, Triangle, CreditCard, Megaphone,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -59,11 +59,6 @@ export function AdminLayout({ children }: AdminLayoutProps) {
             <div className="font-bold text-sm text-sidebar-foreground leading-tight">LocalMarket</div>
             <div className="text-[10px] text-sidebar-foreground/50 leading-tight">Cockpit Admin</div>
           </div>
-          {role === "root" && (
-            <Badge className="ml-auto bg-amber-500/20 text-amber-400 border-amber-500/30 text-[10px] px-1.5 py-0.5 shrink-0 flex items-center gap-1">
-              <Crown className="h-2.5 w-2.5" />ROOT
-            </Badge>
-          )}
         </Link>
       </div>
 
@@ -99,11 +94,11 @@ export function AdminLayout({ children }: AdminLayoutProps) {
         <div className="px-3 py-2 rounded-lg bg-sidebar-accent/50">
           <div className="flex items-center gap-2">
             <div className="h-7 w-7 rounded-full bg-primary/30 flex items-center justify-center shrink-0">
-              {role === "root" ? <Crown className="h-3.5 w-3.5 text-amber-400" /> : <Shield className="h-3.5 w-3.5 text-primary" />}
+              <Shield className="h-3.5 w-3.5 text-primary" />
             </div>
             <div className="min-w-0">
               <div className="text-xs font-semibold text-sidebar-foreground truncate">
-                {role === "root" ? "Root Admin" : "Administrateur"}
+                Administrateur
               </div>
               <div className="text-[10px] text-sidebar-foreground/50">LocalMarket</div>
             </div>
