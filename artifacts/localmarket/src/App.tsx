@@ -17,6 +17,7 @@ import Dons from "@/pages/Dons";
 import EspaceCommercant from "@/pages/EspaceCommercant";
 import ForgotPassword from "@/pages/ForgotPassword";
 import ResetPassword from "@/pages/ResetPassword";
+import VideoTemplate from "@/components/video/VideoTemplate";
 
 const queryClient = new QueryClient();
 
@@ -39,6 +40,7 @@ function Router() {
       <Route path="/mentions-legales" component={Legal} />
       <Route path="/cgu" component={CGU} />
       <Route path="/politique-confidentialite" component={Privacy} />
+      <Route path="/video" component={VideoTemplate} />
       <Route component={NotFound} />
     </Switch>
   );

@@ -6,3 +6,21 @@ id = "mOFoDSx7M4rUi02F9Vmvg"
 uri = "file://deployment/hostinger/GUIDE.md"
 type = "text"
 title = "Guide Déploiement Hostinger — LocalMarket"
+
+[[outputs]]
+id = "TqjdVigPmHAOmo_x1X89P"
+uri = "file://artifacts/localmarket/public/images/vegetables.jpg"
+type = "image"
+title = "Fresh local vegetables in a wooden basket at a farmers market, sunny day, professional photography"
+
+[[outputs]]
+id = "PLxco2ZvrL4LHn_eARN1t"
+uri = "file://artifacts/localmarket/public/images/artisan.jpg"
+type = "image"
+title = "Artisan crafting pottery or woodworking, close up, warm light, professional photography"
+
+[[outputs]]
+id = "SGZWdakL7WjwIt0aJkOKA"
+uri = "file://artifacts/localmarket/public/images/neighbors.jpg"
+type = "image"
+title = "Friendly neighbors talking outside, sunny day, professional photography"
