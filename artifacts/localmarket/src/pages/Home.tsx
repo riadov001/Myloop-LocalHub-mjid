@@ -163,7 +163,7 @@ export default function Home() {
               </Card>
             </div>
 
-            <div className="relative h-[560px] w-full rounded-2xl overflow-hidden border border-border/50 shadow-2xl shadow-black/40">
+            <div className="relative h-[320px] md:h-[560px] w-full rounded-2xl overflow-hidden border border-border/50 shadow-2xl shadow-black/40">
               {adsLoading ? (
                 <div className="absolute inset-0 flex flex-col items-center justify-center bg-card text-muted-foreground gap-3">
                   <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />

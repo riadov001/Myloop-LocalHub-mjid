@@ -88,10 +88,10 @@ export function MapView({ ads = [] }: MapViewProps) {
         shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
       });
 
-      // Initialisation carte centrée sur la France
+      // Initialisation carte centrée sur les Hauts-de-France
       const map = L.map(mapRef.current!, {
-        center: [46.5, 2.5],
-        zoom: 6,
+        center: [50.2, 3.0],
+        zoom: 8,
         zoomControl: true,
         scrollWheelZoom: true,
       });
@@ -154,7 +154,7 @@ export function MapView({ ads = [] }: MapViewProps) {
       // Si pas d'annonces, afficher un message centré
       if (ads.length === 0) {
         L.popup()
-          .setLatLng([46.5, 2.5])
+          .setLatLng([50.2, 3.0])
           .setContent("<p style='text-align:center; padding: 8px;'>Aucune annonce à afficher sur la carte.</p>")
           .openOn(map);
       }
