@@ -411,6 +411,112 @@ paths:
         "204":
           description: Deleted
 
+  /advertisements:
+    get:
+      operationId: listAdvertisements
+      tags: [ads]
+      summary: List active advertisements (public)
+      responses:
+        "200":
+          description: List of active advertisements
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Advertisement"
+
+  /admin/advertisements:
+    get:
+      operationId: adminListAdvertisements
+      tags: [admin]
+      summary: Admin - list all advertisements
+      responses:
+        "200":
+          description: All advertisements
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Advertisement"
+    post:
+      operationId: adminCreateAdvertisement
+      tags: [admin]
+      summary: Admin - create advertisement
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AdvertisementInput"
+      responses:
+        "201":
+          description: Created advertisement
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Advertisement"
+
+  /admin/advertisements/reorder:
+    post:
+      operationId: adminReorderAdvertisements
+      tags: [admin]
+      summary: Admin - reorder advertisements
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AdvertisementReorderInput"
+      responses:
+        "200":
+          description: Reordered advertisements
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Advertisement"
+
+  /admin/advertisements/{id}:
+    put:
+      operationId: adminUpdateAdvertisement
+      tags: [admin]
+      summary: Admin - update advertisement
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AdvertisementInput"
+      responses:
+        "200":
+          description: Updated advertisement
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Advertisement"
+    delete:
+      operationId: adminDeleteAdvertisement
+      tags: [admin]
+      summary: Admin - delete advertisement
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
   /admin/promotion-prices:
     get:
       operationId: adminListPromotionPrices
@@ -911,6 +1017,63 @@ components:
         status:
           type: string
           enum: [pending, published, rejected]
+
+    Advertisement:
+      type: object
+      required: [id, title, mediaType, mediaUrl, displayOrder, isActive, createdAt]
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        mediaType:
+          type: string
+          enum: [image, video]
+        mediaUrl:
+          type: string
+        linkUrl:
+          type: ["string", "null"]
+        displayOrder:
+          type: integer
+        isActive:
+          type: boolean
+        startDate:
+          type: ["string", "null"]
+        endDate:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+
+    AdvertisementInput:
+      type: object
+      required: [title, mediaType, mediaUrl]
+      properties:
+        title:
+          type: string
+        mediaType:
+          type: string
+          enum: [image, video]
+        mediaUrl:
+          type: string
+        linkUrl:
+          type: string
+        displayOrder:
+          type: integer
+        isActive:
+          type: boolean
+        startDate:
+          type: ["string", "null"]
+        endDate:
+          type: ["string", "null"]
+
+    AdvertisementReorderInput:
+      type: object
+      required: [ids]
+      properties:
+        ids:
+          type: array
+          items:
+            type: integer
 
     Stats:
       type: object

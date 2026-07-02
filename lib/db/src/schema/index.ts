@@ -10,3 +10,4 @@ export * from "./admin-users";
 export * from "./subscriptions";
 export * from "./donations";
 export * from "./ad-views";
+export * from "./advertisements";

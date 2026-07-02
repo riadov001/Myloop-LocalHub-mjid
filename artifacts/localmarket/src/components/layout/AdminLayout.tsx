@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import {
   LayoutDashboard, LogOut, Settings, Palette, List, Tag, Scale,
-  Star, Users, Shield, ToggleLeft, ChevronRight, Menu, X, Triangle, Crown, CreditCard,
+  Star, Users, Shield, ToggleLeft, ChevronRight, Menu, X, Triangle, Crown, CreditCard, Megaphone,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -16,6 +16,7 @@ export function useAdminRole(): "root" | "admin" {
 const NAV_ITEMS = [
   { tab: "overview", label: "Vue d'ensemble", icon: LayoutDashboard, roles: ["root", "admin"] },
   { tab: "annonces", label: "Annonces", icon: List, roles: ["root", "admin"] },
+  { tab: "publicites", label: "Publicités", icon: Megaphone, roles: ["root", "admin"] },
   { tab: "plans", label: "Plans & Abonnements", icon: Star, roles: ["root", "admin"] },
   { tab: "modes", label: "Modes plateforme", icon: ToggleLeft, roles: ["root", "admin"] },
   { tab: "categories", label: "Catégories", icon: Tag, roles: ["root", "admin"] },

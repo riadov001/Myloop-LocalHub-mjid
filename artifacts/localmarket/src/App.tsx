@@ -5,6 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/not-found";
 import Home from "@/pages/Home";
 import AdsList from "@/pages/AdsList";
+import Publicites from "@/pages/Publicites";
 import PostAd from "@/pages/PostAd";
 import AdDetail from "@/pages/AdDetail";
 import AdminLogin from "@/pages/AdminLogin";
@@ -27,6 +28,7 @@ function Router() {
       <Route path="/" component={Home} />
       <Route path="/annonces" component={AdsList} />
       <Route path="/annonces/:id" component={AdDetail} />
+      <Route path="/publicites" component={Publicites} />
       <Route path="/deposer" component={PostAd} />
       <Route path="/admin" component={AdminLogin} />
       <Route path="/admin/dashboard" component={AdminDashboard} />

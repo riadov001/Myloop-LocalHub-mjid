@@ -119,6 +119,55 @@ export interface AdStatusUpdate {
   status: AdStatusUpdateStatus;
 }
 
+export type AdvertisementMediaType = typeof AdvertisementMediaType[keyof typeof AdvertisementMediaType];
+
+
+export const AdvertisementMediaType = {
+  image: 'image',
+  video: 'video',
+} as const;
+
+export interface Advertisement {
+  id: number;
+  title: string;
+  mediaType: AdvertisementMediaType;
+  mediaUrl: string;
+  /** @nullable */
+  linkUrl?: string | null;
+  displayOrder: number;
+  isActive: boolean;
+  /** @nullable */
+  startDate?: string | null;
+  /** @nullable */
+  endDate?: string | null;
+  createdAt: string;
+}
+
+export type AdvertisementInputMediaType = typeof AdvertisementInputMediaType[keyof typeof AdvertisementInputMediaType];
+
+
+export const AdvertisementInputMediaType = {
+  image: 'image',
+  video: 'video',
+} as const;
+
+export interface AdvertisementInput {
+  title: string;
+  mediaType: AdvertisementInputMediaType;
+  mediaUrl: string;
+  linkUrl?: string;
+  displayOrder?: number;
+  isActive?: boolean;
+  /** @nullable */
+  startDate?: string | null;
+  /** @nullable */
+  endDate?: string | null;
+}
+
+export interface AdvertisementReorderInput {
+  ids: number[];
+}
+
 export interface Stats {
   totalAds: number;
   totalExchangers: number;

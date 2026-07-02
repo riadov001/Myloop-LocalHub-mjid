@@ -365,6 +365,119 @@ export const AdminDeleteUnitParams = zod.object({
 
 
 /**
+ * @summary List active advertisements (public)
+ */
+export const ListAdvertisementsResponseItem = zod.object({
+  "id": zod.number(),
+  "title": zod.string(),
+  "mediaType": zod.enum(['image', 'video']),
+  "mediaUrl": zod.string(),
+  "linkUrl": zod.string().nullish(),
+  "displayOrder": zod.number(),
+  "isActive": zod.boolean(),
+  "startDate": zod.string().nullish(),
+  "endDate": zod.string().nullish(),
+  "createdAt": zod.string()
+})
+export const ListAdvertisementsResponse = zod.array(ListAdvertisementsResponseItem)
+
+
+/**
+ * @summary Admin - list all advertisements
+ */
+export const AdminListAdvertisementsResponseItem = zod.object({
+  "id": zod.number(),
+  "title": zod.string(),
+  "mediaType": zod.enum(['image', 'video']),
+  "mediaUrl": zod.string(),
+  "linkUrl": zod.string().nullish(),
+  "displayOrder": zod.number(),
+  "isActive": zod.boolean(),
+  "startDate": zod.string().nullish(),
+  "endDate": zod.string().nullish(),
+  "createdAt": zod.string()
+})
+export const AdminListAdvertisementsResponse = zod.array(AdminListAdvertisementsResponseItem)
+
+
+/**
+ * @summary Admin - create advertisement
+ */
+export const AdminCreateAdvertisementBody = zod.object({
+  "title": zod.string(),
+  "mediaType": zod.enum(['image', 'video']),
+  "mediaUrl": zod.string(),
+  "linkUrl": zod.string().optional(),
+  "displayOrder": zod.number().optional(),
+  "isActive": zod.boolean().optional(),
+  "startDate": zod.string().nullish(),
+  "endDate": zod.string().nullish()
+})
+
+
+/**
+ * @summary Admin - reorder advertisements
+ */
+export const AdminReorderAdvertisementsBody = zod.object({
+  "ids": zod.array(zod.number())
+})
+
+export const AdminReorderAdvertisementsResponseItem = zod.object({
+  "id": zod.number(),
+  "title": zod.string(),
+  "mediaType": zod.enum(['image', 'video']),
+  "mediaUrl": zod.string(),
+  "linkUrl": zod.string().nullish(),
+  "displayOrder": zod.number(),
+  "isActive": zod.boolean(),
+  "startDate": zod.string().nullish(),
+  "endDate": zod.string().nullish(),
+  "createdAt": zod.string()
+})
+export const AdminReorderAdvertisementsResponse = zod.array(AdminReorderAdvertisementsResponseItem)
+
+
+/**
+ * @summary Admin - update advertisement
+ */
+export const AdminUpdateAdvertisementParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const AdminUpdateAdvertisementBody = zod.object({
+  "title": zod.string(),
+  "mediaType": zod.enum(['image', 'video']),
+  "mediaUrl": zod.string(),
+  "linkUrl": zod.string().optional(),
+  "displayOrder": zod.number().optional(),
+  "isActive": zod.boolean().optional(),
+  "startDate": zod.string().nullish(),
+  "endDate": zod.string().nullish()
+})
+
+export const AdminUpdateAdvertisementResponse = zod.object({
+  "id": zod.number(),
+  "title": zod.string(),
+  "mediaType": zod.enum(['image', 'video']),
+  "mediaUrl": zod.string(),
+  "linkUrl": zod.string().nullish(),
+  "displayOrder": zod.number(),
+  "isActive": zod.boolean(),
+  "startDate": zod.string().nullish(),
+  "endDate": zod.string().nullish(),
+  "createdAt": zod.string()
+})
+
+
+/**
+ * @summary Admin - delete advertisement
+ */
+export const AdminDeleteAdvertisementParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+
+/**
  * @summary Admin - list promotion prices
  */
 export const AdminListPromotionPricesResponseItem = zod.object({

@@ -18,11 +18,13 @@ import donationsRouter from "./donations";
 import merchantRouter from "./merchant";
 import webhookRouter from "./webhook";
 import adminPaymentsRouter from "./admin-payments";
+import advertisementsRouter from "./advertisements";
 
 const router: IRouter = Router();
 
 router.use(healthRouter);
 router.use(adsRouter);
+router.use(advertisementsRouter);
 router.use(statsRouter);
 router.use(brandingRouter);
 router.use(adminRouter);

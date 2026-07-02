@@ -19,6 +19,8 @@ import {
   useAdminListConfig, useAdminUpdateConfig,
   useAdminGetStats, useAdminGetModes, useAdminUpdateMode,
   useAdminListUsers, useAdminCreateUser, useAdminUpdateUser, useAdminDeleteUser,
+  useAdminListAdvertisements, useAdminCreateAdvertisement, useAdminUpdateAdvertisement,
+  useAdminDeleteAdvertisement, useAdminReorderAdvertisements,
 } from "@workspace/api-client-react";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -26,6 +28,7 @@ import {
   Settings2, Star, Users, Shield, Crown, ToggleLeft, FileText, UserCheck,
   TrendingUp, Clock, Activity, AlertTriangle, CheckSquare, Square, Globe, Hash,
   Share2, Wrench, Key, ChevronDown, ChevronRight, CreditCard, Heart, RefreshCw,
+  Megaphone, Image, Video, Link2, ArrowUp, ArrowDown, ExternalLink,
 } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -48,6 +51,7 @@ export default function AdminDashboard() {
       <div className="flex flex-col gap-6 pb-10">
         {activeTab === "overview" && <OverviewTab />}
         {activeTab === "annonces" && <AnnoncesTab />}
+        {activeTab === "publicites" && <PublicitesTab />}
         {activeTab === "plans" && <PlansTab />}
         {activeTab === "modes" && <ModesTab />}
         {activeTab === "categories" && <CategoriesTab />}
@@ -693,6 +697,273 @@ function AnnoncesTab() {
                 ))
               ) : (
                 <TableRow><TableCell colSpan={8} className="text-center py-10 text-muted-foreground">Aucune annonce trouvée.</TableCell></TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
+function PublicitesTab() {
+  const { toast } = useToast();
+  const { data: ads, isLoading, refetch } = useAdminListAdvertisements();
+  const createAd = useAdminCreateAdvertisement();
+  const updateAd = useAdminUpdateAdvertisement();
+  const deleteAd = useAdminDeleteAdvertisement();
+  const reorderAds = useAdminReorderAdvertisements();
+
+  const emptyForm = {
+    title: "",
+    mediaType: "image" as "image" | "video",
+    mediaUrl: "",
+    linkUrl: "",
+    isActive: true,
+    startDate: "",
+    endDate: "",
+  };
+  const [showForm, setShowForm] = useState(false);
+  const [form, setForm] = useState(emptyForm);
+  const [editingId, setEditingId] = useState<number | null>(null);
+
+  const setField = <K extends keyof typeof emptyForm>(k: K, v: typeof emptyForm[K]) =>
+    setForm(f => ({ ...f, [k]: v }));
+
+  const cancel = () => { setEditingId(null); setForm(emptyForm); setShowForm(false); };
+
+  const buildPayload = () => ({
+    title: form.title,
+    mediaType: form.mediaType,
+    mediaUrl: form.mediaUrl,
+    linkUrl: form.linkUrl || undefined,
+    isActive: form.isActive,
+    startDate: form.startDate ? new Date(form.startDate).toISOString() : null,
+    endDate: form.endDate ? new Date(form.endDate).toISOString() : null,
+  });
+
+  const handleCreate = () => {
+    if (!form.title || !form.mediaUrl) return;
+    createAd.mutate(
+      { data: buildPayload() },
+      {
+        onSuccess: () => { toast({ title: "Publicité créée." }); cancel(); refetch(); },
+        onError: () => toast({ title: "Erreur lors de la création", variant: "destructive" }),
+      }
+    );
+  };
+
+  const startEdit = (a: NonNullable<typeof ads>[number]) => {
+    setEditingId(a.id);
+    setForm({
+      title: a.title,
+      mediaType: a.mediaType,
+      mediaUrl: a.mediaUrl,
+      linkUrl: a.linkUrl ?? "",
+      isActive: a.isActive,
+      startDate: a.startDate ? a.startDate.slice(0, 10) : "",
+      endDate: a.endDate ? a.endDate.slice(0, 10) : "",
+    });
+    setShowForm(true);
+  };
+
+  const handleUpdate = () => {
+    if (!editingId) return;
+    updateAd.mutate(
+      { id: editingId, data: buildPayload() },
+      {
+        onSuccess: () => { toast({ title: "Publicité mise à jour." }); cancel(); refetch(); },
+        onError: () => toast({ title: "Erreur lors de la mise à jour", variant: "destructive" }),
+      }
+    );
+  };
+
+  const handleDelete = (id: number) => {
+    if (!confirm("Supprimer cette publicité ?")) return;
+    deleteAd.mutate(
+      { id },
+      {
+        onSuccess: () => { toast({ title: "Publicité supprimée." }); refetch(); },
+        onError: () => toast({ title: "Erreur lors de la suppression", variant: "destructive" }),
+      }
+    );
+  };
+
+  const handleToggleActive = (a: NonNullable<typeof ads>[number]) => {
+    updateAd.mutate(
+      {
+        id: a.id,
+        data: {
+          title: a.title,
+          mediaType: a.mediaType,
+          mediaUrl: a.mediaUrl,
+          linkUrl: a.linkUrl ?? undefined,
+          isActive: !a.isActive,
+          startDate: a.startDate,
+          endDate: a.endDate,
+        },
+      },
+      {
+        onSuccess: () => { toast({ title: a.isActive ? "Publicité désactivée." : "Publicité activée." }); refetch(); },
+        onError: () => toast({ title: "Erreur", variant: "destructive" }),
+      }
+    );
+  };
+
+  const move = (index: number, direction: -1 | 1) => {
+    if (!ads) return;
+    const target = index + direction;
+    if (target < 0 || target >= ads.length) return;
+    const reordered = [...ads];
+    [reordered[index], reordered[target]] = [reordered[target], reordered[index]];
+    reorderAds.mutate(
+      { data: { ids: reordered.map(a => a.id) } },
+      {
+        onSuccess: () => refetch(),
+        onError: () => toast({ title: "Erreur lors de la réorganisation", variant: "destructive" }),
+      }
+    );
+  };
+
+  return (
+    <div className="space-y-6">
+      <TabHeader
+        title="Gestion des publicités"
+        description="Créez, modifiez, réordonnez et supprimez les bannières et vidéos promotionnelles affichées publiquement."
+        action={
+          <Button onClick={() => { cancel(); setShowForm(true); }} className="gap-2">
+            <Plus className="h-4 w-4" /> Nouvelle publicité
+          </Button>
+        }
+      />
+
+      {showForm && (
+        <Card className="border-primary/20">
+          <CardHeader className="bg-muted/30 border-b pb-4">
+            <CardTitle className="text-base">{editingId ? "Modifier la publicité" : "Nouvelle publicité"}</CardTitle>
+          </CardHeader>
+          <CardContent className="pt-5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-1 sm:col-span-2">
+                <Label>Titre *</Label>
+                <Input placeholder="Promotion de printemps" value={form.title} onChange={e => setField("title", e.target.value)} />
+              </div>
+              <div className="space-y-1">
+                <Label>Type de média</Label>
+                <Select value={form.mediaType} onValueChange={(v: "image" | "video") => setField("mediaType", v)}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="image">Image / Bannière</SelectItem>
+                    <SelectItem value="video">Vidéo courte (short)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-1">
+                <Label>URL du média *</Label>
+                <Input placeholder="https://..." value={form.mediaUrl} onChange={e => setField("mediaUrl", e.target.value)} />
+              </div>
+              <div className="space-y-1 sm:col-span-2">
+                <Label>Lien de destination (optionnel)</Label>
+                <Input placeholder="https://... ou /annonces/123" value={form.linkUrl} onChange={e => setField("linkUrl", e.target.value)} />
+              </div>
+              <div className="space-y-1">
+                <Label>Date de début (optionnel)</Label>
+                <Input type="date" value={form.startDate} onChange={e => setField("startDate", e.target.value)} />
+              </div>
+              <div className="space-y-1">
+                <Label>Date de fin (optionnel)</Label>
+                <Input type="date" value={form.endDate} onChange={e => setField("endDate", e.target.value)} />
+              </div>
+              <div className="flex items-center gap-2 sm:col-span-2">
+                <Switch checked={form.isActive} onCheckedChange={v => setField("isActive", v)} />
+                <Label>Publicité active</Label>
+              </div>
+            </div>
+            <div className="flex gap-2 mt-5">
+              <Button onClick={editingId ? handleUpdate : handleCreate} disabled={createAd.isPending || updateAd.isPending}>
+                {editingId ? "Enregistrer" : "Créer la publicité"}
+              </Button>
+              <Button variant="ghost" onClick={cancel}>Annuler</Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      <Card className="border-border/50">
+        <CardContent className="p-0">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-[70px]">Ordre</TableHead>
+                <TableHead>Titre</TableHead>
+                <TableHead>Type</TableHead>
+                <TableHead>Lien</TableHead>
+                <TableHead>Période</TableHead>
+                <TableHead>Statut</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {isLoading ? (
+                <TableRow><TableCell colSpan={7} className="text-center py-8"><Loader2 className="h-5 w-5 animate-spin inline" /></TableCell></TableRow>
+              ) : ads?.length ? ads.map((a, index) => (
+                <TableRow key={a.id}>
+                  <TableCell>
+                    <div className="flex flex-col gap-0.5">
+                      <button className="text-muted-foreground hover:text-foreground disabled:opacity-30" disabled={index === 0} onClick={() => move(index, -1)}>
+                        <ArrowUp className="h-3.5 w-3.5" />
+                      </button>
+                      <button className="text-muted-foreground hover:text-foreground disabled:opacity-30" disabled={index === ads.length - 1} onClick={() => move(index, 1)}>
+                        <ArrowDown className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  </TableCell>
+                  <TableCell className="font-medium max-w-[200px] truncate" title={a.title}>{a.title}</TableCell>
+                  <TableCell>
+                    {a.mediaType === "video" ? (
+                      <Badge variant="outline" className="text-xs gap-1"><Video className="h-3 w-3" /> Vidéo</Badge>
+                    ) : (
+                      <Badge variant="outline" className="text-xs gap-1"><Image className="h-3 w-3" /> Image</Badge>
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    {a.linkUrl ? (
+                      <a href={a.linkUrl} target="_blank" rel="noreferrer" className="text-xs text-primary flex items-center gap-1 hover:underline max-w-[140px] truncate">
+                        <ExternalLink className="h-3 w-3 shrink-0" /> {a.linkUrl}
+                      </a>
+                    ) : (
+                      <span className="text-xs text-muted-foreground">—</span>
+                    )}
+                  </TableCell>
+                  <TableCell className="text-xs text-muted-foreground">
+                    {a.startDate || a.endDate ? (
+                      <>
+                        {a.startDate ? format(new Date(a.startDate), "dd MMM yyyy", { locale: fr }) : "…"}
+                        {" → "}
+                        {a.endDate ? format(new Date(a.endDate), "dd MMM yyyy", { locale: fr }) : "…"}
+                      </>
+                    ) : "Illimitée"}
+                  </TableCell>
+                  <TableCell>
+                    <button onClick={() => handleToggleActive(a)}>
+                      {a.isActive ? (
+                        <Badge variant="outline" className="text-green-600 border-green-300 text-xs">Active</Badge>
+                      ) : (
+                        <Badge variant="outline" className="text-muted-foreground text-xs">Inactive</Badge>
+                      )}
+                    </button>
+                  </TableCell>
+                  <TableCell className="text-right space-x-2">
+                    <Button size="icon" variant="outline" className="h-8 w-8" onClick={() => startEdit(a)}>
+                      <Pencil className="h-3 w-3" />
+                    </Button>
+                    <Button size="icon" variant="outline" className="h-8 w-8 text-destructive hover:bg-destructive/10" onClick={() => handleDelete(a.id)}>
+                      <Trash2 className="h-3 w-3" />
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              )) : (
+                <TableRow><TableCell colSpan={7} className="text-center py-10 text-muted-foreground">Aucune publicité créée pour le moment.</TableCell></TableRow>
               )}
             </TableBody>
           </Table>

@@ -66,6 +66,7 @@ export function PublicLayout({ children }: { children: React.ReactNode }) {
   const navLinks = [
     { href: "/", label: "Accueil" },
     { href: "/annonces", label: "Annonces" },
+    { href: "/publicites", label: "Publicités" },
     { href: postAdHref, label: "Déposer une annonce" },
     { href: "/tarifs", label: "Tarifs" },
   ];
@@ -248,6 +249,7 @@ export function PublicLayout({ children }: { children: React.ReactNode }) {
             <ul className="space-y-2 text-sm">
               <li><Link href="/" className="hover:text-white transition-colors">Accueil</Link></li>
               <li><Link href="/annonces" className="hover:text-white transition-colors">Annonces</Link></li>
+              <li><Link href="/publicites" className="hover:text-white transition-colors">Publicités</Link></li>
               <li><Link href={postAdHref} className="hover:text-white transition-colors">Déposer une annonce</Link></li>
               <li><Link href="/tarifs" className="hover:text-white transition-colors">Tarifs & Plans</Link></li>
               <li><Link href="/dons" className="hover:text-white transition-colors">Soutenir</Link></li>

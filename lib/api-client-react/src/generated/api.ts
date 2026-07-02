@@ -28,6 +28,9 @@ import type {
   AdminStats,
   AdminUser,
   AdminUserInput,
+  Advertisement,
+  AdvertisementInput,
+  AdvertisementReorderInput,
   AuthResult,
   Branding,
   BulkAdAction,
@@ -1628,6 +1631,444 @@ export const useAdminDeleteUnit = <TError = ErrorType<unknown>,
         TContext
       > => {
       return useMutation(getAdminDeleteUnitMutationOptions(options));
+    }
+
+export const getListAdvertisementsUrl = () => {
+
+
+
+
+  return `/api/advertisements`
+}
+
+/**
+ * @summary List active advertisements (public)
+ */
+export const listAdvertisements = async ( options?: RequestInit): Promise<Advertisement[]> => {
+
+  return customFetch<Advertisement[]>(getListAdvertisementsUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListAdvertisementsQueryKey = () => {
+    return [
+    `/api/advertisements`
+    ] as const;
+    }
+
+
+export const getListAdvertisementsQueryOptions = <TData = Awaited<ReturnType<typeof listAdvertisements>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listAdvertisements>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListAdvertisementsQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listAdvertisements>>> = ({ signal }) => listAdvertisements({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listAdvertisements>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListAdvertisementsQueryResult = NonNullable<Awaited<ReturnType<typeof listAdvertisements>>>
+export type ListAdvertisementsQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary List active advertisements (public)
+ */
+
+export function useListAdvertisements<TData = Awaited<ReturnType<typeof listAdvertisements>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listAdvertisements>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListAdvertisementsQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getAdminListAdvertisementsUrl = () => {
+
+
+
+
+  return `/api/admin/advertisements`
+}
+
+/**
+ * @summary Admin - list all advertisements
+ */
+export const adminListAdvertisements = async ( options?: RequestInit): Promise<Advertisement[]> => {
+
+  return customFetch<Advertisement[]>(getAdminListAdvertisementsUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getAdminListAdvertisementsQueryKey = () => {
+    return [
+    `/api/admin/advertisements`
+    ] as const;
+    }
+
+
+export const getAdminListAdvertisementsQueryOptions = <TData = Awaited<ReturnType<typeof adminListAdvertisements>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof adminListAdvertisements>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getAdminListAdvertisementsQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof adminListAdvertisements>>> = ({ signal }) => adminListAdvertisements({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof adminListAdvertisements>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type AdminListAdvertisementsQueryResult = NonNullable<Awaited<ReturnType<typeof adminListAdvertisements>>>
+export type AdminListAdvertisementsQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Admin - list all advertisements
+ */
+
+export function useAdminListAdvertisements<TData = Awaited<ReturnType<typeof adminListAdvertisements>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof adminListAdvertisements>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getAdminListAdvertisementsQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getAdminCreateAdvertisementUrl = () => {
+
+
+
+
+  return `/api/admin/advertisements`
+}
+
+/**
+ * @summary Admin - create advertisement
+ */
+export const adminCreateAdvertisement = async (advertisementInput: AdvertisementInput, options?: RequestInit): Promise<Advertisement> => {
+
+  return customFetch<Advertisement>(getAdminCreateAdvertisementUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      advertisementInput,)
+  }
+);}
+
+
+
+
+export const getAdminCreateAdvertisementMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminCreateAdvertisement>>, TError,{data: BodyType<AdvertisementInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof adminCreateAdvertisement>>, TError,{data: BodyType<AdvertisementInput>}, TContext> => {
+
+const mutationKey = ['adminCreateAdvertisement'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminCreateAdvertisement>>, {data: BodyType<AdvertisementInput>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  adminCreateAdvertisement(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AdminCreateAdvertisementMutationResult = NonNullable<Awaited<ReturnType<typeof adminCreateAdvertisement>>>
+    export type AdminCreateAdvertisementMutationBody = BodyType<AdvertisementInput>
+    export type AdminCreateAdvertisementMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Admin - create advertisement
+ */
+export const useAdminCreateAdvertisement = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminCreateAdvertisement>>, TError,{data: BodyType<AdvertisementInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof adminCreateAdvertisement>>,
+        TError,
+        {data: BodyType<AdvertisementInput>},
+        TContext
+      > => {
+      return useMutation(getAdminCreateAdvertisementMutationOptions(options));
+    }
+
+export const getAdminReorderAdvertisementsUrl = () => {
+
+
+
+
+  return `/api/admin/advertisements/reorder`
+}
+
+/**
+ * @summary Admin - reorder advertisements
+ */
+export const adminReorderAdvertisements = async (advertisementReorderInput: AdvertisementReorderInput, options?: RequestInit): Promise<Advertisement[]> => {
+
+  return customFetch<Advertisement[]>(getAdminReorderAdvertisementsUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      advertisementReorderInput,)
+  }
+);}
+
+
+
+
+export const getAdminReorderAdvertisementsMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminReorderAdvertisements>>, TError,{data: BodyType<AdvertisementReorderInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof adminReorderAdvertisements>>, TError,{data: BodyType<AdvertisementReorderInput>}, TContext> => {
+
+const mutationKey = ['adminReorderAdvertisements'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminReorderAdvertisements>>, {data: BodyType<AdvertisementReorderInput>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  adminReorderAdvertisements(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AdminReorderAdvertisementsMutationResult = NonNullable<Awaited<ReturnType<typeof adminReorderAdvertisements>>>
+    export type AdminReorderAdvertisementsMutationBody = BodyType<AdvertisementReorderInput>
+    export type AdminReorderAdvertisementsMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Admin - reorder advertisements
+ */
+export const useAdminReorderAdvertisements = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminReorderAdvertisements>>, TError,{data: BodyType<AdvertisementReorderInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof adminReorderAdvertisements>>,
+        TError,
+        {data: BodyType<AdvertisementReorderInput>},
+        TContext
+      > => {
+      return useMutation(getAdminReorderAdvertisementsMutationOptions(options));
+    }
+
+export const getAdminUpdateAdvertisementUrl = (id: number,) => {
+
+
+
+
+  return `/api/admin/advertisements/${id}`
+}
+
+/**
+ * @summary Admin - update advertisement
+ */
+export const adminUpdateAdvertisement = async (id: number,
+    advertisementInput: AdvertisementInput, options?: RequestInit): Promise<Advertisement> => {
+
+  return customFetch<Advertisement>(getAdminUpdateAdvertisementUrl(id),
+  {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      advertisementInput,)
+  }
+);}
+
+
+
+
+export const getAdminUpdateAdvertisementMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminUpdateAdvertisement>>, TError,{id: number;data: BodyType<AdvertisementInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof adminUpdateAdvertisement>>, TError,{id: number;data: BodyType<AdvertisementInput>}, TContext> => {
+
+const mutationKey = ['adminUpdateAdvertisement'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminUpdateAdvertisement>>, {id: number;data: BodyType<AdvertisementInput>}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  adminUpdateAdvertisement(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AdminUpdateAdvertisementMutationResult = NonNullable<Awaited<ReturnType<typeof adminUpdateAdvertisement>>>
+    export type AdminUpdateAdvertisementMutationBody = BodyType<AdvertisementInput>
+    export type AdminUpdateAdvertisementMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Admin - update advertisement
+ */
+export const useAdminUpdateAdvertisement = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminUpdateAdvertisement>>, TError,{id: number;data: BodyType<AdvertisementInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof adminUpdateAdvertisement>>,
+        TError,
+        {id: number;data: BodyType<AdvertisementInput>},
+        TContext
+      > => {
+      return useMutation(getAdminUpdateAdvertisementMutationOptions(options));
+    }
+
+export const getAdminDeleteAdvertisementUrl = (id: number,) => {
+
+
+
+
+  return `/api/admin/advertisements/${id}`
+}
+
+/**
+ * @summary Admin - delete advertisement
+ */
+export const adminDeleteAdvertisement = async (id: number, options?: RequestInit): Promise<void> => {
+
+  return customFetch<void>(getAdminDeleteAdvertisementUrl(id),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+export const getAdminDeleteAdvertisementMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminDeleteAdvertisement>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof adminDeleteAdvertisement>>, TError,{id: number}, TContext> => {
+
+const mutationKey = ['adminDeleteAdvertisement'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminDeleteAdvertisement>>, {id: number}> = (props) => {
+          const {id} = props ?? {};
+
+          return  adminDeleteAdvertisement(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AdminDeleteAdvertisementMutationResult = NonNullable<Awaited<ReturnType<typeof adminDeleteAdvertisement>>>
+
+    export type AdminDeleteAdvertisementMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Admin - delete advertisement
+ */
+export const useAdminDeleteAdvertisement = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminDeleteAdvertisement>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof adminDeleteAdvertisement>>,
+        TError,
+        {id: number},
+        TContext
+      > => {
+      return useMutation(getAdminDeleteAdvertisementMutationOptions(options));
     }
 
 export const getAdminListPromotionPricesUrl = () => {
