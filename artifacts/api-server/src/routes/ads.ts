@@ -11,6 +11,7 @@ import {
   DeleteAdParams,
 } from "@workspace/api-zod";
 import { adminAuth } from "../middleware/adminAuth";
+import { optionalUserAuth, type AuthRequest } from "../middleware/userAuth.js";
 import { z } from "zod/v4";
 
 const BulkAdActionSchema = z.object({
@@ -56,6 +57,11 @@ router.get("/ads", async (req, res) => {
         a.unit?.toLowerCase() === (query.unit as string).toLowerCase()
       );
     }
+    if (query.quantity) {
+      filtered = filtered.filter((a) =>
+        a.quantity?.toLowerCase().includes((query.quantity as string).toLowerCase())
+      );
+    }
     if (query.listingType) {
       filtered = filtered.filter((a) =>
         a.listingType === (query.listingType as string)
@@ -75,12 +81,13 @@ router.get("/ads", async (req, res) => {
 });
 
 // POST /ads — create a new ad (pending review)
-router.post("/ads", async (req, res) => {
+router.post("/ads", optionalUserAuth, async (req: AuthRequest, res) => {
   try {
     const body = CreateAdBody.parse(req.body);
     const [ad] = await db
       .insert(adsTable)
       .values({
+        userId: req.user?.id ?? null,
         title: body.title,
         description: body.description,
         location: body.location,
@@ -94,7 +101,7 @@ router.post("/ads", async (req, res) => {
         promotionDuration: body.promotionDuration,
         promotionPrice: body.promotionPrice,
         contactPhone: body.contactPhone,
-        contactEmail: body.contactEmail,
+        contactEmail: body.contactEmail || null,
         status: "pending",
       })
       .returning();

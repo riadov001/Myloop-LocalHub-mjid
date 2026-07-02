@@ -140,8 +140,7 @@ export default function AdDetail() {
 
                     {!ad?.contactEmail && !ad?.contactPhone && (
                       <div className="text-center p-4 bg-muted rounded-md text-sm text-muted-foreground">
-                        L'annonceur n'a pas laissé de coordonnées directes.
-                        <Button className="w-full mt-4">Envoyer un message</Button>
+                        L'annonceur n'a pas laissé de coordonnées directes. Revenez plus tard ou consultez d'autres annonces.
                       </div>
                     )}
                   </>

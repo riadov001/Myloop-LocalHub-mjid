@@ -10,7 +10,6 @@ import { Label } from "@/components/ui/label";
 import { PublicLayout } from "@/components/layout/PublicLayout";
 import { useToast } from "@/hooks/use-toast";
 
-const API_BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
 
 interface UserProfile {
   id: number;
@@ -73,9 +72,9 @@ export default function EspaceCommercant() {
     try {
       const headers = { Authorization: `Bearer ${t}`, "Content-Type": "application/json" };
       const [profileRes, adsRes, statsRes] = await Promise.all([
-        fetch(`${API_BASE}/api/merchant/me`, { headers }),
-        fetch(`${API_BASE}/api/merchant/ads`, { headers }),
-        fetch(`${API_BASE}/api/merchant/stats`, { headers }),
+        fetch(`/api/merchant/me`, { headers }),
+        fetch(`/api/merchant/ads`, { headers }),
+        fetch(`/api/merchant/stats`, { headers }),
       ]);
       if (!profileRes.ok) { setLocation("/connexion"); return; }
       const [p, a, s] = await Promise.all([profileRes.json(), adsRes.json(), statsRes.json()]);
@@ -101,7 +100,7 @@ export default function EspaceCommercant() {
     e.preventDefault();
     setSavingProfile(true);
     try {
-      const res = await fetch(`${API_BASE}/api/merchant/profile`, {
+      const res = await fetch(`/api/merchant/profile`, {
         method: "PUT",
         headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
         body: JSON.stringify({ name: profileName }),
@@ -121,7 +120,7 @@ export default function EspaceCommercant() {
 
   const handleSubscribe = async (planId: number) => {
     try {
-      const res = await fetch(`${API_BASE}/api/billing/checkout`, {
+      const res = await fetch(`/api/billing/checkout`, {
         method: "POST",
         headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
         body: JSON.stringify({ planId, priceType: "monthly" }),

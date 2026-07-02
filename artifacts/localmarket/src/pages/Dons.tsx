@@ -24,8 +24,6 @@ export default function Dons() {
 
   const amount = custom ? Number(custom) : (selected ?? 0);
 
-  const API_BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
-
   const handleDonate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!amount || amount < 1) {
@@ -34,7 +32,7 @@ export default function Dons() {
     }
     setLoading(true);
     try {
-      const res = await fetch(`${API_BASE}/api/donations/checkout`, {
+      const res = await fetch(`/api/donations/checkout`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
