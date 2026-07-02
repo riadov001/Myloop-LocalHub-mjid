@@ -32,7 +32,7 @@ export default function Home() {
     if (quantity) params.set("quantity", quantity);
     if (unit) params.set("unit", unit);
     if (listingType) params.set("listingType", listingType);
-    setLocation(`/publicites?${params.toString()}`);
+    setLocation(`/annonces?${params.toString()}`);
   };
 
   return (
@@ -186,7 +186,7 @@ export default function Home() {
             </div>
             <Button
               variant="ghost"
-              onClick={() => setLocation("/publicites")}
+              onClick={() => setLocation("/annonces")}
               className="text-primary hover:text-primary/80 hover:bg-primary/10 font-semibold"
               data-testid="link-all-ads"
             >
@@ -211,7 +211,7 @@ export default function Home() {
               <Card
                 key={ad.id}
                 className="overflow-hidden border-border/50 bg-card hover:border-primary/40 hover:shadow-lg hover:shadow-primary/10 transition-all duration-300 group cursor-pointer"
-                onClick={() => setLocation(`/publicites/${ad.id}`)}
+                onClick={() => setLocation(`/annonces/${ad.id}`)}
                 data-testid={`card-ad-${ad.id}`}
               >
                 <div className="h-36 bg-primary/10 flex items-center justify-center relative overflow-hidden">

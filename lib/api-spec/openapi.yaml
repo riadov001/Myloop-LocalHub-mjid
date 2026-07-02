@@ -1213,6 +1213,9 @@ components:
         password:
           type: string
           minLength: 8
+        role:
+          type: string
+          enum: [customer, merchant]
 
     LoginInput:
       type: object
@@ -1233,6 +1236,8 @@ components:
         name:
           type: string
         email:
+          type: string
+        role:
           type: string
         createdAt:
           type: string

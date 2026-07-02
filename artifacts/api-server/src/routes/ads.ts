@@ -11,7 +11,7 @@ import {
   DeleteAdParams,
 } from "@workspace/api-zod";
 import { adminAuth } from "../middleware/adminAuth";
-import { optionalUserAuth, type AuthRequest } from "../middleware/userAuth.js";
+import { userAuth, requireRole, type AuthRequest } from "../middleware/userAuth.js";
 import { z } from "zod/v4";
 
 const BulkAdActionSchema = z.object({
@@ -81,8 +81,8 @@ router.get("/ads", async (req, res) => {
   }
 });
 
-// POST /ads — create a new ad (pending review)
-router.post("/ads", optionalUserAuth, async (req: AuthRequest, res) => {
+// POST /ads — create a new ad (pending review) — réservé aux marchands connectés
+router.post("/ads", userAuth, requireRole("merchant"), async (req: AuthRequest, res) => {
   try {
     const body = CreateAdBody.parse(req.body);
     const [ad] = await db

@@ -35,17 +35,20 @@ function toProfile(user: typeof usersTable.$inferSelect) {
 // POST /auth/register (comportement existant préservé + rôle + email bienvenue)
 router.post("/auth/register", async (req, res) => {
   try {
-    const { name, email, password } = RegisterBody.parse(req.body);
+    const { name, email, password, role } = RegisterBody.parse(req.body);
     const existing = await db.select().from(usersTable).where(eq(usersTable.email, email)).limit(1);
     if (existing.length > 0) {
       res.status(409).json({ error: "Cette adresse email est déjà utilisée." });
       return;
     }
+    // Seuls "customer" et "merchant" sont sélectionnables à l'inscription ; "moderator" reste réservé à l'admin.
+    const safeRole: "customer" | "merchant" = role === "merchant" ? "merchant" : "customer";
     const passwordHash = await bcrypt.hash(password, 12);
     const verifyToken = crypto.randomBytes(32).toString("hex");
     const verifyExpires = new Date(Date.now() + 24 * 60 * 60 * 1000);
     const [user] = await db.insert(usersTable).values({
       name, email, passwordHash,
+      role: safeRole,
       emailVerifyToken: verifyToken,
       emailVerifyTokenExpires: verifyExpires,
     }).returning();

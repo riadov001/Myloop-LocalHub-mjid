@@ -230,7 +230,7 @@ export default function EspaceCommercant() {
                           <span className="text-xs text-slate-400 flex items-center gap-1"><Eye className="h-3 w-3" />{ad.views}</span>
                         )}
                         <StatusBadge status={ad.status} />
-                        <Link href={`/publicites/${ad.id}`}>
+                        <Link href={`/annonces/${ad.id}`}>
                           <Button variant="ghost" size="sm"><ChevronRight className="h-4 w-4" /></Button>
                         </Link>
                       </div>

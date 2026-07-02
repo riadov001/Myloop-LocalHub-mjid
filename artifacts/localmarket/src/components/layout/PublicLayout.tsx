@@ -13,17 +13,19 @@ import {
 import { useHealthCheck } from "@workspace/api-client-react";
 
 function useAuth() {
-  const [user, setUser] = useState<{ name: string; token: string } | null>(null);
+  const [user, setUser] = useState<{ name: string; token: string; role: string | null } | null>(null);
 
   useEffect(() => {
     const token = localStorage.getItem("userToken");
     const name = localStorage.getItem("userName");
-    if (token && name) setUser({ token, name });
+    const role = localStorage.getItem("userRole");
+    if (token && name) setUser({ token, name, role });
 
     const handler = () => {
       const t = localStorage.getItem("userToken");
       const n = localStorage.getItem("userName");
-      setUser(t && n ? { token: t, name: n } : null);
+      const r = localStorage.getItem("userRole");
+      setUser(t && n ? { token: t, name: n, role: r } : null);
     };
     window.addEventListener("storage", handler);
     window.addEventListener("auth-change", handler);
@@ -33,6 +35,7 @@ function useAuth() {
   const logout = () => {
     localStorage.removeItem("userToken");
     localStorage.removeItem("userName");
+    localStorage.removeItem("userRole");
     setUser(null);
     window.dispatchEvent(new Event("auth-change"));
   };
@@ -60,7 +63,7 @@ export function PublicLayout({ children }: { children: React.ReactNode }) {
 
   const navLinks = [
     { href: "/", label: "Accueil" },
-    { href: "/publicites", label: "Publicités" },
+    { href: "/annonces", label: "Annonces" },
     { href: "/deposer", label: "Déposer une annonce" },
     { href: "/tarifs", label: "Tarifs" },
   ];
@@ -242,7 +245,7 @@ export function PublicLayout({ children }: { children: React.ReactNode }) {
             <h3 className="text-sm font-semibold text-white uppercase tracking-wider">Navigation</h3>
             <ul className="space-y-2 text-sm">
               <li><Link href="/" className="hover:text-white transition-colors">Accueil</Link></li>
-              <li><Link href="/publicites" className="hover:text-white transition-colors">Publicités</Link></li>
+              <li><Link href="/annonces" className="hover:text-white transition-colors">Annonces</Link></li>
               <li><Link href="/deposer" className="hover:text-white transition-colors">Déposer une annonce</Link></li>
               <li><Link href="/tarifs" className="hover:text-white transition-colors">Tarifs & Plans</Link></li>
               <li><Link href="/dons" className="hover:text-white transition-colors">Soutenir</Link></li>

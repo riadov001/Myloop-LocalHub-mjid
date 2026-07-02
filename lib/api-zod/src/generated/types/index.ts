@@ -42,6 +42,7 @@ export * from './platformModeInput';
 export * from './promotionPrice';
 export * from './promotionPriceInput';
 export * from './registerInput';
+export * from './registerInputRole';
 export * from './stats';
 export * from './unit';
 export * from './unitInput';

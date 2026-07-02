@@ -429,7 +429,8 @@ export const registerBodyPasswordMin = 8;
 export const RegisterBody = zod.object({
   "name": zod.string(),
   "email": zod.string().email(),
-  "password": zod.string().min(registerBodyPasswordMin)
+  "password": zod.string().min(registerBodyPasswordMin),
+  "role": zod.enum(['customer', 'merchant']).optional()
 })
 
 
@@ -447,6 +448,7 @@ export const UserLoginResponse = zod.object({
   "id": zod.number(),
   "name": zod.string(),
   "email": zod.string(),
+  "role": zod.string().optional(),
   "createdAt": zod.string()
 })
 })
@@ -459,6 +461,7 @@ export const GetMeResponse = zod.object({
   "id": zod.number(),
   "name": zod.string(),
   "email": zod.string(),
+  "role": zod.string().optional(),
   "createdAt": zod.string()
 })
 

@@ -24,6 +24,8 @@ export default function Login() {
         onSuccess: (data) => {
           localStorage.setItem("userToken", data.token);
           localStorage.setItem("userName", data.user.name);
+          if (data.user.role) localStorage.setItem("userRole", data.user.role);
+          else localStorage.removeItem("userRole");
           window.dispatchEvent(new Event("auth-change"));
           toast({ title: "Connexion réussie", description: `Bienvenue, ${data.user.name} !` });
           setLocation("/");

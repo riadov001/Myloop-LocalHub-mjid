@@ -25,13 +25,18 @@ function Router() {
   return (
     <Switch>
       <Route path="/" component={Home} />
-      <Route path="/publicites" component={AdsList} />
-      <Route path="/publicites/:id" component={AdDetail} />
+      <Route path="/annonces" component={AdsList} />
+      <Route path="/annonces/:id" component={AdDetail} />
       <Route path="/deposer" component={PostAd} />
       <Route path="/admin" component={AdminLogin} />
       <Route path="/admin/dashboard" component={AdminDashboard} />
       <Route path="/connexion" component={Login} />
-      <Route path="/inscription" component={Register} />
+      <Route path="/inscription">
+        <Register />
+      </Route>
+      <Route path="/inscription-marchand">
+        <Register defaultRole="merchant" />
+      </Route>
       <Route path="/tarifs" component={Tarifs} />
       <Route path="/dons" component={Dons} />
       <Route path="/espace-commercant" component={EspaceCommercant} />

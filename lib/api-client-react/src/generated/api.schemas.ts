@@ -304,11 +304,20 @@ export interface LoginResult {
   role?: string | null;
 }
 
+export type RegisterInputRole = typeof RegisterInputRole[keyof typeof RegisterInputRole];
+
+
+export const RegisterInputRole = {
+  customer: 'customer',
+  merchant: 'merchant',
+} as const;
+
 export interface RegisterInput {
   name: string;
   email: string;
   /** @minLength 8 */
   password: string;
+  role?: RegisterInputRole;
 }
 
 export interface LoginInput {
@@ -320,6 +329,7 @@ export interface UserProfile {
   id: number;
   name: string;
   email: string;
+  role?: string;
   createdAt: string;
 }
 

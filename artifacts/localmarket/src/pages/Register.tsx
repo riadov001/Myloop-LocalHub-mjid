@@ -1,19 +1,30 @@
 import { useState } from "react";
-import { Link, useLocation } from "wouter";
-import { Triangle, Lock, Loader2, Mail, User } from "lucide-react";
+import { Link, useLocation, useSearch } from "wouter";
+import { Triangle, Lock, Loader2, Mail, User, Store, ShoppingBag } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useToast } from "@/hooks/use-toast";
 import { useRegister } from "@workspace/api-client-react";
 
-export default function Register() {
+interface RegisterProps {
+  defaultRole?: "customer" | "merchant";
+}
+
+export default function Register({ defaultRole }: RegisterProps = {}) {
   const [, setLocation] = useLocation();
+  const search = useSearch();
+  const params = new URLSearchParams(search);
+  const initialRole: "customer" | "merchant" =
+    defaultRole ?? (params.get("role") === "merchant" ? "merchant" : "customer");
+
   const { toast } = useToast();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [role, setRole] = useState<"customer" | "merchant">(initialRole);
 
   const registerMutation = useRegister();
 
@@ -28,14 +39,15 @@ export default function Register() {
       return;
     }
     registerMutation.mutate(
-      { data: { name, email, password } },
+      { data: { name, email, password, role } },
       {
         onSuccess: (data) => {
           localStorage.setItem("userToken", data.token);
           localStorage.setItem("userName", data.user.name);
+          localStorage.setItem("userRole", data.user.role ?? role);
           window.dispatchEvent(new Event("auth-change"));
           toast({ title: "Compte créé", description: `Bienvenue sur LocalMarket, ${data.user.name} !` });
-          setLocation("/");
+          setLocation(role === "merchant" ? "/deposer" : "/");
         },
         onError: (err: unknown) => {
           const msg =
@@ -61,12 +73,52 @@ export default function Register() {
 
         <Card className="border-border/50 bg-card shadow-2xl shadow-black/30">
           <CardHeader className="text-center pb-6">
-            <CardTitle className="text-2xl font-bold">Créer un compte</CardTitle>
-            <CardDescription>Rejoignez la communauté LocalMarket</CardDescription>
+            <CardTitle className="text-2xl font-bold">
+              {role === "merchant" ? "Créer un compte marchand" : "Créer un compte"}
+            </CardTitle>
+            <CardDescription>
+              {role === "merchant"
+                ? "Créez votre compte marchand pour déposer des annonces sur LocalMarket"
+                : "Rejoignez la communauté LocalMarket"}
+            </CardDescription>
           </CardHeader>
 
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="space-y-1.5">
+                <Label>Type de compte</Label>
+                <RadioGroup
+                  value={role}
+                  onValueChange={(val) => setRole(val as "customer" | "merchant")}
+                  className="grid grid-cols-2 gap-3"
+                >
+                  <div>
+                    <RadioGroupItem value="customer" id="role-customer" className="peer sr-only" />
+                    <Label
+                      htmlFor="role-customer"
+                      className="flex flex-col items-center justify-center gap-1.5 rounded-lg border-2 border-muted bg-popover p-3 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary cursor-pointer text-center"
+                    >
+                      <ShoppingBag className="h-5 w-5" />
+                      <span className="text-sm font-semibold">Particulier</span>
+                    </Label>
+                  </div>
+                  <div>
+                    <RadioGroupItem value="merchant" id="role-merchant" className="peer sr-only" />
+                    <Label
+                      htmlFor="role-merchant"
+                      className="flex flex-col items-center justify-center gap-1.5 rounded-lg border-2 border-muted bg-popover p-3 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary cursor-pointer text-center"
+                    >
+                      <Store className="h-5 w-5" />
+                      <span className="text-sm font-semibold">Marchand</span>
+                    </Label>
+                  </div>
+                </RadioGroup>
+                {role === "merchant" && (
+                  <p className="text-xs text-muted-foreground pt-1">
+                    Un compte marchand vous permet de déposer des annonces sur LocalMarket.
+                  </p>
+                )}
+              </div>
               <div className="space-y-1.5">
                 <Label htmlFor="name">Nom complet</Label>
                 <div className="relative">

@@ -5,10 +5,12 @@
  * LocalMarket API
  * OpenAPI spec version: 0.1.0
  */
+import type { RegisterInputRole } from './registerInputRole';
 
 export interface RegisterInput {
   name: string;
   email: string;
   /** @minLength 8 */
   password: string;
+  role?: RegisterInputRole;
 }

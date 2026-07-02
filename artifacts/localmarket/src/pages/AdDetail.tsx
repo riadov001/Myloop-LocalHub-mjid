@@ -26,7 +26,7 @@ export default function AdDetail() {
       <PublicLayout>
         <div className="container py-20 text-center">
           <h2 className="text-2xl font-bold text-destructive">Annonce invalide</h2>
-          <Button className="mt-4" onClick={() => setLocation("/publicites")}>Retour aux annonces</Button>
+          <Button className="mt-4" onClick={() => setLocation("/annonces")}>Retour aux annonces</Button>
         </div>
       </PublicLayout>
     );
@@ -38,7 +38,7 @@ export default function AdDetail() {
         <div className="container py-20 text-center">
           <h2 className="text-2xl font-bold text-destructive">Erreur</h2>
           <p className="text-muted-foreground mt-2">Impossible de charger cette annonce. Elle a peut-être été supprimée.</p>
-          <Button className="mt-4" onClick={() => setLocation("/publicites")}>Retour aux annonces</Button>
+          <Button className="mt-4" onClick={() => setLocation("/annonces")}>Retour aux annonces</Button>
         </div>
       </PublicLayout>
     );
@@ -48,7 +48,7 @@ export default function AdDetail() {
     <PublicLayout>
       <div className="bg-primary/5 py-8 border-b border-border/50">
         <div className="container max-w-4xl">
-          <Button variant="ghost" onClick={() => setLocation("/publicites")} className="mb-4 -ml-4 text-muted-foreground hover:text-foreground">
+          <Button variant="ghost" onClick={() => setLocation("/annonces")} className="mb-4 -ml-4 text-muted-foreground hover:text-foreground">
             <ArrowLeft className="h-4 w-4 mr-2" /> Retour aux annonces
           </Button>
           
