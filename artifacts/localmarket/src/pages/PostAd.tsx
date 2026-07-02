@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -15,7 +15,7 @@ import { Label } from "@/components/ui/label";
 import { useCreateAd, useListCategories, useListUnits } from "@workspace/api-client-react";
 import { useQuery } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
-import { CheckCircle2, ArrowLeft, Store, Lock } from "lucide-react";
+import { CheckCircle2, ArrowLeft } from "lucide-react";
 
 const formSchema = z.object({
   title: z.string().min(5, "Le titre doit faire au moins 5 caractères"),
@@ -43,7 +43,13 @@ export default function PostAd() {
 
   const userToken = typeof window !== "undefined" ? localStorage.getItem("userToken") : null;
   const userRole = typeof window !== "undefined" ? localStorage.getItem("userRole") : null;
-  const isMerchant = !!userToken && userRole === "merchant";
+  const isMerchant = Boolean(userToken) && userRole === "merchant";
+
+  useEffect(() => {
+    if (!isMerchant) {
+      setLocation("/inscription-marchand");
+    }
+  }, [isMerchant, setLocation]);
 
   const { data: categories } = useListCategories();
   const { data: units } = useListUnits();
@@ -131,29 +137,7 @@ export default function PostAd() {
   }
 
   if (!isMerchant) {
-    return (
-      <PublicLayout>
-        <div className="container max-w-2xl py-20 flex flex-col items-center justify-center text-center">
-          <div className="h-24 w-24 bg-primary/10 text-primary rounded-full flex items-center justify-center mb-6">
-            {userToken ? <Lock className="h-12 w-12" /> : <Store className="h-12 w-12" />}
-          </div>
-          <h1 className="text-3xl font-bold mb-4">Réservé aux marchands</h1>
-          <p className="text-lg text-muted-foreground mb-8 max-w-md">
-            {userToken
-              ? "Votre compte n'est pas un compte marchand. Créez un compte marchand pour déposer des annonces sur LocalMarket."
-              : "Pour déposer une annonce, vous devez disposer d'un compte marchand. Créez-en un en quelques instants."}
-          </p>
-          <div className="flex gap-4">
-            <Button variant="outline" onClick={() => setLocation("/")}>
-              Retour à l'accueil
-            </Button>
-            <Button onClick={() => setLocation("/inscription-marchand")}>
-              Créer un compte marchand
-            </Button>
-          </div>
-        </div>
-      </PublicLayout>
-    );
+    return null;
   }
 
   return (

@@ -54,6 +54,8 @@ export function PublicLayout({ children }: { children: React.ReactNode }) {
   const isAdmin = useIsAdmin();
   const { user, logout } = useAuth();
   const [open, setOpen] = useState(false);
+  const isMerchant = user?.role === "merchant";
+  const postAdHref = isMerchant ? "/deposer" : "/inscription-marchand";
 
   const handleLogout = () => {
     logout();
@@ -64,7 +66,7 @@ export function PublicLayout({ children }: { children: React.ReactNode }) {
   const navLinks = [
     { href: "/", label: "Accueil" },
     { href: "/annonces", label: "Annonces" },
-    { href: "/deposer", label: "Déposer une annonce" },
+    { href: postAdHref, label: "Déposer une annonce" },
     { href: "/tarifs", label: "Tarifs" },
   ];
 
@@ -116,7 +118,7 @@ export function PublicLayout({ children }: { children: React.ReactNode }) {
                     <p className="text-xs text-muted-foreground">Compte LocalMarket</p>
                   </div>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => setLocation("/deposer")} className="cursor-pointer">
+                  <DropdownMenuItem onClick={() => setLocation(postAdHref)} className="cursor-pointer">
                     Déposer une annonce
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => setLocation("/espace-commercant")} className="cursor-pointer">
@@ -246,7 +248,7 @@ export function PublicLayout({ children }: { children: React.ReactNode }) {
             <ul className="space-y-2 text-sm">
               <li><Link href="/" className="hover:text-white transition-colors">Accueil</Link></li>
               <li><Link href="/annonces" className="hover:text-white transition-colors">Annonces</Link></li>
-              <li><Link href="/deposer" className="hover:text-white transition-colors">Déposer une annonce</Link></li>
+              <li><Link href={postAdHref} className="hover:text-white transition-colors">Déposer une annonce</Link></li>
               <li><Link href="/tarifs" className="hover:text-white transition-colors">Tarifs & Plans</Link></li>
               <li><Link href="/dons" className="hover:text-white transition-colors">Soutenir</Link></li>
             </ul>
