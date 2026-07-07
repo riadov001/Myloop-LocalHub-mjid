@@ -40,8 +40,6 @@ const fr = {
     privacy: "Politique de confidentialité",
     admin: "Administration",
     copyright: "{{year}} LocalMarket. Tous droits réservés.",
-    made_with: "Fait avec",
-    made_with_suffix: "pour les échanges locaux",
   },
 
   // Home page
