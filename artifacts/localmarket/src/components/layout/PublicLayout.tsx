@@ -276,11 +276,8 @@ export function PublicLayout({ children }: { children: React.ReactNode }) {
             </ul>
           </div>
         </div>
-        <div className="container max-w-7xl mt-12 pt-8 border-t border-slate-800 text-sm text-slate-400 text-center flex flex-col md:flex-row justify-between items-center gap-4">
+        <div className="container max-w-7xl mt-12 pt-8 border-t border-slate-800 text-sm text-slate-400 text-center">
           <div>&copy; {t("footer.copyright", { year: new Date().getFullYear() })}</div>
-          <div className="flex items-center gap-1 text-slate-500">
-            {t("footer.made_with")} <Heart className="h-3.5 w-3.5 fill-red-500 text-red-500 mx-1" /> {t("footer.made_with_suffix")}
-          </div>
         </div>
       </footer>
     </div>

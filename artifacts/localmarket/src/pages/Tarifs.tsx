@@ -47,7 +47,7 @@ export default function Tarifs() {
           ) : activePlans.length === 0 ? (
             <div className="text-center text-muted-foreground py-20">{t("pricing.no_plans")}</div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-start">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 items-stretch pt-6">
               {activePlans.map((plan, i) => {
                 const color = COLORS[i % COLORS.length];
                 const Icon = ICONS[i % ICONS.length];
@@ -55,15 +55,15 @@ export default function Tarifs() {
                 const features = plan.features as string[];
 
                 return (
-                  <div key={plan.id} className={`relative ${isPopular ? "md:-mt-4" : ""}`}>
+                  <div key={plan.id} className="relative flex flex-col">
                     {isPopular && (
-                      <div className="absolute -top-4 left-0 right-0 flex justify-center">
+                      <div className="absolute -top-6 left-0 right-0 flex justify-center">
                         <span className="bg-primary text-primary-foreground text-xs font-bold px-4 py-1 rounded-full uppercase tracking-wider shadow-lg">
                           {t("pricing.popular")}
                         </span>
                       </div>
                     )}
-                    <Card className={`overflow-hidden border-2 ${color.border} shadow-xl ${isPopular ? "shadow-primary/20" : ""}`}>
+                    <Card className={`overflow-hidden border-2 ${color.border} shadow-xl ${isPopular ? "shadow-primary/20" : ""} h-full flex flex-col`}>
                       <CardHeader className={`${color.bg} p-8 pb-6`}>
                         <div className="flex items-center justify-between mb-4">
                           <div className={`h-10 w-10 rounded-xl flex items-center justify-center ${color.badge}`}>
@@ -98,7 +98,7 @@ export default function Tarifs() {
                           )}
                         </div>
                       </CardHeader>
-                      <CardContent className="p-8 pt-6 space-y-6">
+                      <CardContent className="p-8 pt-6 space-y-6 flex-1 flex flex-col">
                         {plan.maxAds != null && (
                           <div className="text-sm font-semibold text-foreground border-b border-border/40 pb-4">
                             {t("pricing.ads_limit_other", { count: plan.maxAds })}
