@@ -16,30 +16,32 @@ import { useCreateAd, useListCategories, useListUnits } from "@workspace/api-cli
 import { useQuery } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { CheckCircle2, ArrowLeft } from "lucide-react";
-
-const formSchema = z.object({
-  title: z.string().min(5, "Le titre doit faire au moins 5 caractères"),
-  description: z.string().optional(),
-  location: z.string().min(2, "La localisation est requise"),
-  category: z.string().min(1, "La catégorie est requise"),
-  product: z.string().min(2, "Le produit est requis"),
-  quantity: z.string().optional(),
-  unit: z.string().optional(),
-  listingType: z.enum(["free", "flexible", "fixed"]).default("flexible"),
-  price: z.string().optional(),
-  isPromoted: z.boolean().default(false),
-  promotionDuration: z.number().optional(),
-  subscriptionType: z.enum(["none", "weekly", "monthly", "annual"]).default("none"),
-  subscriptionPrice: z.string().optional(),
-  contactPhone: z.string().optional(),
-  contactEmail: z.string().email("Email invalide").optional().or(z.literal('')),
-});
+import { useTranslation } from "react-i18next";
 
 export default function PostAd() {
+  const { t } = useTranslation();
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const createAd = useCreateAd();
   const [isSuccess, setIsSuccess] = useState(false);
+
+  const formSchema = z.object({
+    title: z.string().min(5, t("post_ad.errors.title_min")),
+    description: z.string().optional(),
+    location: z.string().min(2, t("post_ad.errors.location_required")),
+    category: z.string().min(1, t("post_ad.errors.category_required")),
+    product: z.string().min(2, t("post_ad.errors.product_required")),
+    quantity: z.string().optional(),
+    unit: z.string().optional(),
+    listingType: z.enum(["free", "flexible", "fixed"]).default("flexible"),
+    price: z.string().optional(),
+    isPromoted: z.boolean().default(false),
+    promotionDuration: z.number().optional(),
+    subscriptionType: z.enum(["none", "weekly", "monthly", "annual"]).default("none"),
+    subscriptionPrice: z.string().optional(),
+    contactPhone: z.string().optional(),
+    contactEmail: z.string().email(t("post_ad.errors.email_invalid")).optional().or(z.literal('')),
+  });
 
   const userToken = typeof window !== "undefined" ? localStorage.getItem("userToken") : null;
   const userRole = typeof window !== "undefined" ? localStorage.getItem("userRole") : null;
@@ -103,8 +105,8 @@ export default function PostAd() {
         },
         onError: () => {
           toast({
-            title: "Erreur",
-            description: "Une erreur est survenue lors de la création de l'annonce.",
+            title: t("common.error"),
+            description: t("post_ad.errors.submit_error"),
             variant: "destructive",
           });
         },
@@ -119,16 +121,16 @@ export default function PostAd() {
           <div className="h-24 w-24 bg-green-100 text-green-600 rounded-full flex items-center justify-center mb-6">
             <CheckCircle2 className="h-12 w-12" />
           </div>
-          <h1 className="text-3xl font-bold mb-4">Annonce envoyée !</h1>
+          <h1 className="text-3xl font-bold mb-4">{t("post_ad.success.title")}</h1>
           <p className="text-lg text-muted-foreground mb-8 max-w-md">
-            Votre annonce a bien été enregistrée. Elle est actuellement en cours de révision par notre équipe et sera publiée prochainement.
+            {t("post_ad.success.desc")}
           </p>
           <div className="flex gap-4">
             <Button variant="outline" onClick={() => setLocation("/annonces")}>
-              Voir les annonces
+              {t("post_ad.success.see_ads")}
             </Button>
             <Button onClick={() => { setIsSuccess(false); form.reset(); }}>
-              Déposer une autre annonce
+              {t("post_ad.success.post_another")}
             </Button>
           </div>
         </div>
@@ -145,18 +147,18 @@ export default function PostAd() {
       <div className="bg-primary/5 py-8 border-b border-border/50">
         <div className="container max-w-3xl">
           <Button variant="ghost" onClick={() => setLocation("/")} className="mb-4 -ml-4 text-muted-foreground hover:text-foreground">
-            <ArrowLeft className="h-4 w-4 mr-2" /> Retour à l'accueil
+            <ArrowLeft className="h-4 w-4 mr-2" /> {t("post_ad.back")}
           </Button>
-          <h1 className="text-3xl font-bold">Déposer une annonce</h1>
-          <p className="text-muted-foreground mt-2">Partagez vos produits, ressources ou services avec la communauté locale.</p>
+          <h1 className="text-3xl font-bold">{t("post_ad.title")}</h1>
+          <p className="text-muted-foreground mt-2">{t("post_ad.subtitle")}</p>
         </div>
       </div>
 
       <div className="container max-w-3xl py-12">
         <Card className="shadow-lg border-primary/10">
           <CardHeader className="bg-muted/30 border-b border-border/50 pb-8">
-            <CardTitle>Détails de l'annonce</CardTitle>
-            <CardDescription>Remplissez les informations ci-dessous avec le plus de précision possible.</CardDescription>
+            <CardTitle>{t("post_ad.card_title")}</CardTitle>
+            <CardDescription>{t("post_ad.card_desc")}</CardDescription>
           </CardHeader>
           <CardContent className="pt-8">
             <Form {...form}>
@@ -168,9 +170,9 @@ export default function PostAd() {
                     name="title"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-base">Titre de l'annonce <span className="text-destructive">*</span></FormLabel>
+                        <FormLabel className="text-base">{t("post_ad.fields.title")} <span className="text-destructive">*</span></FormLabel>
                         <FormControl>
-                          <Input placeholder="Ex: Tomates bio du jardin à échanger" className="h-12" {...field} />
+                          <Input placeholder={t("post_ad.fields.title_placeholder")} className="h-12" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -182,9 +184,9 @@ export default function PostAd() {
                     name="location"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Localisation <span className="text-destructive">*</span></FormLabel>
+                        <FormLabel>{t("post_ad.fields.location")} <span className="text-destructive">*</span></FormLabel>
                         <FormControl>
-                          <Input placeholder="Ex: Place du marché, Centre-ville" className="h-12" {...field} />
+                          <Input placeholder={t("post_ad.fields.location_placeholder")} className="h-12" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -196,11 +198,11 @@ export default function PostAd() {
                     name="category"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Catégorie <span className="text-destructive">*</span></FormLabel>
+                        <FormLabel>{t("post_ad.fields.category")} <span className="text-destructive">*</span></FormLabel>
                         <Select onValueChange={field.onChange} value={field.value}>
                           <FormControl>
                             <SelectTrigger className="h-12">
-                              <SelectValue placeholder="Sélectionnez une catégorie" />
+                              <SelectValue placeholder={t("post_ad.fields.category_placeholder")} />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
@@ -219,9 +221,9 @@ export default function PostAd() {
                     name="product"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Produit / Élément <span className="text-destructive">*</span></FormLabel>
+                        <FormLabel>{t("post_ad.fields.product")} <span className="text-destructive">*</span></FormLabel>
                         <FormControl>
-                          <Input placeholder="Ex: Tomates Coeur de Boeuf" className="h-12" {...field} />
+                          <Input placeholder={t("post_ad.fields.product_placeholder")} className="h-12" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -234,9 +236,9 @@ export default function PostAd() {
                       name="quantity"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Quantité</FormLabel>
+                          <FormLabel>{t("post_ad.fields.quantity")}</FormLabel>
                           <FormControl>
-                            <Input placeholder="Ex: 5, 10, 2" className="h-12" {...field} />
+                            <Input placeholder={t("post_ad.fields.quantity_placeholder")} className="h-12" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -248,11 +250,11 @@ export default function PostAd() {
                       name="unit"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Unité <span className="text-destructive">*</span></FormLabel>
+                          <FormLabel>{t("post_ad.fields.unit")} <span className="text-destructive">*</span></FormLabel>
                           <Select onValueChange={field.onChange} value={field.value}>
                             <FormControl>
                               <SelectTrigger className="h-12">
-                                <SelectValue placeholder="Unité de mesure" />
+                                <SelectValue placeholder={t("post_ad.fields.unit_placeholder")} />
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
@@ -272,10 +274,10 @@ export default function PostAd() {
                     name="description"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Description détaillée</FormLabel>
+                        <FormLabel>{t("post_ad.fields.description")}</FormLabel>
                         <FormControl>
                           <Textarea
-                            placeholder="Décrivez votre produit, vos conditions d'échange, etc."
+                            placeholder={t("post_ad.fields.description_placeholder")}
                             className="min-h-[120px] resize-y"
                             {...field}
                           />
@@ -288,7 +290,7 @@ export default function PostAd() {
 
                 {/* Section Prix / Don */}
                 <div className="space-y-6 pt-6 border-t border-border">
-                  <h3 className="text-lg font-semibold">Type de transaction</h3>
+                  <h3 className="text-lg font-semibold">{t("post_ad.transaction.title")}</h3>
 
                   <FormField
                     control={form.control}
@@ -307,8 +309,8 @@ export default function PostAd() {
                                 htmlFor="free"
                                 className="flex flex-col items-center justify-center rounded-lg border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary cursor-pointer text-center"
                               >
-                                <span className="text-base font-semibold">Don gratuit</span>
-                                <span className="text-xs text-muted-foreground mt-1">Aucun montant</span>
+                                <span className="text-base font-semibold">{t("post_ad.transaction.free")}</span>
+                                <span className="text-xs text-muted-foreground mt-1">{t("post_ad.transaction.free_sub")}</span>
                               </Label>
                             </div>
                             <div>
@@ -317,8 +319,8 @@ export default function PostAd() {
                                 htmlFor="flexible"
                                 className="flex flex-col items-center justify-center rounded-lg border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary cursor-pointer text-center"
                               >
-                                <span className="text-base font-semibold">Prix libre</span>
-                                <span className="text-xs text-muted-foreground mt-1">Montant facultatif</span>
+                                <span className="text-base font-semibold">{t("post_ad.transaction.flexible")}</span>
+                                <span className="text-xs text-muted-foreground mt-1">{t("post_ad.transaction.flexible_sub")}</span>
                               </Label>
                             </div>
                             <div>
@@ -327,8 +329,8 @@ export default function PostAd() {
                                 htmlFor="fixed"
                                 className="flex flex-col items-center justify-center rounded-lg border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary cursor-pointer text-center"
                               >
-                                <span className="text-base font-semibold">Prix fixe</span>
-                                <span className="text-xs text-muted-foreground mt-1">Montant obligatoire</span>
+                                <span className="text-base font-semibold">{t("post_ad.transaction.fixed")}</span>
+                                <span className="text-xs text-muted-foreground mt-1">{t("post_ad.transaction.fixed_sub")}</span>
                               </Label>
                             </div>
                           </RadioGroup>
@@ -345,11 +347,11 @@ export default function PostAd() {
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>
-                            Montant (€) {listingType === "fixed" && <span className="text-destructive">*</span>}
+                            {listingType === "fixed" ? t("post_ad.transaction.amount_required") : t("post_ad.transaction.amount")}
                           </FormLabel>
                           <FormControl>
                             <Input
-                              placeholder={listingType === "fixed" ? "Ex: 15.00" : "Ex: 10.00 (facultatif)"}
+                              placeholder={listingType === "fixed" ? t("post_ad.transaction.amount_placeholder_fixed") : t("post_ad.transaction.amount_placeholder_flexible")}
                               type="number"
                               step="0.01"
                               min="0"
@@ -367,8 +369,8 @@ export default function PostAd() {
                 {/* Section Mise en avant */}
                 <div className="space-y-6 pt-6 border-t border-border">
                   <div>
-                    <h3 className="text-lg font-semibold">Mise en avant de l'annonce</h3>
-                    <p className="text-sm text-muted-foreground mt-1">Augmentez la visibilité de votre annonce en la mettant en avant.</p>
+                    <h3 className="text-lg font-semibold">{t("post_ad.promotion.title")}</h3>
+                    <p className="text-sm text-muted-foreground mt-1">{t("post_ad.promotion.subtitle")}</p>
                   </div>
 
                   <FormField
@@ -384,11 +386,11 @@ export default function PostAd() {
                           >
                             <div className="flex items-center gap-2">
                               <RadioGroupItem value="false" id="promo-no" />
-                              <Label htmlFor="promo-no" className="cursor-pointer font-normal">Non</Label>
+                              <Label htmlFor="promo-no" className="cursor-pointer font-normal">{t("post_ad.promotion.no")}</Label>
                             </div>
                             <div className="flex items-center gap-2">
                               <RadioGroupItem value="true" id="promo-yes" />
-                              <Label htmlFor="promo-yes" className="cursor-pointer font-normal">Oui</Label>
+                              <Label htmlFor="promo-yes" className="cursor-pointer font-normal">{t("post_ad.promotion.yes")}</Label>
                             </div>
                           </RadioGroup>
                         </FormControl>
@@ -403,7 +405,7 @@ export default function PostAd() {
                       name="promotionDuration"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Durée de mise en avant <span className="text-destructive">*</span></FormLabel>
+                          <FormLabel>{t("post_ad.promotion.duration")} <span className="text-destructive">*</span></FormLabel>
                           <FormControl>
                             <RadioGroup
                               onValueChange={(val) => field.onChange(Number(val))}
@@ -434,8 +436,8 @@ export default function PostAd() {
                 {/* Section Abonnement */}
                 <div className="space-y-6 pt-6 border-t border-border">
                   <div>
-                    <h3 className="text-lg font-semibold">Abonnement</h3>
-                    <p className="text-sm text-muted-foreground mt-1">Proposez votre produit en livraison régulière (panier hebdomadaire, mensuel, etc.).</p>
+                    <h3 className="text-lg font-semibold">{t("post_ad.subscription.title")}</h3>
+                    <p className="text-sm text-muted-foreground mt-1">{t("post_ad.subscription.subtitle")}</p>
                   </div>
 
                   <FormField
@@ -443,7 +445,7 @@ export default function PostAd() {
                     name="subscriptionType"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Type d'abonnement</FormLabel>
+                        <FormLabel>{t("post_ad.subscription.type")}</FormLabel>
                         <FormControl>
                           <RadioGroup
                             onValueChange={field.onChange}
@@ -451,10 +453,10 @@ export default function PostAd() {
                             className="grid grid-cols-2 md:grid-cols-4 gap-3"
                           >
                             {[
-                              { value: "none", label: "Aucun", sub: "Pas d'abonnement" },
-                              { value: "weekly", label: "Hebdomadaire", sub: "Chaque semaine" },
-                              { value: "monthly", label: "Mensuel", sub: "Chaque mois" },
-                              { value: "annual", label: "Annuel", sub: "Chaque année" },
+                              { value: "none", label: t("post_ad.subscription.none"), sub: t("post_ad.subscription.none_sub") },
+                              { value: "weekly", label: t("post_ad.subscription.weekly"), sub: t("post_ad.subscription.weekly_sub") },
+                              { value: "monthly", label: t("post_ad.subscription.monthly"), sub: t("post_ad.subscription.monthly_sub") },
+                              { value: "annual", label: t("post_ad.subscription.annual"), sub: t("post_ad.subscription.annual_sub") },
                             ].map((opt) => (
                               <div key={opt.value}>
                                 <RadioGroupItem value={opt.value} id={`sub-${opt.value}`} className="peer sr-only" />
@@ -480,7 +482,7 @@ export default function PostAd() {
                       name="subscriptionPrice"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Tarif de l'abonnement (€)</FormLabel>
+                          <FormLabel>{t("post_ad.subscription.price")}</FormLabel>
                           <FormControl>
                             <Input
                               placeholder="Ex: 25.00"
@@ -500,9 +502,9 @@ export default function PostAd() {
 
                 {/* Section Contact */}
                 <div className="space-y-6 pt-6 border-t border-border">
-                  <h3 className="text-lg font-semibold">Contact (Optionnel)</h3>
+                  <h3 className="text-lg font-semibold">{t("post_ad.contact.title")}</h3>
                   <p className="text-sm text-muted-foreground -mt-4">
-                    Laissez un moyen de vous joindre directement.
+                    {t("post_ad.contact.subtitle")}
                   </p>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -511,9 +513,9 @@ export default function PostAd() {
                       name="contactEmail"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Email de contact</FormLabel>
+                          <FormLabel>{t("post_ad.contact.email")}</FormLabel>
                           <FormControl>
-                            <Input placeholder="votre@email.fr" type="email" className="h-12" {...field} />
+                            <Input placeholder={t("post_ad.contact.email_placeholder")} type="email" className="h-12" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -525,9 +527,9 @@ export default function PostAd() {
                       name="contactPhone"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Téléphone</FormLabel>
+                          <FormLabel>{t("post_ad.contact.phone")}</FormLabel>
                           <FormControl>
-                            <Input placeholder="06 12 34 56 78" className="h-12" {...field} />
+                            <Input placeholder={t("post_ad.contact.phone_placeholder")} className="h-12" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -538,7 +540,7 @@ export default function PostAd() {
 
                 <div className="pt-6 border-t border-border flex justify-end">
                   <Button type="submit" size="lg" className="w-full md:w-auto min-w-[200px]" disabled={createAd.isPending}>
-                    {createAd.isPending ? "Envoi en cours..." : "Publier l'annonce"}
+                    {createAd.isPending ? t("post_ad.submitting") : t("post_ad.submit")}
                   </Button>
                 </div>
               </form>

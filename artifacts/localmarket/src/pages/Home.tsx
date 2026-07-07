@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
-import { Search, MapPin, Package, Scale, ArrowRight, Tag, Layers, Euro } from "lucide-react";
+import { Search, MapPin, Package, Scale, ArrowRight, Layers, Euro } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
@@ -9,8 +9,10 @@ import { PublicLayout } from "@/components/layout/PublicLayout";
 import { useListAds, useListCategories, useListUnits } from "@workspace/api-client-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { MapView } from "@/components/MapView";
+import { useTranslation } from "react-i18next";
 
 export default function Home() {
+  const { t, i18n } = useTranslation();
   const [, setLocation] = useLocation();
   const [searchLocation, setSearchLocation] = useState("");
   const [category, setCategory] = useState("");
@@ -35,6 +37,12 @@ export default function Home() {
     setLocation(`/annonces?${params.toString()}`);
   };
 
+  const getListingLabel = (ad: { listingType?: string | null; price?: string | null }) => {
+    if (ad.listingType === "free") return t("home.listing_free");
+    if (ad.listingType === "fixed") return ad.price ? t("home.listing_fixed_price", { price: ad.price }) : t("home.listing_fixed");
+    return ad.price ? `${ad.price} €` : t("home.listing_flexible");
+  };
+
   return (
     <PublicLayout>
       <section className="py-16 lg:py-24">
@@ -43,16 +51,16 @@ export default function Home() {
             <div className="space-y-8">
               <div className="inline-flex items-center gap-2 border border-primary/40 bg-primary/10 text-primary text-xs font-semibold px-4 py-1.5 rounded-full uppercase tracking-widest">
                 <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
-                Plateforme d'échanges locaux
+                {t("home.hero.badge")}
               </div>
 
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight leading-[1.1] text-foreground">
-                Trouvez ce dont vous avez besoin{" "}
-                <span className="text-primary">près de chez vous</span>
+                {t("home.hero.title_part1")}{" "}
+                <span className="text-primary">{t("home.hero.title_highlight")}</span>
               </h1>
 
               <p className="text-lg text-muted-foreground max-w-xl leading-relaxed">
-                LocalMarket connecte voisins, agriculteurs et artisans pour échanger produits et ressources localement.
+                {t("home.hero.subtitle")}
               </p>
 
               <Card className="border-border/60 bg-card shadow-xl shadow-black/30">
@@ -61,9 +69,9 @@ export default function Home() {
                   <div className="flex items-center gap-3 px-4 py-3 border-b border-border/50">
                     <MapPin className="h-4 w-4 text-primary shrink-0" />
                     <div className="flex-1">
-                      <div className="text-[10px] font-bold text-primary/80 uppercase tracking-widest mb-0.5">Localisation</div>
+                      <div className="text-[10px] font-bold text-primary/80 uppercase tracking-widest mb-0.5">{t("home.search.location_label")}</div>
                       <Input
-                        placeholder="Ville, code postal, adresse..."
+                        placeholder={t("home.search.location_placeholder")}
                         className="border-0 bg-transparent shadow-none focus-visible:ring-0 p-0 h-auto text-sm text-foreground placeholder:text-muted-foreground"
                         value={searchLocation}
                         onChange={(e) => setSearchLocation(e.target.value)}
@@ -76,13 +84,13 @@ export default function Home() {
                   <div className="flex items-center gap-3 px-4 py-3 border-b border-border/50">
                     <Layers className="h-4 w-4 text-primary shrink-0" />
                     <div className="flex-1">
-                      <div className="text-[10px] font-bold text-primary/80 uppercase tracking-widest mb-0.5">Catégorie</div>
+                      <div className="text-[10px] font-bold text-primary/80 uppercase tracking-widest mb-0.5">{t("home.search.category_label")}</div>
                       <Select value={category} onValueChange={setCategory}>
                         <SelectTrigger className="border-0 bg-transparent shadow-none focus:ring-0 p-0 h-auto text-sm text-foreground">
-                          <SelectValue placeholder="Toutes les catégories" />
+                          <SelectValue placeholder={t("home.search.category_all")} />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="all">Toutes les catégories</SelectItem>
+                          <SelectItem value="all">{t("home.search.category_all")}</SelectItem>
                           {categories?.map((cat) => (
                             <SelectItem key={cat.id} value={cat.name}>{cat.name}</SelectItem>
                           ))}
@@ -95,9 +103,9 @@ export default function Home() {
                   <div className="flex items-center gap-3 px-4 py-3 border-b border-border/50">
                     <Package className="h-4 w-4 text-primary shrink-0" />
                     <div className="flex-1">
-                      <div className="text-[10px] font-bold text-primary/80 uppercase tracking-widest mb-0.5">Produit / Élément</div>
+                      <div className="text-[10px] font-bold text-primary/80 uppercase tracking-widest mb-0.5">{t("home.search.product_label")}</div>
                       <Input
-                        placeholder="pommes, bois, sable..."
+                        placeholder={t("home.search.product_placeholder")}
                         className="border-0 bg-transparent shadow-none focus-visible:ring-0 p-0 h-auto text-sm text-foreground placeholder:text-muted-foreground"
                         value={product}
                         onChange={(e) => setProduct(e.target.value)}
@@ -110,10 +118,10 @@ export default function Home() {
                   <div className="flex items-center gap-3 px-4 py-3 border-b border-border/50">
                     <Scale className="h-4 w-4 text-primary shrink-0" />
                     <div className="flex-1">
-                      <div className="text-[10px] font-bold text-primary/80 uppercase tracking-widest mb-0.5">Quantité</div>
+                      <div className="text-[10px] font-bold text-primary/80 uppercase tracking-widest mb-0.5">{t("home.search.quantity_label")}</div>
                       <div className="flex gap-2">
                         <Input
-                          placeholder="ex: 10"
+                          placeholder={t("home.search.quantity_placeholder")}
                           className="border-0 bg-transparent shadow-none focus-visible:ring-0 p-0 h-auto text-sm text-foreground placeholder:text-muted-foreground flex-1"
                           value={quantity}
                           onChange={(e) => setQuantity(e.target.value)}
@@ -121,10 +129,10 @@ export default function Home() {
                         />
                         <Select value={unit} onValueChange={setUnit}>
                           <SelectTrigger className="border-0 bg-transparent shadow-none focus:ring-0 p-0 h-auto text-sm w-24 shrink-0">
-                            <SelectValue placeholder="Unité" />
+                            <SelectValue placeholder={t("home.search.unit_placeholder")} />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="all">Toutes</SelectItem>
+                            <SelectItem value="all">{t("home.search.unit_all")}</SelectItem>
                             {units?.map((u) => (
                               <SelectItem key={u.id} value={u.symbol}>{u.symbol}</SelectItem>
                             ))}
@@ -138,16 +146,16 @@ export default function Home() {
                   <div className="flex items-center gap-3 px-4 py-3">
                     <Euro className="h-4 w-4 text-primary shrink-0" />
                     <div className="flex-1">
-                      <div className="text-[10px] font-bold text-primary/80 uppercase tracking-widest mb-0.5">Prix / Don</div>
+                      <div className="text-[10px] font-bold text-primary/80 uppercase tracking-widest mb-0.5">{t("home.search.price_label")}</div>
                       <Select value={listingType} onValueChange={setListingType}>
                         <SelectTrigger className="border-0 bg-transparent shadow-none focus:ring-0 p-0 h-auto text-sm text-foreground">
-                          <SelectValue placeholder="Tous les types" />
+                          <SelectValue placeholder={t("home.search.type_all")} />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="all">Tous les types</SelectItem>
-                          <SelectItem value="free">Don gratuit</SelectItem>
-                          <SelectItem value="flexible">Prix libre</SelectItem>
-                          <SelectItem value="fixed">Prix fixe</SelectItem>
+                          <SelectItem value="all">{t("home.search.type_all")}</SelectItem>
+                          <SelectItem value="free">{t("home.search.type_free")}</SelectItem>
+                          <SelectItem value="flexible">{t("home.search.type_flexible")}</SelectItem>
+                          <SelectItem value="fixed">{t("home.search.type_fixed")}</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
@@ -156,7 +164,7 @@ export default function Home() {
                   <div className="px-4 pb-4">
                     <Button type="submit" className="w-full h-11 font-semibold text-base" data-testid="button-search">
                       <Search className="h-4 w-4 mr-2" />
-                      Rechercher
+                      {t("home.search.submit")}
                     </Button>
                   </div>
                 </form>
@@ -167,7 +175,7 @@ export default function Home() {
               {adsLoading ? (
                 <div className="absolute inset-0 flex flex-col items-center justify-center bg-card text-muted-foreground gap-3">
                   <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-                  <span className="text-sm">Chargement de la carte...</span>
+                  <span className="text-sm">{t("home.map_loading")}</span>
                 </div>
               ) : (
                 <MapView ads={ads ?? []} />
@@ -181,8 +189,8 @@ export default function Home() {
         <div className="container max-w-7xl px-4">
           <div className="flex items-center justify-between mb-8">
             <div>
-              <h2 className="text-2xl font-bold tracking-tight text-foreground">Dernières annonces</h2>
-              <p className="text-sm text-muted-foreground mt-1">publiées récemment</p>
+              <h2 className="text-2xl font-bold tracking-tight text-foreground">{t("home.latest_ads")}</h2>
+              <p className="text-sm text-muted-foreground mt-1">{t("home.latest_ads_subtitle")}</p>
             </div>
             <Button
               variant="ghost"
@@ -190,7 +198,7 @@ export default function Home() {
               className="text-primary hover:text-primary/80 hover:bg-primary/10 font-semibold"
               data-testid="link-all-ads"
             >
-              Toutes les annonces
+              {t("home.see_all")}
               <ArrowRight className="h-4 w-4 ml-2" />
             </Button>
           </div>
@@ -221,7 +229,7 @@ export default function Home() {
                   </div>
                   {ad.isPromoted && (
                     <div className="absolute top-2 right-2 bg-amber-500 text-white px-2 py-0.5 text-[10px] font-bold rounded uppercase tracking-wide">
-                      Mis en avant
+                      {t("home.promoted")}
                     </div>
                   )}
                 </div>
@@ -241,11 +249,11 @@ export default function Home() {
                   </div>
                   {ad.listingType && (
                     <div className="text-xs text-muted-foreground">
-                      {ad.listingType === "free" ? "Don gratuit" : ad.listingType === "fixed" ? `Prix fixe${ad.price ? ` : ${ad.price} €` : ""}` : ad.price ? `${ad.price} €` : "Prix libre"}
+                      {getListingLabel(ad)}
                     </div>
                   )}
                   <div className="text-[10px] text-muted-foreground/60 mt-2">
-                    {new Date(ad.createdAt).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}
+                    {new Date(ad.createdAt).toLocaleDateString(i18n.language === "en" ? "en-GB" : "fr-FR", { day: "numeric", month: "long", year: "numeric" })}
                   </div>
                 </CardContent>
               </Card>

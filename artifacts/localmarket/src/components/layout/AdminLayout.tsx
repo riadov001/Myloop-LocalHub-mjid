@@ -2,40 +2,43 @@ import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import {
   LayoutDashboard, LogOut, Settings, Palette, List, Tag, Scale,
-  Star, Users, Shield, ToggleLeft, ChevronRight, Menu, X, Triangle, CreditCard, Megaphone,
+  Star, Users, Shield, ToggleLeft, ChevronRight, Menu, Triangle, CreditCard, Megaphone,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "react-i18next";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 
 export function useAdminRole(): "root" | "admin" {
   if (typeof window === "undefined") return "admin";
   return (localStorage.getItem("adminRole") ?? "admin") as "root" | "admin";
 }
 
-const NAV_ITEMS = [
-  { tab: "overview", label: "Vue d'ensemble", icon: LayoutDashboard, roles: ["root", "admin"] },
-  { tab: "annonces", label: "Annonces", icon: List, roles: ["root", "admin"] },
-  { tab: "publicites", label: "Publicités", icon: Megaphone, roles: ["root", "admin"] },
-  { tab: "plans", label: "Plans & Abonnements", icon: Star, roles: ["root", "admin"] },
-  { tab: "modes", label: "Modes plateforme", icon: ToggleLeft, roles: ["root", "admin"] },
-  { tab: "categories", label: "Catégories", icon: Tag, roles: ["root", "admin"] },
-  { tab: "unites", label: "Unités", icon: Scale, roles: ["root", "admin"] },
-  { tab: "branding", label: "Branding", icon: Palette, roles: ["root", "admin"] },
-  { tab: "paiements", label: "Paiements", icon: CreditCard, roles: ["root", "admin"] },
-  { tab: "settings", label: "Paramètres", icon: Settings, roles: ["root", "admin"] },
-  { tab: "admins", label: "Gestion admins", icon: Users, roles: ["root"] },
-];
-
 interface AdminLayoutProps {
   children: React.ReactNode;
 }
 
 export function AdminLayout({ children }: AdminLayoutProps) {
+  const { t } = useTranslation();
   const [, setLocation] = useLocation();
   const [location] = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
   const role = useAdminRole();
+
+  const NAV_ITEMS = [
+    { tab: "overview", label: t("admin.nav.overview"), icon: LayoutDashboard, roles: ["root", "admin"] },
+    { tab: "annonces", label: t("admin.nav.ads"), icon: List, roles: ["root", "admin"] },
+    { tab: "publicites", label: t("admin.nav.ads_promo"), icon: Megaphone, roles: ["root", "admin"] },
+    { tab: "plans", label: t("admin.nav.plans"), icon: Star, roles: ["root", "admin"] },
+    { tab: "modes", label: t("admin.nav.modes"), icon: ToggleLeft, roles: ["root", "admin"] },
+    { tab: "categories", label: t("admin.nav.categories"), icon: Tag, roles: ["root", "admin"] },
+    { tab: "unites", label: t("admin.nav.units"), icon: Scale, roles: ["root", "admin"] },
+    { tab: "branding", label: t("admin.nav.branding"), icon: Palette, roles: ["root", "admin"] },
+    { tab: "paiements", label: t("admin.nav.payments"), icon: CreditCard, roles: ["root", "admin"] },
+    { tab: "settings", label: t("admin.nav.settings"), icon: Settings, roles: ["root", "admin"] },
+    { tab: "admins", label: t("admin.nav.admins"), icon: Users, roles: ["root"] },
+  ];
 
   const params = new URLSearchParams(location.includes("?") ? location.split("?")[1] : "");
   const activeTab = params.get("tab") || "overview";
@@ -57,7 +60,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
           </div>
           <div className="min-w-0">
             <div className="font-bold text-sm text-sidebar-foreground leading-tight">LocalMarket</div>
-            <div className="text-[10px] text-sidebar-foreground/50 leading-tight">Cockpit Admin</div>
+            <div className="text-[10px] text-sidebar-foreground/50 leading-tight">{t("admin.header.title")}</div>
           </div>
         </Link>
       </div>
@@ -98,20 +101,23 @@ export function AdminLayout({ children }: AdminLayoutProps) {
             </div>
             <div className="min-w-0">
               <div className="text-xs font-semibold text-sidebar-foreground truncate">
-                Administrateur
+                {t("admin.user.role")}
               </div>
               <div className="text-[10px] text-sidebar-foreground/50">LocalMarket</div>
             </div>
           </div>
         </div>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={handleLogout}
-          className="w-full justify-start text-sidebar-foreground/70 hover:bg-red-500/10 hover:text-red-400 gap-2"
-        >
-          <LogOut className="h-4 w-4" /> Déconnexion
-        </Button>
+        <div className="flex items-center gap-1">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleLogout}
+            className="flex-1 justify-start text-sidebar-foreground/70 hover:bg-red-500/10 hover:text-red-400 gap-2"
+          >
+            <LogOut className="h-4 w-4" /> {t("admin.user.logout")}
+          </Button>
+          <LanguageSwitcher />
+        </div>
       </div>
     </>
   );
@@ -139,7 +145,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
           <Button variant="ghost" size="icon" onClick={() => setMobileOpen(true)}>
             <Menu className="h-5 w-5" />
           </Button>
-          <span className="font-bold text-sm">Cockpit Admin</span>
+          <span className="font-bold text-sm">{t("admin.header.title")}</span>
           <Button variant="ghost" size="sm" onClick={handleLogout}>
             <LogOut className="h-4 w-4" />
           </Button>

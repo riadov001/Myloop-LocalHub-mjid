@@ -8,12 +8,15 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useToast } from "@/hooks/use-toast";
 import { useRegister } from "@workspace/api-client-react";
+import { useTranslation } from "react-i18next";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 
 interface RegisterProps {
   defaultRole?: "customer" | "merchant";
 }
 
 export default function Register({ defaultRole }: RegisterProps = {}) {
+  const { t } = useTranslation();
   const [, setLocation] = useLocation();
   const search = useSearch();
   const params = new URLSearchParams(search);
@@ -32,8 +35,8 @@ export default function Register({ defaultRole }: RegisterProps = {}) {
     e.preventDefault();
     if (password.length < 8) {
       toast({
-        title: "Mot de passe trop court",
-        description: "Le mot de passe doit contenir au moins 8 caractères.",
+        title: t("register.error_password_short"),
+        description: t("register.error_password_short_desc"),
         variant: "destructive",
       });
       return;
@@ -46,14 +49,14 @@ export default function Register({ defaultRole }: RegisterProps = {}) {
           localStorage.setItem("userName", data.user.name);
           localStorage.setItem("userRole", data.user.role ?? role);
           window.dispatchEvent(new Event("auth-change"));
-          toast({ title: "Compte créé", description: `Bienvenue sur LocalMarket, ${data.user.name} !` });
+          toast({ title: t("register.success_title"), description: t("register.success_desc", { name: data.user.name }) });
           setLocation(role === "merchant" ? "/deposer" : "/");
         },
         onError: (err: unknown) => {
           const msg =
             (err as { response?: { data?: { error?: string } } })?.response?.data?.error ??
-            "Une erreur est survenue lors de l'inscription.";
-          toast({ title: "Erreur", description: msg, variant: "destructive" });
+            t("common.error");
+          toast({ title: t("register.error_title"), description: msg, variant: "destructive" });
         },
       }
     );
@@ -62,7 +65,10 @@ export default function Register({ defaultRole }: RegisterProps = {}) {
   return (
     <div className="min-h-[100dvh] flex items-center justify-center bg-background p-4">
       <div className="w-full max-w-md space-y-6">
-        <div className="flex flex-col items-center gap-3 text-center">
+        <div className="flex flex-col items-center gap-3 text-center relative">
+          <div className="absolute right-0 top-0">
+            <LanguageSwitcher />
+          </div>
           <Link href="/" className="flex items-center gap-2">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-primary-foreground">
               <Triangle className="h-5 w-5 fill-current" />
@@ -74,19 +80,17 @@ export default function Register({ defaultRole }: RegisterProps = {}) {
         <Card className="border-border/50 bg-card shadow-2xl shadow-black/30">
           <CardHeader className="text-center pb-6">
             <CardTitle className="text-2xl font-bold">
-              {role === "merchant" ? "Créer un compte marchand" : "Créer un compte"}
+              {role === "merchant" ? t("register.title_merchant") : t("register.title_customer")}
             </CardTitle>
             <CardDescription>
-              {role === "merchant"
-                ? "Créez votre compte marchand pour déposer des annonces sur LocalMarket"
-                : "Rejoignez la communauté LocalMarket"}
+              {role === "merchant" ? t("register.subtitle_merchant") : t("register.subtitle_customer")}
             </CardDescription>
           </CardHeader>
 
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-1.5">
-                <Label>Type de compte</Label>
+                <Label>{t("register.role_label")}</Label>
                 <RadioGroup
                   value={role}
                   onValueChange={(val) => setRole(val as "customer" | "merchant")}
@@ -99,7 +103,7 @@ export default function Register({ defaultRole }: RegisterProps = {}) {
                       className="flex flex-col items-center justify-center gap-1.5 rounded-lg border-2 border-muted bg-popover p-3 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary cursor-pointer text-center"
                     >
                       <ShoppingBag className="h-5 w-5" />
-                      <span className="text-sm font-semibold">Particulier</span>
+                      <span className="text-sm font-semibold">{t("register.role_customer")}</span>
                     </Label>
                   </div>
                   <div>
@@ -109,24 +113,24 @@ export default function Register({ defaultRole }: RegisterProps = {}) {
                       className="flex flex-col items-center justify-center gap-1.5 rounded-lg border-2 border-muted bg-popover p-3 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary cursor-pointer text-center"
                     >
                       <Store className="h-5 w-5" />
-                      <span className="text-sm font-semibold">Marchand</span>
+                      <span className="text-sm font-semibold">{t("register.role_merchant")}</span>
                     </Label>
                   </div>
                 </RadioGroup>
                 {role === "merchant" && (
                   <p className="text-xs text-muted-foreground pt-1">
-                    Un compte marchand vous permet de déposer des annonces sur LocalMarket.
+                    {t("register.merchant_hint")}
                   </p>
                 )}
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="name">Nom complet</Label>
+                <Label htmlFor="name">{t("register.name")}</Label>
                 <div className="relative">
                   <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
                     id="name"
                     type="text"
-                    placeholder="Jean Dupont"
+                    placeholder={t("register.name_placeholder")}
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     required
@@ -136,13 +140,13 @@ export default function Register({ defaultRole }: RegisterProps = {}) {
                 </div>
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="email">Adresse email</Label>
+                <Label htmlFor="email">{t("register.email")}</Label>
                 <div className="relative">
                   <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
                     id="email"
                     type="email"
-                    placeholder="votre@email.fr"
+                    placeholder={t("register.email_placeholder")}
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
@@ -152,13 +156,13 @@ export default function Register({ defaultRole }: RegisterProps = {}) {
                 </div>
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="password">Mot de passe</Label>
+                <Label htmlFor="password">{t("register.password")}</Label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
                     id="password"
                     type="password"
-                    placeholder="Minimum 8 caractères"
+                    placeholder={t("register.password_placeholder")}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
@@ -174,9 +178,9 @@ export default function Register({ defaultRole }: RegisterProps = {}) {
                 disabled={registerMutation.isPending}
               >
                 {registerMutation.isPending ? (
-                  <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Inscription...</>
+                  <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> {t("register.submitting")}</>
                 ) : (
-                  "Créer mon compte"
+                  t("register.submit")
                 )}
               </Button>
             </form>
@@ -184,9 +188,9 @@ export default function Register({ defaultRole }: RegisterProps = {}) {
 
           <CardFooter className="flex-col gap-3 border-t border-border/40 pt-4">
             <p className="text-sm text-muted-foreground text-center">
-              Déjà un compte ?{" "}
+              {t("register.has_account")}{" "}
               <Link href="/connexion" className="text-primary font-semibold hover:underline">
-                Se connecter
+                {t("register.login_link")}
               </Link>
             </p>
           </CardFooter>
@@ -194,7 +198,7 @@ export default function Register({ defaultRole }: RegisterProps = {}) {
 
         <p className="text-center">
           <Link href="/" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-            Retour à l'accueil
+            {t("register.back_home")}
           </Link>
         </p>
       </div>

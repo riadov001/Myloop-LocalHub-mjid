@@ -7,8 +7,11 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription }
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { useUserLogin } from "@workspace/api-client-react";
+import { useTranslation } from "react-i18next";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 
 export default function Login() {
+  const { t } = useTranslation();
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const [email, setEmail] = useState("");
@@ -27,13 +30,13 @@ export default function Login() {
           if (data.user.role) localStorage.setItem("userRole", data.user.role);
           else localStorage.removeItem("userRole");
           window.dispatchEvent(new Event("auth-change"));
-          toast({ title: "Connexion réussie", description: `Bienvenue, ${data.user.name} !` });
+          toast({ title: t("login.success_title"), description: t("login.success_desc", { name: data.user.name }) });
           setLocation("/");
         },
         onError: () => {
           toast({
-            title: "Identifiants incorrects",
-            description: "Vérifiez votre email et mot de passe.",
+            title: t("login.error_title"),
+            description: t("login.error_desc"),
             variant: "destructive",
           });
         },
@@ -44,7 +47,10 @@ export default function Login() {
   return (
     <div className="min-h-[100dvh] flex items-center justify-center bg-background p-4">
       <div className="w-full max-w-md space-y-6">
-        <div className="flex flex-col items-center gap-3 text-center">
+        <div className="flex flex-col items-center gap-3 text-center relative">
+          <div className="absolute right-0 top-0">
+            <LanguageSwitcher />
+          </div>
           <Link href="/" className="flex items-center gap-2">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-primary-foreground">
               <Triangle className="h-5 w-5 fill-current" />
@@ -55,20 +61,20 @@ export default function Login() {
 
         <Card className="border-border/50 bg-card shadow-2xl shadow-black/30">
           <CardHeader className="text-center pb-6">
-            <CardTitle className="text-2xl font-bold">Se connecter</CardTitle>
-            <CardDescription>Accédez à votre espace LocalMarket</CardDescription>
+            <CardTitle className="text-2xl font-bold">{t("login.title")}</CardTitle>
+            <CardDescription>{t("login.subtitle")}</CardDescription>
           </CardHeader>
 
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-1.5">
-                <Label htmlFor="email">Adresse email</Label>
+                <Label htmlFor="email">{t("login.email")}</Label>
                 <div className="relative">
                   <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
                     id="email"
                     type="email"
-                    placeholder="votre@email.fr"
+                    placeholder={t("login.email_placeholder")}
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
@@ -79,9 +85,9 @@ export default function Login() {
               </div>
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between">
-                  <Label htmlFor="password">Mot de passe</Label>
+                  <Label htmlFor="password">{t("login.password")}</Label>
                   <Link href="/mot-de-passe-oublie" className="text-xs text-primary hover:underline">
-                    Mot de passe oublié ?
+                    {t("login.forgot")}
                   </Link>
                 </div>
                 <div className="relative">
@@ -104,9 +110,9 @@ export default function Login() {
                 disabled={loginMutation.isPending}
               >
                 {loginMutation.isPending ? (
-                  <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Connexion...</>
+                  <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> {t("login.submitting")}</>
                 ) : (
-                  "Se connecter"
+                  t("login.submit")
                 )}
               </Button>
             </form>
@@ -114,20 +120,20 @@ export default function Login() {
 
           <CardFooter className="flex-col gap-3 border-t border-border/40 pt-4">
             <p className="text-sm text-muted-foreground text-center">
-              Pas encore de compte ?{" "}
+              {t("login.no_account")}{" "}
               <Link href="/inscription" className="text-primary font-semibold hover:underline">
-                S'inscrire gratuitement
+                {t("login.register_link")}
               </Link>
             </p>
             <Link href="/espace-commercant" className="text-xs text-muted-foreground hover:text-foreground transition-colors">
-              Accéder à mon espace commerçant
+              {t("login.merchant_link")}
             </Link>
           </CardFooter>
         </Card>
 
         <p className="text-center">
           <Link href="/" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-            Retour à l'accueil
+            {t("login.back_home")}
           </Link>
         </p>
       </div>

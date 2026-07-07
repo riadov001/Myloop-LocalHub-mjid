@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PublicLayout } from "@/components/layout/PublicLayout";
 import { useToast } from "@/hooks/use-toast";
+import { useTranslation } from "react-i18next";
 
 
 interface UserProfile {
@@ -43,13 +44,15 @@ interface Stats {
 }
 
 function StatusBadge({ status }: { status: string }) {
-  if (status === "published") return <Badge className="bg-green-100 text-green-800">Publié</Badge>;
-  if (status === "pending") return <Badge className="bg-yellow-100 text-yellow-800">En attente</Badge>;
-  if (status === "rejected") return <Badge className="bg-red-100 text-red-800">Refusé</Badge>;
+  const { t } = useTranslation();
+  if (status === "published") return <Badge className="bg-green-100 text-green-800">{t("merchant.status.published")}</Badge>;
+  if (status === "pending") return <Badge className="bg-yellow-100 text-yellow-800">{t("merchant.status.pending")}</Badge>;
+  if (status === "rejected") return <Badge className="bg-red-100 text-red-800">{t("merchant.status.rejected")}</Badge>;
   return <Badge variant="outline">{status}</Badge>;
 }
 
 export default function EspaceCommercant() {
+  const { t, i18n } = useTranslation();
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const [token, setToken] = useState<string | null>(null);
@@ -67,10 +70,10 @@ export default function EspaceCommercant() {
     loadAll(t);
   }, []);
 
-  async function loadAll(t: string) {
+  async function loadAll(tok: string) {
     setLoading(true);
     try {
-      const headers = { Authorization: `Bearer ${t}`, "Content-Type": "application/json" };
+      const headers = { Authorization: `Bearer ${tok}`, "Content-Type": "application/json" };
       const [profileRes, adsRes, statsRes] = await Promise.all([
         fetch(`/api/merchant/me`, { headers }),
         fetch(`/api/merchant/ads`, { headers }),
@@ -83,7 +86,7 @@ export default function EspaceCommercant() {
       setAds(Array.isArray(a) ? a : []);
       setStats(s);
     } catch {
-      toast({ title: "Erreur", description: "Impossible de charger votre espace.", variant: "destructive" });
+      toast({ title: t("merchant.error_loading"), variant: "destructive" });
     } finally {
       setLoading(false);
     }
@@ -110,26 +113,11 @@ export default function EspaceCommercant() {
       setProfile((p) => p ? { ...p, name: updated.name } : p);
       localStorage.setItem("userName", updated.name);
       window.dispatchEvent(new Event("auth-change"));
-      toast({ title: "Profil mis à jour" });
+      toast({ title: t("merchant.profile.updated") });
     } catch {
-      toast({ title: "Erreur", description: "Mise à jour impossible.", variant: "destructive" });
+      toast({ title: t("common.error"), description: t("merchant.profile.error"), variant: "destructive" });
     } finally {
       setSavingProfile(false);
-    }
-  };
-
-  const handleSubscribe = async (planId: number) => {
-    try {
-      const res = await fetch(`/api/billing/checkout`, {
-        method: "POST",
-        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
-        body: JSON.stringify({ planId, priceType: "monthly" }),
-      });
-      const data = await res.json();
-      if (data.url) window.location.href = data.url;
-      else toast({ title: "Erreur", description: data.error ?? "Impossible de créer la session.", variant: "destructive" });
-    } catch {
-      toast({ title: "Erreur", description: "Impossible d'accéder au paiement.", variant: "destructive" });
     }
   };
 
@@ -151,18 +139,18 @@ export default function EspaceCommercant() {
           <div>
             <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
               <Store className="h-6 w-6 text-blue-600" />
-              Espace commerçant
+              {t("merchant.title")}
             </h1>
-            <p className="text-slate-500 mt-1">Bonjour, <span className="font-medium text-slate-700">{profile?.name}</span></p>
+            <p className="text-slate-500 mt-1">{t("merchant.hello")} <span className="font-medium text-slate-700">{profile?.name}</span></p>
           </div>
           <div className="flex items-center gap-2">
             <Link href="/deposer">
               <Button size="sm" className="gap-1">
-                <Plus className="h-4 w-4" /> Nouvelle annonce
+                <Plus className="h-4 w-4" /> {t("merchant.new_ad")}
               </Button>
             </Link>
             <Button variant="outline" size="sm" className="gap-1" onClick={handleLogout}>
-              <LogOut className="h-4 w-4" /> Déconnexion
+              <LogOut className="h-4 w-4" /> {t("merchant.logout")}
             </Button>
           </div>
         </div>
@@ -173,25 +161,25 @@ export default function EspaceCommercant() {
             <Card>
               <CardContent className="pt-5 pb-4">
                 <div className="text-2xl font-bold text-slate-900">{stats.totalAds}</div>
-                <div className="text-xs text-slate-500 mt-1 flex items-center gap-1"><ListChecks className="h-3.5 w-3.5" /> Total annonces</div>
+                <div className="text-xs text-slate-500 mt-1 flex items-center gap-1"><ListChecks className="h-3.5 w-3.5" /> {t("merchant.stats.total")}</div>
               </CardContent>
             </Card>
             <Card>
               <CardContent className="pt-5 pb-4">
                 <div className="text-2xl font-bold text-green-600">{stats.publishedAds}</div>
-                <div className="text-xs text-slate-500 mt-1 flex items-center gap-1"><CheckCircle className="h-3.5 w-3.5" /> Publiées</div>
+                <div className="text-xs text-slate-500 mt-1 flex items-center gap-1"><CheckCircle className="h-3.5 w-3.5" /> {t("merchant.stats.published")}</div>
               </CardContent>
             </Card>
             <Card>
               <CardContent className="pt-5 pb-4">
                 <div className="text-2xl font-bold text-amber-600">{stats.pendingAds}</div>
-                <div className="text-xs text-slate-500 mt-1 flex items-center gap-1"><Clock className="h-3.5 w-3.5" /> En attente</div>
+                <div className="text-xs text-slate-500 mt-1 flex items-center gap-1"><Clock className="h-3.5 w-3.5" /> {t("merchant.stats.pending")}</div>
               </CardContent>
             </Card>
             <Card>
               <CardContent className="pt-5 pb-4">
                 <div className="text-2xl font-bold text-blue-600">{stats.totalViews30d}</div>
-                <div className="text-xs text-slate-500 mt-1 flex items-center gap-1"><Eye className="h-3.5 w-3.5" /> Vues (30j)</div>
+                <div className="text-xs text-slate-500 mt-1 flex items-center gap-1"><Eye className="h-3.5 w-3.5" /> {t("merchant.stats.views")}</div>
               </CardContent>
             </Card>
           </div>
@@ -199,9 +187,9 @@ export default function EspaceCommercant() {
 
         <Tabs defaultValue="annonces">
           <TabsList className="mb-6">
-            <TabsTrigger value="annonces" className="gap-1.5"><ListChecks className="h-4 w-4" /> Mes annonces</TabsTrigger>
-            <TabsTrigger value="abonnement" className="gap-1.5"><CreditCard className="h-4 w-4" /> Abonnement</TabsTrigger>
-            <TabsTrigger value="profil" className="gap-1.5"><User className="h-4 w-4" /> Mon profil</TabsTrigger>
+            <TabsTrigger value="annonces" className="gap-1.5"><ListChecks className="h-4 w-4" /> {t("merchant.tabs.ads")}</TabsTrigger>
+            <TabsTrigger value="abonnement" className="gap-1.5"><CreditCard className="h-4 w-4" /> {t("merchant.tabs.subscription")}</TabsTrigger>
+            <TabsTrigger value="profil" className="gap-1.5"><User className="h-4 w-4" /> {t("merchant.tabs.profile")}</TabsTrigger>
           </TabsList>
 
           {/* Onglet Annonces */}
@@ -210,9 +198,9 @@ export default function EspaceCommercant() {
               <Card>
                 <CardContent className="py-12 text-center">
                   <ListChecks className="h-10 w-10 text-slate-300 mx-auto mb-3" />
-                  <p className="text-slate-600 font-medium">Aucune annonce pour le moment</p>
-                  <p className="text-slate-400 text-sm mt-1 mb-4">Publiez votre première annonce et touchez des milliers de voisins.</p>
-                  <Link href="/deposer"><Button size="sm">Déposer une annonce</Button></Link>
+                  <p className="text-slate-600 font-medium">{t("merchant.ads.empty_title")}</p>
+                  <p className="text-slate-400 text-sm mt-1 mb-4">{t("merchant.ads.empty_desc")}</p>
+                  <Link href="/deposer"><Button size="sm">{t("merchant.ads.post_ad")}</Button></Link>
                 </CardContent>
               </Card>
             ) : (
@@ -223,7 +211,9 @@ export default function EspaceCommercant() {
                       <div className="min-w-0">
                         <div className="font-medium text-slate-900 truncate">{ad.title}</div>
                         <div className="text-sm text-slate-500">{ad.product} · {ad.location}</div>
-                        <div className="text-xs text-slate-400 mt-0.5">{new Date(ad.createdAt).toLocaleDateString("fr-FR")}</div>
+                        <div className="text-xs text-slate-400 mt-0.5">
+                          {new Date(ad.createdAt).toLocaleDateString(i18n.language === "en" ? "en-GB" : "fr-FR")}
+                        </div>
                       </div>
                       <div className="flex items-center gap-3 shrink-0">
                         {ad.views !== undefined && (
@@ -245,8 +235,8 @@ export default function EspaceCommercant() {
           <TabsContent value="abonnement">
             <Card>
               <CardHeader>
-                <CardTitle>Abonnement en cours</CardTitle>
-                <CardDescription>Gérez votre abonnement commerçant</CardDescription>
+                <CardTitle>{t("merchant.subscription.title")}</CardTitle>
+                <CardDescription>{t("merchant.subscription.subtitle")}</CardDescription>
               </CardHeader>
               <CardContent>
                 {profile?.subscription && profile.subscription.status === "active" ? (
@@ -254,23 +244,23 @@ export default function EspaceCommercant() {
                     <div className="flex items-center gap-3 p-4 bg-green-50 rounded-lg border border-green-200">
                       <CheckCircle className="h-5 w-5 text-green-600 shrink-0" />
                       <div>
-                        <div className="font-medium text-green-800">{profile.subscription.plan?.name ?? "Abonnement actif"}</div>
+                        <div className="font-medium text-green-800">{profile.subscription.plan?.name ?? t("merchant.subscription.title")}</div>
                         {profile.subscription.currentPeriodEnd && (
                           <div className="text-sm text-green-600">
-                            Renouvellement le {new Date(profile.subscription.currentPeriodEnd).toLocaleDateString("fr-FR")}
+                            {t("merchant.subscription.renewal", { date: new Date(profile.subscription.currentPeriodEnd).toLocaleDateString(i18n.language === "en" ? "en-GB" : "fr-FR") })}
                           </div>
                         )}
                         {profile.subscription.cancelAtPeriodEnd && (
-                          <div className="text-sm text-amber-600 mt-1">Annulation en fin de période</div>
+                          <div className="text-sm text-amber-600 mt-1">{t("merchant.subscription.cancel_end")}</div>
                         )}
                       </div>
                     </div>
                   </div>
                 ) : (
                   <div className="space-y-4">
-                    <p className="text-slate-600">Vous n'avez pas d'abonnement actif. Passez à un plan commerçant pour accéder à plus d'annonces et de fonctionnalités.</p>
+                    <p className="text-slate-600">{t("merchant.subscription.no_sub")}</p>
                     <Link href="/tarifs">
-                      <Button className="gap-1.5"><CreditCard className="h-4 w-4" /> Voir les offres</Button>
+                      <Button className="gap-1.5"><CreditCard className="h-4 w-4" /> {t("merchant.subscription.see_plans")}</Button>
                     </Link>
                   </div>
                 )}
@@ -282,31 +272,31 @@ export default function EspaceCommercant() {
           <TabsContent value="profil">
             <Card>
               <CardHeader>
-                <CardTitle>Mon profil</CardTitle>
-                <CardDescription>Informations de votre compte</CardDescription>
+                <CardTitle>{t("merchant.profile.title")}</CardTitle>
+                <CardDescription>{t("merchant.profile.subtitle")}</CardDescription>
               </CardHeader>
               <CardContent>
                 <form onSubmit={handleSaveProfile} className="space-y-4 max-w-md">
                   <div>
-                    <Label htmlFor="name">Nom</Label>
+                    <Label htmlFor="name">{t("merchant.profile.name")}</Label>
                     <Input id="name" value={profileName} onChange={(e) => setProfileName(e.target.value)} className="mt-1" />
                   </div>
                   <div>
-                    <Label>Email</Label>
+                    <Label>{t("merchant.profile.email")}</Label>
                     <Input value={profile?.email ?? ""} disabled className="mt-1 bg-slate-50" />
                   </div>
                   <div>
-                    <Label>Rôle</Label>
+                    <Label>{t("merchant.profile.role")}</Label>
                     <Input value={profile?.role ?? ""} disabled className="mt-1 bg-slate-50" />
                   </div>
                   <div className="flex items-center gap-2">
                     <div className={`h-2 w-2 rounded-full ${profile?.emailVerified ? "bg-green-500" : "bg-amber-500"}`} />
                     <span className="text-sm text-slate-600">
-                      Email {profile?.emailVerified ? "vérifié" : "non vérifié"}
+                      {profile?.emailVerified ? t("merchant.profile.email_verified") : t("merchant.profile.email_not_verified")}
                     </span>
                   </div>
                   <Button type="submit" disabled={savingProfile}>
-                    {savingProfile ? "Enregistrement..." : "Enregistrer"}
+                    {savingProfile ? t("merchant.profile.saving") : t("merchant.profile.save")}
                   </Button>
                 </form>
               </CardContent>

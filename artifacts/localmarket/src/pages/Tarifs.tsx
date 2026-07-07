@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { PublicLayout } from "@/components/layout/PublicLayout";
 import { useListPlans } from "@workspace/api-client-react";
+import { useTranslation } from "react-i18next";
 
 const ICONS = [Star, Zap, Rocket];
 const COLORS = [
@@ -14,6 +15,7 @@ const COLORS = [
 ];
 
 export default function Tarifs() {
+  const { t } = useTranslation();
   const [, setLocation] = useLocation();
   const { data: plans, isLoading } = useListPlans();
 
@@ -26,13 +28,13 @@ export default function Tarifs() {
           <div className="text-center mb-14 space-y-4">
             <div className="inline-flex items-center gap-2 border border-primary/40 bg-primary/10 text-primary text-xs font-semibold px-4 py-1.5 rounded-full uppercase tracking-widest">
               <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
-              Offres & Abonnements
+              {t("pricing.badge")}
             </div>
             <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight text-foreground">
-              Choisissez votre plan
+              {t("pricing.title")}
             </h1>
             <p className="text-lg text-muted-foreground max-w-xl mx-auto">
-              Des offres adaptées à chaque besoin, du particulier au professionnel.
+              {t("pricing.subtitle")}
             </p>
           </div>
 
@@ -43,7 +45,7 @@ export default function Tarifs() {
               ))}
             </div>
           ) : activePlans.length === 0 ? (
-            <div className="text-center text-muted-foreground py-20">Aucun plan disponible pour le moment.</div>
+            <div className="text-center text-muted-foreground py-20">{t("pricing.no_plans")}</div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-start">
               {activePlans.map((plan, i) => {
@@ -57,7 +59,7 @@ export default function Tarifs() {
                     {isPopular && (
                       <div className="absolute -top-4 left-0 right-0 flex justify-center">
                         <span className="bg-primary text-primary-foreground text-xs font-bold px-4 py-1 rounded-full uppercase tracking-wider shadow-lg">
-                          Populaire
+                          {t("pricing.popular")}
                         </span>
                       </div>
                     )}
@@ -80,17 +82,17 @@ export default function Tarifs() {
                         <div className="mt-6">
                           <div className="flex items-baseline gap-1">
                             <span className="text-4xl font-extrabold text-foreground">
-                              {plan.priceMonthly === "0" ? "Gratuit" : `${plan.priceMonthly} €`}
+                              {plan.priceMonthly === "0" ? t("pricing.free") : `${plan.priceMonthly} €`}
                             </span>
                             {plan.priceMonthly !== "0" && (
-                              <span className="text-muted-foreground text-sm">/mois</span>
+                              <span className="text-muted-foreground text-sm">{t("pricing.per_month")}</span>
                             )}
                           </div>
                           {plan.priceAnnual && plan.priceMonthly !== "0" && (
                             <p className="text-xs text-muted-foreground mt-1">
-                              ou {plan.priceAnnual} €/an{" "}
+                              {t("pricing.annual_price", { price: plan.priceAnnual })}{" "}
                               <span className="text-green-600 font-semibold">
-                                (économisez {Math.round((1 - Number(plan.priceAnnual) / (Number(plan.priceMonthly) * 12)) * 100)}%)
+                                {t("pricing.savings", { percent: Math.round((1 - Number(plan.priceAnnual) / (Number(plan.priceMonthly) * 12)) * 100) })}
                               </span>
                             </p>
                           )}
@@ -99,12 +101,12 @@ export default function Tarifs() {
                       <CardContent className="p-8 pt-6 space-y-6">
                         {plan.maxAds != null && (
                           <div className="text-sm font-semibold text-foreground border-b border-border/40 pb-4">
-                            {plan.maxAds} annonce{plan.maxAds > 1 ? "s" : ""} active{plan.maxAds > 1 ? "s" : ""}
+                            {t("pricing.ads_limit_other", { count: plan.maxAds })}
                           </div>
                         )}
                         {plan.maxAds == null && (
                           <div className="text-sm font-bold text-primary border-b border-border/40 pb-4">
-                            Annonces illimitées
+                            {t("pricing.ads_unlimited")}
                           </div>
                         )}
                         <ul className="space-y-3">
@@ -125,7 +127,7 @@ export default function Tarifs() {
                             }
                           }}
                         >
-                          {plan.priceMonthly === "0" ? "Commencer gratuitement" : `Choisir ${plan.name}`}
+                          {plan.priceMonthly === "0" ? t("pricing.start_free") : t("pricing.select_plan", { plan: plan.name })}
                         </Button>
                       </CardContent>
                     </Card>
@@ -136,15 +138,19 @@ export default function Tarifs() {
           )}
 
           <div className="mt-16 text-center">
-            <p className="text-muted-foreground text-sm mb-6">
-              Toutes les offres incluent un accès complet à la plateforme d'échanges locaux.
-              <br />Paiement sécurisé par Stripe. Annulation à tout moment.
+            <p className="text-muted-foreground text-sm mb-6 whitespace-pre-line">
+              {t("pricing.footer_info")}
             </p>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-2xl mx-auto text-sm">
-              {["Accès immédiat", "Sans engagement", "Support inclus", "100% sécurisé"].map(t => (
-                <div key={t} className="flex items-center gap-2 text-muted-foreground">
+              {([
+                t("pricing.feat_immediate"),
+                t("pricing.feat_no_commitment"),
+                t("pricing.feat_support"),
+                t("pricing.feat_secure"),
+              ]).map(feat => (
+                <div key={feat} className="flex items-center gap-2 text-muted-foreground">
                   <Check className="h-4 w-4 text-green-500 shrink-0" />
-                  {t}
+                  {feat}
                 </div>
               ))}
             </div>

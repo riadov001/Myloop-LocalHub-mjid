@@ -3,8 +3,10 @@ import { useListAdvertisements } from "@workspace/api-client-react";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Megaphone, ExternalLink } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 export default function Publicites() {
+  const { t } = useTranslation();
   const { data: ads, isLoading } = useListAdvertisements();
 
   return (
@@ -16,8 +18,8 @@ export default function Publicites() {
               <Megaphone className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold">Publicités</h1>
-              <p className="text-muted-foreground mt-1">Découvrez les offres et contenus mis en avant par notre équipe.</p>
+              <h1 className="text-3xl font-bold">{t("ads_promo.title")}</h1>
+              <p className="text-muted-foreground mt-1">{t("ads_promo.subtitle")}</p>
             </div>
           </div>
         </div>
@@ -72,8 +74,8 @@ export default function Publicites() {
         ) : (
           <div className="flex flex-col items-center justify-center py-20 text-center text-muted-foreground gap-3">
             <Megaphone className="h-10 w-10 text-muted-foreground/50" />
-            <p className="font-semibold text-lg text-foreground">Aucune publicité pour le moment</p>
-            <p className="text-sm">Revenez bientôt pour découvrir nos contenus promotionnels.</p>
+            <p className="font-semibold text-lg text-foreground">{t("ads_promo.empty_title")}</p>
+            <p className="text-sm">{t("ads_promo.empty_sub")}</p>
           </div>
         )}
       </div>

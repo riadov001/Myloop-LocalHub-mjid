@@ -11,6 +11,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useHealthCheck } from "@workspace/api-client-react";
+import { useTranslation } from "react-i18next";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 
 function useAuth() {
   const [user, setUser] = useState<{ name: string; token: string; role: string | null } | null>(null);
@@ -49,6 +51,7 @@ function useIsAdmin() {
 }
 
 export function PublicLayout({ children }: { children: React.ReactNode }) {
+  const { t } = useTranslation();
   const [, setLocation] = useLocation();
   const { data: health } = useHealthCheck();
   const isAdmin = useIsAdmin();
@@ -64,11 +67,11 @@ export function PublicLayout({ children }: { children: React.ReactNode }) {
   };
 
   const navLinks = [
-    { href: "/", label: "Accueil" },
-    { href: "/annonces", label: "Annonces" },
-    { href: "/publicites", label: "Publicités" },
-    { href: postAdHref, label: "Déposer une annonce" },
-    { href: "/tarifs", label: "Tarifs" },
+    { href: "/", label: t("nav.home") },
+    { href: "/annonces", label: t("nav.ads") },
+    { href: "/publicites", label: t("nav.ads_promo") },
+    { href: postAdHref, label: t("nav.post_ad") },
+    { href: "/tarifs", label: t("nav.pricing") },
   ];
 
   return (
@@ -91,7 +94,9 @@ export function PublicLayout({ children }: { children: React.ReactNode }) {
             </nav>
           </div>
 
-          <div className="hidden md:flex items-center gap-3">
+          <div className="hidden md:flex items-center gap-2">
+            <LanguageSwitcher />
+
             <Button
               variant="outline"
               size="sm"
@@ -99,7 +104,7 @@ export function PublicLayout({ children }: { children: React.ReactNode }) {
               onClick={() => setLocation("/dons")}
             >
               <Heart className="h-3.5 w-3.5 fill-current" />
-              Soutenir
+              {t("header.support")}
             </Button>
 
             {user ? (
@@ -116,29 +121,29 @@ export function PublicLayout({ children }: { children: React.ReactNode }) {
                 <DropdownMenuContent align="end" className="w-48">
                   <div className="px-3 py-2">
                     <p className="text-sm font-semibold text-foreground truncate">{user.name}</p>
-                    <p className="text-xs text-muted-foreground">Compte LocalMarket</p>
+                    <p className="text-xs text-muted-foreground">{t("user.account_type")}</p>
                   </div>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={() => setLocation(postAdHref)} className="cursor-pointer">
-                    Déposer une annonce
+                    {t("user.post_ad")}
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => setLocation("/espace-commercant")} className="cursor-pointer">
-                    Mon espace commerçant
+                    {t("user.merchant_space")}
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={handleLogout} className="cursor-pointer text-red-600 focus:text-red-600">
                     <LogOut className="h-4 w-4 mr-2" />
-                    Se déconnecter
+                    {t("user.logout")}
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
               <div className="flex items-center gap-2">
                 <Button variant="ghost" size="sm" onClick={() => setLocation("/connexion")}>
-                  Se connecter
+                  {t("header.login")}
                 </Button>
                 <Button size="sm" onClick={() => setLocation("/inscription")} className="font-semibold">
-                  S'inscrire
+                  {t("header.register")}
                 </Button>
               </div>
             )}
@@ -148,16 +153,19 @@ export function PublicLayout({ children }: { children: React.ReactNode }) {
             <SheetTrigger asChild className="md:hidden">
               <Button variant="ghost" size="icon">
                 <Menu className="h-6 w-6" />
-                <span className="sr-only">Menu</span>
+                <span className="sr-only">{t("header.menu_sr")}</span>
               </Button>
             </SheetTrigger>
             <SheetContent side="right">
               <div className="flex flex-col gap-4 mt-8">
-                <div className="flex items-center gap-2 mb-2">
-                  <div className="flex h-8 w-8 items-center justify-center rounded bg-primary text-primary-foreground">
-                    <Triangle className="h-5 w-5 fill-current" />
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2">
+                    <div className="flex h-8 w-8 items-center justify-center rounded bg-primary text-primary-foreground">
+                      <Triangle className="h-5 w-5 fill-current" />
+                    </div>
+                    <span className="font-bold text-foreground">LocalMarket</span>
                   </div>
-                  <span className="font-bold text-foreground">LocalMarket</span>
+                  <LanguageSwitcher />
                 </div>
 
                 {navLinks.map(l => (
@@ -174,7 +182,7 @@ export function PublicLayout({ children }: { children: React.ReactNode }) {
                   onClick={() => { setLocation("/dons"); setOpen(false); }}
                 >
                   <Heart className="h-4 w-4 fill-current" />
-                  Soutenir LocalMarket
+                  {t("header.support_full")}
                 </Button>
 
                 {user ? (
@@ -185,7 +193,7 @@ export function PublicLayout({ children }: { children: React.ReactNode }) {
                       </div>
                       <div className="min-w-0">
                         <p className="text-sm font-semibold truncate">{user.name}</p>
-                        <p className="text-xs text-muted-foreground">Connecté</p>
+                        <p className="text-xs text-muted-foreground">{t("user.connected")}</p>
                       </div>
                     </div>
                     <Button
@@ -193,7 +201,7 @@ export function PublicLayout({ children }: { children: React.ReactNode }) {
                       className="w-full justify-start"
                       onClick={() => { setLocation("/espace-commercant"); setOpen(false); }}
                     >
-                      Mon espace commerçant
+                      {t("user.merchant_space")}
                     </Button>
                     <Button
                       variant="outline"
@@ -201,16 +209,16 @@ export function PublicLayout({ children }: { children: React.ReactNode }) {
                       onClick={handleLogout}
                     >
                       <LogOut className="h-4 w-4" />
-                      Se déconnecter
+                      {t("user.logout")}
                     </Button>
                   </>
                 ) : (
                   <>
                     <Button variant="ghost" className="w-full justify-start" onClick={() => { setLocation("/connexion"); setOpen(false); }}>
-                      Se connecter
+                      {t("header.login")}
                     </Button>
                     <Button className="w-full justify-start font-semibold" onClick={() => { setLocation("/inscription"); setOpen(false); }}>
-                      S'inscrire gratuitement
+                      {t("header.register_free")}
                     </Button>
                   </>
                 )}
@@ -234,44 +242,44 @@ export function PublicLayout({ children }: { children: React.ReactNode }) {
               <span className="text-xl font-bold tracking-tight text-white">LocalMarket</span>
             </div>
             <p className="text-sm text-slate-400 max-w-xs">
-              La plateforme de confiance pour les échanges locaux. Connectons voisins, agriculteurs et artisans.
+              {t("footer.description")}
             </p>
             {health && (
               <div className="flex items-center gap-2 mt-4 text-xs text-slate-500">
                 <Activity className="h-3 w-3 text-green-500" />
-                <span>Système {health.status}</span>
+                <span>{t("footer.system_status", { status: health.status })}</span>
               </div>
             )}
           </div>
 
           <div className="space-y-4">
-            <h3 className="text-sm font-semibold text-white uppercase tracking-wider">Navigation</h3>
+            <h3 className="text-sm font-semibold text-white uppercase tracking-wider">{t("footer.nav_title")}</h3>
             <ul className="space-y-2 text-sm">
-              <li><Link href="/" className="hover:text-white transition-colors">Accueil</Link></li>
-              <li><Link href="/annonces" className="hover:text-white transition-colors">Annonces</Link></li>
-              <li><Link href="/publicites" className="hover:text-white transition-colors">Publicités</Link></li>
-              <li><Link href={postAdHref} className="hover:text-white transition-colors">Déposer une annonce</Link></li>
-              <li><Link href="/tarifs" className="hover:text-white transition-colors">Tarifs & Plans</Link></li>
-              <li><Link href="/dons" className="hover:text-white transition-colors">Soutenir</Link></li>
+              <li><Link href="/" className="hover:text-white transition-colors">{t("nav.home")}</Link></li>
+              <li><Link href="/annonces" className="hover:text-white transition-colors">{t("nav.ads")}</Link></li>
+              <li><Link href="/publicites" className="hover:text-white transition-colors">{t("nav.ads_promo")}</Link></li>
+              <li><Link href={postAdHref} className="hover:text-white transition-colors">{t("nav.post_ad")}</Link></li>
+              <li><Link href="/tarifs" className="hover:text-white transition-colors">{t("footer.pricing_plans")}</Link></li>
+              <li><Link href="/dons" className="hover:text-white transition-colors">{t("footer.support")}</Link></li>
             </ul>
           </div>
 
           <div className="space-y-4">
-            <h3 className="text-sm font-semibold text-white uppercase tracking-wider">Légal</h3>
+            <h3 className="text-sm font-semibold text-white uppercase tracking-wider">{t("footer.legal_title")}</h3>
             <ul className="space-y-2 text-sm">
-              <li><Link href="/mentions-legales" className="hover:text-white transition-colors">Mentions légales</Link></li>
-              <li><Link href="/cgu" className="hover:text-white transition-colors">CGU</Link></li>
-              <li><Link href="/politique-confidentialite" className="hover:text-white transition-colors">Politique de confidentialité</Link></li>
+              <li><Link href="/mentions-legales" className="hover:text-white transition-colors">{t("footer.legal_notices")}</Link></li>
+              <li><Link href="/cgu" className="hover:text-white transition-colors">{t("footer.cgu")}</Link></li>
+              <li><Link href="/politique-confidentialite" className="hover:text-white transition-colors">{t("footer.privacy")}</Link></li>
               {isAdmin && (
-                <li><Link href="/admin" className="hover:text-white transition-colors">Administration</Link></li>
+                <li><Link href="/admin" className="hover:text-white transition-colors">{t("footer.admin")}</Link></li>
               )}
             </ul>
           </div>
         </div>
         <div className="container max-w-7xl mt-12 pt-8 border-t border-slate-800 text-sm text-slate-400 text-center flex flex-col md:flex-row justify-between items-center gap-4">
-          <div>&copy; {new Date().getFullYear()} LocalMarket. Tous droits réservés.</div>
+          <div>&copy; {t("footer.copyright", { year: new Date().getFullYear() })}</div>
           <div className="flex items-center gap-1 text-slate-500">
-            Fait avec <Heart className="h-3.5 w-3.5 fill-red-500 text-red-500 mx-1" /> pour les échanges locaux
+            {t("footer.made_with")} <Heart className="h-3.5 w-3.5 fill-red-500 text-red-500 mx-1" /> {t("footer.made_with_suffix")}
           </div>
         </div>
       </footer>

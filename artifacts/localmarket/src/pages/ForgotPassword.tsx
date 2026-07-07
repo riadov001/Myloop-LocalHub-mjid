@@ -1,15 +1,18 @@
 import { useState } from "react";
 import { Link } from "wouter";
-import { Mail, ArrowLeft, Loader2, CheckCircle } from "lucide-react";
+import { Mail, ArrowLeft, Loader2, CheckCircle, Triangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
+import { useTranslation } from "react-i18next";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 
 const API_BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
 
 export default function ForgotPassword() {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
@@ -27,7 +30,7 @@ export default function ForgotPassword() {
       if (!res.ok) throw new Error();
       setSent(true);
     } catch {
-      toast({ title: "Erreur", description: "Une erreur est survenue. Réessayez.", variant: "destructive" });
+      toast({ title: t("common.error"), description: t("forgot.error"), variant: "destructive" });
     } finally {
       setLoading(false);
     }
@@ -36,38 +39,45 @@ export default function ForgotPassword() {
   return (
     <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
-        <div className="text-center mb-6">
-          <div className="inline-flex items-center justify-center h-12 w-12 rounded-xl bg-blue-600 text-white font-bold text-xl mb-3">LM</div>
-          <h1 className="text-2xl font-bold text-slate-900">LocalMarket</h1>
+        <div className="text-center mb-6 relative">
+          <div className="absolute right-0 top-0">
+            <LanguageSwitcher />
+          </div>
+          <Link href="/" className="inline-flex items-center gap-2 justify-center">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-primary-foreground">
+              <Triangle className="h-5 w-5 fill-current" />
+            </div>
+            <span className="text-xl font-bold tracking-tight">LocalMarket</span>
+          </Link>
         </div>
 
         <Card>
           <CardHeader className="pb-4">
-            <CardTitle>Mot de passe oublié</CardTitle>
-            <CardDescription>Renseignez votre email pour recevoir un lien de réinitialisation.</CardDescription>
+            <CardTitle>{t("forgot.title")}</CardTitle>
+            <CardDescription>{t("forgot.subtitle")}</CardDescription>
           </CardHeader>
           <CardContent>
             {sent ? (
               <div className="text-center py-4">
                 <CheckCircle className="h-12 w-12 text-green-500 mx-auto mb-3" />
-                <h3 className="font-semibold text-slate-900 mb-2">Email envoyé</h3>
+                <h3 className="font-semibold text-slate-900 mb-2">{t("forgot.sent_title")}</h3>
                 <p className="text-slate-600 text-sm mb-4">
-                  Si votre adresse est enregistrée, vous allez recevoir un email avec un lien de réinitialisation valable 1 heure.
+                  {t("forgot.sent_desc")}
                 </p>
                 <Link href="/connexion">
                   <Button variant="outline" size="sm" className="gap-1.5">
-                    <ArrowLeft className="h-4 w-4" /> Retour à la connexion
+                    <ArrowLeft className="h-4 w-4" /> {t("forgot.back_login")}
                   </Button>
                 </Link>
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
-                  <Label htmlFor="email">Adresse email</Label>
+                  <Label htmlFor="email">{t("forgot.email")}</Label>
                   <Input
                     id="email"
                     type="email"
-                    placeholder="votre@email.fr"
+                    placeholder={t("forgot.email_placeholder")}
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
@@ -76,11 +86,11 @@ export default function ForgotPassword() {
                 </div>
                 <Button type="submit" className="w-full gap-2" disabled={loading}>
                   {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Mail className="h-4 w-4" />}
-                  Envoyer le lien
+                  {t("forgot.submit")}
                 </Button>
                 <Link href="/connexion">
                   <Button variant="ghost" size="sm" className="w-full gap-1.5">
-                    <ArrowLeft className="h-4 w-4" /> Retour à la connexion
+                    <ArrowLeft className="h-4 w-4" /> {t("forgot.back_login")}
                   </Button>
                 </Link>
               </form>

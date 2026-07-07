@@ -8,8 +8,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { PublicLayout } from "@/components/layout/PublicLayout";
 import { useListAds, useListCategories, useListUnits } from "@workspace/api-client-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useTranslation } from "react-i18next";
 
 export default function AdsList() {
+  const { t } = useTranslation();
   const searchString = useSearch();
   const params = new URLSearchParams(searchString);
 
@@ -56,25 +58,24 @@ export default function AdsList() {
     setUrlLocation("/annonces");
   };
 
-  const listingTypeLabel = (type: string | null | undefined) => {
-    if (type === "free") return "Don gratuit";
-    if (type === "fixed") return "Prix fixe";
-    if (type === "flexible") return "Prix libre";
-    return null;
+  const getListingLabel = (ad: { listingType?: string | null; price?: string | null }) => {
+    if (ad.listingType === "free") return t("ads.listing_free");
+    if (ad.listingType === "fixed") return ad.price ? t("ads.listing_fixed_price", { price: ad.price }) : t("ads.listing_fixed");
+    return ad.price ? `${ad.price} €` : t("ads.listing_flexible");
   };
 
   return (
     <PublicLayout>
       <div className="bg-primary/5 py-8 border-b border-border/50">
         <div className="container max-w-6xl">
-          <h1 className="text-3xl font-bold mb-6">Toutes les annonces</h1>
+          <h1 className="text-3xl font-bold mb-6">{t("ads.title")}</h1>
 
           <Card className="p-4 shadow-sm border-primary/10 bg-card">
             <form onSubmit={handleSearch} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
               <div className="flex items-center px-3 bg-muted/30 rounded-md border border-transparent focus-within:border-primary focus-within:bg-background transition-colors">
                 <MapPin className="h-4 w-4 text-muted-foreground mr-2 shrink-0" />
                 <Input
-                  placeholder="Localisation"
+                  placeholder={t("ads.search.location")}
                   className="border-0 bg-transparent shadow-none focus-visible:ring-0 px-0 h-10"
                   value={location}
                   onChange={(e) => setSearchLocation(e.target.value)}
@@ -85,10 +86,10 @@ export default function AdsList() {
                 <Layers className="h-4 w-4 text-muted-foreground mr-2 shrink-0" />
                 <Select value={category} onValueChange={setCategory}>
                   <SelectTrigger className="border-0 bg-transparent shadow-none focus:ring-0 px-0 h-10 flex-1">
-                    <SelectValue placeholder="Catégorie" />
+                    <SelectValue placeholder={t("ads.search.category")} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">Toutes les catégories</SelectItem>
+                    <SelectItem value="all">{t("ads.search.category_all")}</SelectItem>
                     {categories?.map((cat) => (
                       <SelectItem key={cat.id} value={cat.name}>{cat.name}</SelectItem>
                     ))}
@@ -99,7 +100,7 @@ export default function AdsList() {
               <div className="flex items-center px-3 bg-muted/30 rounded-md border border-transparent focus-within:border-primary focus-within:bg-background transition-colors">
                 <Package className="h-4 w-4 text-muted-foreground mr-2 shrink-0" />
                 <Input
-                  placeholder="Produit/Élément"
+                  placeholder={t("ads.search.product")}
                   className="border-0 bg-transparent shadow-none focus-visible:ring-0 px-0 h-10"
                   value={product}
                   onChange={(e) => setProduct(e.target.value)}
@@ -109,17 +110,17 @@ export default function AdsList() {
               <div className="flex items-center px-3 bg-muted/30 rounded-md border border-transparent focus-within:border-primary focus-within:bg-background transition-colors">
                 <Scale className="h-4 w-4 text-muted-foreground mr-2 shrink-0" />
                 <Input
-                  placeholder="Quantité"
+                  placeholder={t("ads.search.quantity")}
                   className="border-0 bg-transparent shadow-none focus-visible:ring-0 px-0 h-10 w-20 shrink-0"
                   value={quantity}
                   onChange={(e) => setQuantity(e.target.value)}
                 />
                 <Select value={unit} onValueChange={setUnit}>
                   <SelectTrigger className="border-0 bg-transparent shadow-none focus:ring-0 px-0 h-10 flex-1">
-                    <SelectValue placeholder="Unité" />
+                    <SelectValue placeholder={t("ads.search.unit")} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">Toutes</SelectItem>
+                    <SelectItem value="all">{t("ads.search.unit_all")}</SelectItem>
                     {units?.map((u) => (
                       <SelectItem key={u.id} value={u.symbol}>{u.symbol}</SelectItem>
                     ))}
@@ -131,13 +132,13 @@ export default function AdsList() {
                 <Euro className="h-4 w-4 text-muted-foreground mr-2 shrink-0" />
                 <Select value={listingType} onValueChange={setListingType}>
                   <SelectTrigger className="border-0 bg-transparent shadow-none focus:ring-0 px-0 h-10 flex-1">
-                    <SelectValue placeholder="Type de prix" />
+                    <SelectValue placeholder={t("ads.search.price_type")} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">Tous les types</SelectItem>
-                    <SelectItem value="free">Don gratuit</SelectItem>
-                    <SelectItem value="flexible">Prix libre</SelectItem>
-                    <SelectItem value="fixed">Prix fixe</SelectItem>
+                    <SelectItem value="all">{t("ads.search.type_all")}</SelectItem>
+                    <SelectItem value="free">{t("ads.search.type_free")}</SelectItem>
+                    <SelectItem value="flexible">{t("ads.search.type_flexible")}</SelectItem>
+                    <SelectItem value="fixed">{t("ads.search.type_fixed")}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -145,10 +146,10 @@ export default function AdsList() {
               <div className="flex gap-2">
                 <Button type="submit" className="flex-1 h-10">
                   <Search className="h-4 w-4 mr-2" />
-                  Filtrer
+                  {t("ads.search.filter")}
                 </Button>
                 <Button type="button" variant="outline" className="h-10" onClick={handleReset}>
-                  Réinitialiser
+                  {t("ads.search.reset")}
                 </Button>
               </div>
             </form>
@@ -179,7 +180,7 @@ export default function AdsList() {
                   </div>
                   {ad.isPromoted && (
                     <div className="absolute top-3 right-3 bg-amber-500 text-white px-2.5 py-1 text-xs font-bold rounded-md">
-                      Mis en avant
+                      {t("ads.promoted")}
                     </div>
                   )}
                 </div>
@@ -208,13 +209,7 @@ export default function AdsList() {
                     {ad.listingType && (
                       <div className="flex items-center text-sm text-muted-foreground">
                         <Euro className="h-4 w-4 mr-2 shrink-0" />
-                        <span>
-                          {ad.listingType === "free"
-                            ? "Don gratuit"
-                            : ad.listingType === "fixed"
-                            ? `Prix fixe${ad.price ? ` : ${ad.price} €` : ""}`
-                            : ad.price ? `${ad.price} €` : "Prix libre"}
-                        </span>
+                        <span>{getListingLabel(ad)}</span>
                       </div>
                     )}
                   </div>
@@ -222,7 +217,7 @@ export default function AdsList() {
                     className="w-full mt-6 group-hover:bg-primary group-hover:text-primary-foreground transition-colors shadow-sm"
                     onClick={(e) => { e.stopPropagation(); setUrlLocation(`/annonces/${ad.id}`); }}
                   >
-                    Contacter
+                    {t("ads.contact")}
                   </Button>
                 </CardContent>
               </Card>
@@ -232,12 +227,12 @@ export default function AdsList() {
               <div className="h-16 w-16 bg-muted flex items-center justify-center rounded-full mb-4">
                 <Search className="h-8 w-8 text-muted-foreground" />
               </div>
-              <h3 className="text-xl font-bold mb-2">Aucune annonce trouvée</h3>
+              <h3 className="text-xl font-bold mb-2">{t("ads.empty.title")}</h3>
               <p className="text-muted-foreground max-w-md">
-                Nous n'avons trouvé aucune annonce correspondant à vos critères de recherche. Essayez de modifier vos filtres.
+                {t("ads.empty.description")}
               </p>
               <Button variant="outline" className="mt-6" onClick={handleReset}>
-                Réinitialiser la recherche
+                {t("ads.empty.reset")}
               </Button>
             </div>
           )}
