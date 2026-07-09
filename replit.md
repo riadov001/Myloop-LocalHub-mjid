@@ -47,8 +47,9 @@ Plateforme d'échanges locaux connectant voisins, agriculteurs et artisans pour 
 
 ## Admin credentials (dev only)
 
-- Email: `admin@localmarket.fr`
-- Password: `admin123`
+- Email: `rbelmahi90@gmail.com`
+- Password: `Root@26!`
+- This root account is hardcoded in `artifacts/api-server/src/routes/admin.ts`. Additional admins can be created from the admin dashboard and are stored in the `admin_users` table.
 
 ## User preferences
 
