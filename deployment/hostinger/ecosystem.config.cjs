@@ -6,7 +6,7 @@ module.exports = {
   apps: [
     {
       name: "localmarket-api",
-      script: "./artifacts/api-server/dist/index.js",
+      script: "./index.mjs",
       instances: "max",          // 1 worker par cœur CPU
       exec_mode: "cluster",
       env: {

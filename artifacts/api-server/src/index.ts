@@ -22,4 +22,9 @@ app.listen(port, (err) => {
   }
 
   logger.info({ port }, "Server listening");
+
+  // Signal readiness to PM2 (used by ecosystem.config.cjs `wait_ready`)
+  if (process.send) {
+    process.send("ready");
+  }
 });

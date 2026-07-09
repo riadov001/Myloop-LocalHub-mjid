@@ -7,3 +7,5 @@
 - [Stripe client location](stripe-client-location.md) — Stripe client at src/stripeClient.ts (exports getUncachableStripeClient, getStripeSync); no stripe/ subdirectory.
 - [Workspace pkg linking](workspace-pkg-linking.md) — @workspace/* packages must be added by editing package.json directly, then run pnpm install; pnpm add fails for workspace packages.
 - [Stripe webhook raw body](stripe-webhook-raw.md) — Webhook must mount express.raw() at /api/webhooks/stripe BEFORE express.json() in app.ts; adminAuth is named export (not default) from middleware/adminAuth.ts; constructEvent() needs `as unknown as typeof event` cast to avoid TS2352.
+- [Manual secrets over connector](manual-secrets-preference.md) — User declined the Stripe Replit connector and instead pastes raw API keys; stripeClient.ts/email-service.ts now check STRIPE_SECRET_KEY/RESEND_API_KEY env vars first, falling back to connector/DB config.
+- [JWT_SECRET required in prod](jwt-secret-prod.md) — auth.ts/userAuth.ts import JWT_SECRET from lib/jwtSecret.ts, which throws if unset when NODE_ENV=production instead of using the hardcoded dev fallback.

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
+import { motion } from "framer-motion";
 import { Search, MapPin, Package, Scale, ArrowRight, Layers, Euro } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -45,24 +46,49 @@ export default function Home() {
 
   return (
     <PublicLayout>
-      <section className="py-16 lg:py-24">
+      <section className="py-16 lg:py-24 overflow-hidden">
         <div className="container max-w-7xl px-4">
           <div className="grid lg:grid-cols-2 gap-10 items-start">
-            <div className="space-y-8">
-              <div className="inline-flex items-center gap-2 border border-primary/40 bg-primary/10 text-primary text-xs font-semibold px-4 py-1.5 rounded-full uppercase tracking-widest">
+            <motion.div
+              className="space-y-8"
+              initial={{ opacity: 0, y: 24 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, ease: "easeOut" }}
+            >
+              <motion.div
+                className="inline-flex items-center gap-2 border border-primary/40 bg-primary/10 text-primary text-xs font-semibold px-4 py-1.5 rounded-full uppercase tracking-widest"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.05 }}
+              >
                 <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
                 {t("home.hero.badge")}
-              </div>
+              </motion.div>
 
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight leading-[1.1] text-foreground">
+              <motion.h1
+                className="text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight leading-[1.1] text-foreground"
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.12 }}
+              >
                 {t("home.hero.title_part1")}{" "}
                 <span className="text-primary">{t("home.hero.title_highlight")}</span>
-              </h1>
+              </motion.h1>
 
-              <p className="text-lg text-muted-foreground max-w-xl leading-relaxed">
+              <motion.p
+                className="text-lg text-muted-foreground max-w-xl leading-relaxed"
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.2 }}
+              >
                 {t("home.hero.subtitle")}
-              </p>
+              </motion.p>
 
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.28 }}
+              >
               <Card className="border-border/60 bg-card shadow-xl shadow-black/30">
                 <form onSubmit={handleSearch} className="flex flex-col gap-0">
                   {/* Localisation */}
@@ -169,9 +195,15 @@ export default function Home() {
                   </div>
                 </form>
               </Card>
-            </div>
+              </motion.div>
+            </motion.div>
 
-            <div className="relative h-[320px] md:h-[560px] w-full rounded-2xl overflow-hidden border border-border/50 shadow-2xl shadow-black/40">
+            <motion.div
+              className="relative h-[320px] md:h-[560px] w-full rounded-2xl overflow-hidden border border-border/50 shadow-2xl shadow-black/40"
+              initial={{ opacity: 0, scale: 0.97 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.7, delay: 0.15, ease: "easeOut" }}
+            >
               {adsLoading ? (
                 <div className="absolute inset-0 flex flex-col items-center justify-center bg-card text-muted-foreground gap-3">
                   <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
@@ -180,14 +212,20 @@ export default function Home() {
               ) : (
                 <MapView ads={ads ?? []} />
               )}
-            </div>
+            </motion.div>
           </div>
         </div>
       </section>
 
       <section className="py-16 border-t border-border/30">
         <div className="container max-w-7xl px-4">
-          <div className="flex items-center justify-between mb-8">
+          <motion.div
+            className="flex items-center justify-between mb-8"
+            initial={{ opacity: 0, y: 16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-80px" }}
+            transition={{ duration: 0.5 }}
+          >
             <div>
               <h2 className="text-2xl font-bold tracking-tight text-foreground">{t("home.latest_ads")}</h2>
               <p className="text-sm text-muted-foreground mt-1">{t("home.latest_ads_subtitle")}</p>
@@ -195,13 +233,13 @@ export default function Home() {
             <Button
               variant="ghost"
               onClick={() => setLocation("/annonces")}
-              className="text-primary hover:text-primary/80 hover:bg-primary/10 font-semibold"
+              className="text-primary hover:text-primary/80 hover:bg-primary/10 font-semibold group/link"
               data-testid="link-all-ads"
             >
               {t("home.see_all")}
-              <ArrowRight className="h-4 w-4 ml-2" />
+              <ArrowRight className="h-4 w-4 ml-2 transition-transform group-hover/link:translate-x-1" />
             </Button>
-          </div>
+          </motion.div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
             {adsLoading ? (
@@ -215,9 +253,16 @@ export default function Home() {
                   </CardContent>
                 </Card>
               ))
-            ) : ads?.slice(0, 4).map((ad) => (
-              <Card
+            ) : ads?.slice(0, 4).map((ad, idx) => (
+              <motion.div
                 key={ad.id}
+                initial={{ opacity: 0, y: 24 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-60px" }}
+                transition={{ duration: 0.45, delay: idx * 0.08, ease: "easeOut" }}
+                whileHover={{ y: -4 }}
+              >
+              <Card
                 className="overflow-hidden border-border/50 bg-card hover:border-primary/40 hover:shadow-lg hover:shadow-primary/10 transition-all duration-300 group cursor-pointer"
                 onClick={() => setLocation(`/annonces/${ad.id}`)}
                 data-testid={`card-ad-${ad.id}`}
@@ -257,6 +302,7 @@ export default function Home() {
                   </div>
                 </CardContent>
               </Card>
+              </motion.div>
             ))}
           </div>
         </div>

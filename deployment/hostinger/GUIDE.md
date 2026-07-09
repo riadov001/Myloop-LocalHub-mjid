@@ -205,6 +205,8 @@ sudo systemctl reload nginx
 # Ajoutez AVANT le bloc server : limit_req_zone $binary_remote_addr zone=api:10m rate=60r/m;
 ```
 
+> ⚠️ **Important** : le fichier `nginx.conf` fourni utilise `zone=api` dans le bloc `location /api`. Cette zone DOIT être déclarée dans le bloc `http {}` global de `/etc/nginx/nginx.conf` (pas dans le fichier de site) avant d'activer le site, sinon `nginx -t` échouera avec une erreur `zone "api" is unknown`.
+
 ---
 
 ## 9. Certificat SSL (HTTPS) gratuit

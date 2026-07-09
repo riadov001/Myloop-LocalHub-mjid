@@ -2,6 +2,15 @@ import Stripe from 'stripe';
 import { StripeSync } from 'stripe-replit-sync';
 
 async function getStripeCredentials(): Promise<{ secretKey: string; webhookSecret?: string }> {
+  // Prefer a manually configured secret key (e.g. Stripe test key) over the Replit connector.
+  const envSecretKey = process.env.STRIPE_SECRET_KEY;
+  if (envSecretKey) {
+    return {
+      secretKey: envSecretKey,
+      webhookSecret: process.env.STRIPE_WEBHOOK_SECRET,
+    };
+  }
+
   const hostname = process.env.REPLIT_CONNECTORS_HOSTNAME;
   const xReplitToken = process.env.REPL_IDENTITY
     ? "repl " + process.env.REPL_IDENTITY

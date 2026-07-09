@@ -6,6 +6,17 @@ let resendClient: Resend | null = null;
 let fromEmail = "noreply@localmarket.fr";
 
 async function getResendClient(): Promise<Resend> {
+  // Prefer environment-configured credentials over the DB-stored admin settings.
+  const envApiKey = process.env.RESEND_API_KEY;
+  const envFromEmail = process.env.RESEND_FROM_EMAIL;
+
+  if (envFromEmail) fromEmail = envFromEmail;
+
+  if (envApiKey) {
+    if (!resendClient) resendClient = new Resend(envApiKey);
+    return resendClient;
+  }
+
   const [apiKeyRow] = await db
     .select({ value: platformConfigTable.value })
     .from(platformConfigTable)

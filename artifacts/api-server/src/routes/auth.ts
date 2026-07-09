@@ -7,10 +7,10 @@ import { eq } from "drizzle-orm";
 import { RegisterBody, UserLoginBody } from "@workspace/api-zod";
 import { EmailService } from "@workspace/email";
 import { z } from "zod/v4";
+import { JWT_SECRET } from "../lib/jwtSecret.js";
 
 const router = Router();
 
-const JWT_SECRET = process.env.JWT_SECRET ?? "localmarket-dev-secret-2026";
 const JWT_EXPIRES = "7d";
 
 function makeToken(user: { id: number; name: string; email: string; role: string }) {
