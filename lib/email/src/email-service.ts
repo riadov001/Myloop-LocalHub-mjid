@@ -158,6 +158,20 @@ export const EmailService = {
     await sendEmail(to, `Merci pour votre don de ${amount} € — Grainily`, html);
   },
 
+  async sendAdminPasswordReset(to: string, name: string, token: string): Promise<void> {
+    const siteUrl = process.env.SITE_URL ?? "https://grainily.com";
+    const link = `${siteUrl}/admin/reinitialisation?token=${token}`;
+    const html = wrap(`
+      <span class="badge-warning">Sécurité</span>
+      <h2>Réinitialisation du mot de passe administrateur</h2>
+      <p>Bonjour ${name},</p>
+      <p>Vous avez demandé à réinitialiser votre mot de passe administrateur Grainily. Cliquez sur le bouton ci-dessous pour choisir un nouveau mot de passe.</p>
+      <a href="${link}" class="btn">Réinitialiser mon mot de passe</a>
+      <p>Ce lien expire dans <strong>1 heure</strong>. Si vous n'avez pas fait cette demande, ignorez cet email et vérifiez la sécurité de votre compte.</p>
+    `, "Réinitialisation mot de passe admin");
+    await sendEmail(to, "Réinitialisation de votre mot de passe administrateur — Grainily", html);
+  },
+
   async sendStorageAlert(to: string, usedPercent: number, usedGb: number, totalGb: number): Promise<void> {
     const html = wrap(`
       <span class="badge-error">Alerte stockage</span>

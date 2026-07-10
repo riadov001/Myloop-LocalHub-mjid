@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
-import { Menu, Triangle, Activity, Heart, LogOut, User, X } from "lucide-react";
+import { Menu, Activity, Heart, LogOut, User, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useHealthCheck } from "@workspace/api-client-react";
@@ -85,10 +85,7 @@ export function PublicLayout({ children }: { children: React.ReactNode }) {
       >
         <div className="container flex h-16 max-w-7xl items-center justify-between px-4">
           <Link href="/" className="flex items-center gap-2 shrink-0">
-            <div className="flex h-8 w-8 items-center justify-center rounded bg-primary text-primary-foreground">
-              <Triangle className="h-5 w-5 fill-current" />
-            </div>
-            <span className="text-xl font-bold tracking-tight text-foreground">Grainily</span>
+            <img src="/logo-grainily.jpg" alt="Grainily" className="h-9 w-auto rounded object-contain" />
           </Link>
 
           <Sheet open={open} onOpenChange={setOpen}>
@@ -101,12 +98,7 @@ export function PublicLayout({ children }: { children: React.ReactNode }) {
             <SheetContent side="right" className="w-80 sm:w-96 p-0 overflow-y-auto">
               <div className="flex flex-col h-full">
                 <div className="flex items-center justify-between px-6 py-5 border-b border-border/50">
-                  <div className="flex items-center gap-2">
-                    <div className="flex h-8 w-8 items-center justify-center rounded bg-primary text-primary-foreground">
-                      <Triangle className="h-5 w-5 fill-current" />
-                    </div>
-                    <span className="font-bold text-foreground">Grainily</span>
-                  </div>
+                  <img src="/logo-grainily.jpg" alt="Grainily" className="h-8 w-auto rounded object-contain" />
                   <LanguageSwitcher />
                 </div>
 
@@ -192,10 +184,7 @@ export function PublicLayout({ children }: { children: React.ReactNode }) {
         <div className="container max-w-7xl px-4 grid grid-cols-1 md:grid-cols-4 gap-8">
           <div className="space-y-4 md:col-span-2">
             <div className="flex items-center gap-2 cursor-pointer" onClick={() => setLocation("/")}>
-              <div className="flex h-8 w-8 items-center justify-center rounded bg-primary text-primary-foreground">
-                <Triangle className="h-5 w-5 fill-current" />
-              </div>
-              <span className="text-xl font-bold tracking-tight text-white">Grainily</span>
+              <img src="/logo-grainily.jpg" alt="Grainily" className="h-9 w-auto rounded object-contain brightness-0 invert" />
             </div>
             <p className="text-sm text-slate-400 max-w-xs">
               {t("footer.description")}

@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import {
   LayoutDashboard, LogOut, Settings, Palette, List, Tag, Scale,
-  Star, Users, Shield, ToggleLeft, ChevronRight, Menu, Triangle, CreditCard, Megaphone,
+  Star, Users, Shield, ToggleLeft, ChevronRight, Menu, CreditCard, Megaphone,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -55,11 +55,8 @@ export function AdminLayout({ children }: AdminLayoutProps) {
     <>
       <div className="h-16 flex items-center px-4 border-b border-sidebar-border shrink-0">
         <Link href="/admin/dashboard" className="flex items-center gap-2.5 w-full" onClick={() => setMobileOpen(false)}>
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow shrink-0">
-            <Triangle className="h-4 w-4 fill-current" />
-          </div>
+          <img src="/logo-grainily.jpg" alt="Grainily" className="h-8 w-auto rounded object-contain shrink-0" />
           <div className="min-w-0">
-            <div className="font-bold text-sm text-sidebar-foreground leading-tight">Grainily</div>
             <div className="text-[10px] text-sidebar-foreground/50 leading-tight">{t("admin.header.title")}</div>
           </div>
         </Link>

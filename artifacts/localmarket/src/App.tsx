@@ -19,6 +19,8 @@ import Dons from "@/pages/Dons";
 import EspaceCommercant from "@/pages/EspaceCommercant";
 import ForgotPassword from "@/pages/ForgotPassword";
 import ResetPassword from "@/pages/ResetPassword";
+import AdminForgotPassword from "@/pages/AdminForgotPassword";
+import AdminResetPassword from "@/pages/AdminResetPassword";
 import VideoTemplate from "@/components/video/VideoTemplate";
 
 const queryClient = new QueryClient();
@@ -45,6 +47,8 @@ function Router() {
       <Route path="/espace-commercant" component={EspaceCommercant} />
       <Route path="/mot-de-passe-oublie" component={ForgotPassword} />
       <Route path="/reinitialisation-mot-de-passe" component={ResetPassword} />
+      <Route path="/admin/mot-de-passe-oublie" component={AdminForgotPassword} />
+      <Route path="/admin/reinitialisation" component={AdminResetPassword} />
       <Route path="/mentions-legales" component={Legal} />
       <Route path="/cgu" component={CGU} />
       <Route path="/politique-confidentialite" component={Privacy} />

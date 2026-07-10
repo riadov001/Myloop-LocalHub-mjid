@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { useLocation } from "wouter";
-import { Triangle, Lock, Loader2 } from "lucide-react";
+import { useLocation, Link } from "wouter";
+import { Lock, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
@@ -58,9 +58,7 @@ export default function AdminLogin() {
 
         <Card className="border-border/50 bg-card shadow-2xl shadow-black/40">
           <CardHeader className="space-y-4 items-center text-center pb-6">
-            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-lg shadow-primary/30">
-              <Triangle className="h-7 w-7 fill-current" />
-            </div>
+            <img src="/logo-grainily.jpg" alt="Grainily" className="h-14 w-auto rounded-xl object-contain" />
             <div className="space-y-1">
               <CardTitle className="text-xl font-bold tracking-tight text-foreground">Espace Administrateur</CardTitle>
               <CardDescription className="text-muted-foreground">
@@ -111,7 +109,10 @@ export default function AdminLogin() {
             </form>
           </CardContent>
 
-          <CardFooter className="justify-center border-t border-border/40 p-4">
+          <CardFooter className="flex-col gap-2 border-t border-border/40 p-4">
+            <Link href="/admin/mot-de-passe-oublie" className="text-xs text-primary hover:underline">
+              Mot de passe oublié ?
+            </Link>
             <p className="text-xs text-muted-foreground text-center">
               Accès réservé à l'équipe de modération Grainily.
             </p>
