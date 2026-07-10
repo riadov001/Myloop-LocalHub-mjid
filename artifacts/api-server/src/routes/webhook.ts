@@ -30,6 +30,12 @@ router.post("/webhooks/stripe", async (req, res) => {
       const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
       if (webhookSecret) {
         event = stripe.webhooks.constructEvent(rawBody, signature, webhookSecret) as unknown as typeof event;
+      } else if (process.env.NODE_ENV === "production") {
+        // En production, un secret de webhook manquant est une erreur de configuration : on refuse
+        // de traiter l'événement plutôt que de faire confiance à un body non vérifié.
+        logger.error("STRIPE_WEBHOOK_SECRET manquant en production — webhook rejeté.");
+        res.status(500).json({ error: "Configuration webhook manquante." });
+        return;
       } else {
         // Sans secret, on parse le body brut (dev only)
         event = JSON.parse(rawBody.toString()) as typeof event;

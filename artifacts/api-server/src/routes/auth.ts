@@ -54,7 +54,7 @@ router.post("/auth/register", async (req, res) => {
     }).returning();
     const token = makeToken(user);
     // Non-bloquant — ne doit pas faire échouer l'inscription
-    EmailService.sendWelcome(email, name).catch(() => {});
+    EmailService.sendWelcome(email, name).catch((err) => req.log.error({ err }, "Échec envoi email de bienvenue"));
     res.status(201).json({ token, user: toProfile(user) });
   } catch (err) {
     req.log.error(err);
@@ -103,7 +103,7 @@ router.post("/auth/forgot-password", async (req, res) => {
       const token = crypto.randomBytes(32).toString("hex");
       const expires = new Date(Date.now() + 60 * 60 * 1000);
       await db.update(usersTable).set({ resetToken: token, resetTokenExpires: expires }).where(eq(usersTable.id, user.id));
-      EmailService.sendPasswordReset(email, user.name, token).catch(() => {});
+      EmailService.sendPasswordReset(email, user.name, token).catch((err) => req.log.error({ err }, "Échec envoi email de réinitialisation"));
     }
     res.json({ message: "Si cette adresse est enregistrée, un email de réinitialisation vous a été envoyé." });
   } catch (err) {

@@ -1,9 +1,10 @@
 import { Router } from "express";
 import { db, subscriptionsTable, plansTable, usersTable } from "@workspace/db";
-import { eq, and } from "drizzle-orm";
+import { eq, and, inArray, desc, isNotNull } from "drizzle-orm";
 import { userAuth, type AuthRequest } from "../middleware/userAuth.js";
 import { z } from "zod/v4";
 
+const ACTIVE_STATUSES = ["active", "trialing", "past_due"] as const;
 const router = Router();
 
 /** GET /billing/plans — plans publics disponibles */
@@ -25,8 +26,8 @@ router.get("/billing/subscription", userAuth, async (req: AuthRequest, res) => {
       .select({ sub: subscriptionsTable, plan: plansTable })
       .from(subscriptionsTable)
       .leftJoin(plansTable, eq(subscriptionsTable.planId, plansTable.id))
-      .where(and(eq(subscriptionsTable.userId, userId)))
-      .orderBy(subscriptionsTable.createdAt)
+      .where(and(eq(subscriptionsTable.userId, userId), inArray(subscriptionsTable.status, ACTIVE_STATUSES)))
+      .orderBy(desc(subscriptionsTable.createdAt))
       .limit(1);
     if (!sub) {
       res.json(null);
@@ -69,11 +70,22 @@ router.post("/billing/checkout", userAuth, async (req: AuthRequest, res) => {
     const { getUncachableStripeClient } = await import("../stripeClient.js");
     const stripe = await getUncachableStripeClient();
 
+    // Réutiliser un customer Stripe existant plutôt que d'en créer un nouveau à chaque checkout.
+    // On cherche la ligne la plus récente qui possède déjà un customerId (une session "pending"
+    // plus récente sans customerId ne doit pas masquer un customer existant plus ancien).
+    const [existingSub] = await db
+      .select({ stripeCustomerId: subscriptionsTable.stripeCustomerId })
+      .from(subscriptionsTable)
+      .where(and(eq(subscriptionsTable.userId, req.user!.id), isNotNull(subscriptionsTable.stripeCustomerId)))
+      .orderBy(desc(subscriptionsTable.createdAt))
+      .limit(1);
+    const existingCustomerId = existingSub?.stripeCustomerId ?? undefined;
+
     const baseUrl = process.env.FRONTEND_URL ?? `https://${process.env.REPLIT_DOMAINS?.split(",")[0] ?? "localhost"}`;
     const session = await stripe.checkout.sessions.create({
       mode: "subscription",
       payment_method_types: ["card"],
-      customer_email: user.email,
+      ...(existingCustomerId ? { customer: existingCustomerId } : { customer_email: user.email }),
       line_items: [{
         price_data: {
           currency: "eur",
@@ -106,8 +118,11 @@ router.post("/billing/checkout", userAuth, async (req: AuthRequest, res) => {
 /** POST /billing/portal — portail Stripe pour gérer l'abonnement */
 router.post("/billing/portal", userAuth, async (req: AuthRequest, res) => {
   try {
+    // On cherche la ligne la plus récente qui a un customerId Stripe, pas simplement la dernière
+    // ligne créée (qui pourrait être un checkout "pending" abandonné sans customerId).
     const [sub] = await db.select().from(subscriptionsTable)
-      .where(and(eq(subscriptionsTable.userId, req.user!.id)))
+      .where(and(eq(subscriptionsTable.userId, req.user!.id), isNotNull(subscriptionsTable.stripeCustomerId)))
+      .orderBy(desc(subscriptionsTable.createdAt))
       .limit(1);
     if (!sub?.stripeCustomerId) {
       res.status(400).json({ error: "Aucun abonnement Stripe actif trouvé." });

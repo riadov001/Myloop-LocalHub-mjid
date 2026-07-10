@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { db, adsTable } from "@workspace/db";
-import { eq, and, inArray } from "drizzle-orm";
+import { eq, and, inArray, ilike, sql } from "drizzle-orm";
 import {
   ListAdsQueryParams,
   CreateAdBody,
@@ -25,7 +25,21 @@ const router = Router();
 router.get("/ads", async (req, res) => {
   try {
     const query = ListAdsQueryParams.parse(req.query);
-    const conditions: ReturnType<typeof eq>[] = [eq(adsTable.status, "published")];
+    // Toutes les conditions sont appliquées au niveau SQL afin que limit/offset paginent
+    // correctement sur le jeu de résultats déjà filtré (et non sur les 50 premières lignes brutes).
+    const conditions = [eq(adsTable.status, "published")];
+    if (query.location) conditions.push(ilike(adsTable.location, `%${query.location}%`));
+    if (query.product) {
+      conditions.push(
+        sql`(${ilike(adsTable.product, `%${query.product}%`)} or ${ilike(adsTable.title, `%${query.product}%`)})`
+      );
+    }
+    if (query.category) conditions.push(eq(adsTable.category, query.category));
+    if (query.unit) conditions.push(eq(adsTable.unit, query.unit));
+    if (query.quantity) conditions.push(ilike(adsTable.quantity, `%${query.quantity}%`));
+    if (query.listingType) {
+      conditions.push(eq(adsTable.listingType, query.listingType as "free" | "flexible" | "fixed"));
+    }
 
     const ads = await db
       .select()
@@ -35,42 +49,8 @@ router.get("/ads", async (req, res) => {
       .limit(query.limit ?? 50)
       .offset(query.offset ?? 0);
 
-    let filtered = ads;
-    if (query.location) {
-      filtered = filtered.filter((a) =>
-        a.location.toLowerCase().includes((query.location as string).toLowerCase())
-      );
-    }
-    if (query.product) {
-      filtered = filtered.filter((a) =>
-        a.product.toLowerCase().includes((query.product as string).toLowerCase()) ||
-        a.title.toLowerCase().includes((query.product as string).toLowerCase())
-      );
-    }
-    if (query.category) {
-      filtered = filtered.filter((a) =>
-        a.category.toLowerCase() === (query.category as string).toLowerCase()
-      );
-    }
-    if (query.unit) {
-      filtered = filtered.filter((a) =>
-        a.unit?.toLowerCase() === (query.unit as string).toLowerCase()
-      );
-    }
-    if (query.quantity) {
-      const q = (query.quantity as string).toLowerCase();
-      filtered = filtered.filter((a) =>
-        (a.quantity ?? "").toLowerCase().includes(q)
-      );
-    }
-    if (query.listingType) {
-      filtered = filtered.filter((a) =>
-        a.listingType === (query.listingType as string)
-      );
-    }
-
     res.json(
-      filtered.map((a) => ({
+      ads.map((a) => ({
         ...a,
         createdAt: a.createdAt.toISOString(),
       }))
@@ -88,7 +68,7 @@ router.post("/ads", userAuth, requireRole("merchant"), async (req: AuthRequest, 
     const [ad] = await db
       .insert(adsTable)
       .values({
-        userId: req.user?.id ?? null,
+        userId: req.user!.id,
         title: body.title,
         description: body.description,
         location: body.location,
