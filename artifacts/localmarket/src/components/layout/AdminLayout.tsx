@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { useAdminTokenRefresh } from "@/hooks/useAdminTokenRefresh";
 
 export function useAdminRole(): "root" | "admin" {
   if (typeof window === "undefined") return "admin";
@@ -23,6 +24,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
   const { t } = useTranslation();
   const [, setLocation] = useLocation();
   const [location] = useLocation();
+  useAdminTokenRefresh();
   const [mobileOpen, setMobileOpen] = useState(false);
   const role = useAdminRole();
 

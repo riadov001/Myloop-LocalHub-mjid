@@ -1,27 +1,35 @@
 import { Router } from "express";
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
+import jwt from "jsonwebtoken";
 import { db, adminUsersTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
 import { AdminLoginBody } from "@workspace/api-zod";
 import { ROOT_PASSWORD } from "../lib/rootCredentials.js";
 import { EmailService } from "@workspace/email";
+import { JWT_SECRET } from "../lib/jwtSecret.js";
+import { adminAuth, AdminJwtPayload } from "../middleware/adminAuth.js";
 import { z } from "zod/v4";
 
 const router = Router();
 
 export const ROOT_EMAIL = process.env.ROOT_ADMIN_EMAIL ?? "rbelmahi90@gmail.com";
-export const ROOT_TOKEN = "localmarket-root-token-2026";
-export const ADMIN_TOKEN_PREFIX = "localmarket-admin-token-2026";
+
+const JWT_EXPIRY = "8h";
+
+function signAdminToken(payload: Omit<AdminJwtPayload, "iat" | "exp">): string {
+  return jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXPIRY });
+}
 
 // POST /admin/login — checks root hardcoded creds first, then DB admin users
 router.post("/admin/login", async (req, res) => {
   try {
     const { email, password } = AdminLoginBody.parse(req.body);
 
-    // Root admin (hardcoded — always works)
+    // Root admin (hardcoded credentials — issues a signed JWT)
     if (email === ROOT_EMAIL && password === ROOT_PASSWORD) {
-      res.json({ success: true, token: ROOT_TOKEN, role: "root" });
+      const token = signAdminToken({ sub: "root", role: "root" });
+      res.json({ success: true, token, role: "root" });
       return;
     }
 
@@ -38,7 +46,7 @@ router.post("/admin/login", async (req, res) => {
           .update(adminUsersTable)
           .set({ lastLoginAt: new Date() })
           .where(eq(adminUsersTable.id, user.id));
-        const token = `${ADMIN_TOKEN_PREFIX}:${user.id}:${user.role}`;
+        const token = signAdminToken({ sub: String(user.id), role: user.role as "root" | "admin" });
         res.json({ success: true, token, role: user.role });
         return;
       }
@@ -49,6 +57,14 @@ router.post("/admin/login", async (req, res) => {
     req.log.error(err);
     res.status(400).json({ error: "Invalid credentials format" });
   }
+});
+
+// POST /admin/refresh — exchange a valid JWT for a fresh one (same role/sub)
+// Note: only accepts JWT tokens — legacy static tokens are rejected by adminAuth
+router.post("/admin/refresh", adminAuth, (req, res) => {
+  const r = req as typeof req & { adminRole: string; adminPayload: AdminJwtPayload };
+  const token = signAdminToken({ sub: r.adminPayload.sub, role: r.adminPayload.role });
+  res.json({ token, role: r.adminPayload.role });
 });
 
 // POST /admin/forgot-password — envoie un email de réinitialisation aux admins DB (pas root)
