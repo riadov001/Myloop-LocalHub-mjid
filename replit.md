@@ -1,4 +1,4 @@
-# LocalMarket
+# Grainily (formerly LocalMarket)
 
 Plateforme d'échanges locaux connectant voisins, agriculteurs et artisans pour échanger produits et ressources localement.
 

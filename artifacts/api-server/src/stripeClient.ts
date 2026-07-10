@@ -1,8 +1,33 @@
 import Stripe from 'stripe';
 import { StripeSync } from 'stripe-replit-sync';
+import { db, platformConfigTable } from '@workspace/db';
+import { inArray } from 'drizzle-orm';
+
+async function getDbStripeConfig(): Promise<{ secretKey?: string; webhookSecret?: string }> {
+  const rows = await db
+    .select({ key: platformConfigTable.key, value: platformConfigTable.value })
+    .from(platformConfigTable)
+    .where(inArray(platformConfigTable.key, ['stripe_api_key', 'stripe_webhook_secret']));
+
+  const map = Object.fromEntries(rows.map((r) => [r.key, r.value]));
+  return {
+    secretKey: map.stripe_api_key ?? undefined,
+    webhookSecret: map.stripe_webhook_secret ?? undefined,
+  };
+}
 
 async function getStripeCredentials(): Promise<{ secretKey: string; webhookSecret?: string }> {
-  // Prefer a manually configured secret key (e.g. Stripe test key) over the Replit connector.
+  // Prefer a key set by an admin from the admin dashboard (Configuration > Intégrations)
+  // so changes made there take effect immediately, without redeploying or touching env vars.
+  const dbConfig = await getDbStripeConfig();
+  if (dbConfig.secretKey) {
+    return {
+      secretKey: dbConfig.secretKey,
+      webhookSecret: dbConfig.webhookSecret,
+    };
+  }
+
+  // Fall back to a manually configured environment secret.
   const envSecretKey = process.env.STRIPE_SECRET_KEY;
   if (envSecretKey) {
     return {

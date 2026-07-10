@@ -3,20 +3,11 @@ import { db, platformConfigTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
 
 let resendClient: Resend | null = null;
-let fromEmail = "noreply@localmarket.fr";
+let fromEmail = "noreply@grainily.com";
 
 async function getResendClient(): Promise<Resend> {
-  // Prefer environment-configured credentials over the DB-stored admin settings.
-  const envApiKey = process.env.RESEND_API_KEY;
-  const envFromEmail = process.env.RESEND_FROM_EMAIL;
-
-  if (envFromEmail) fromEmail = envFromEmail;
-
-  if (envApiKey) {
-    if (!resendClient) resendClient = new Resend(envApiKey);
-    return resendClient;
-  }
-
+  // Prefer a key set by an admin from the admin dashboard (Configuration > Intégrations) so
+  // changes made there take effect immediately, without redeploying or touching env vars.
   const [apiKeyRow] = await db
     .select({ value: platformConfigTable.value })
     .from(platformConfigTable)
@@ -27,12 +18,16 @@ async function getResendClient(): Promise<Resend> {
     .from(platformConfigTable)
     .where(eq(platformConfigTable.key, "from_email"));
 
-  if (fromRow?.value) fromEmail = fromRow.value;
+  const envApiKey = process.env.RESEND_API_KEY;
+  const envFromEmail = process.env.RESEND_FROM_EMAIL;
 
-  const apiKey = apiKeyRow?.value;
+  fromEmail = fromRow?.value || envFromEmail || fromEmail;
+
+  const apiKey = apiKeyRow?.value || envApiKey;
   if (!apiKey) throw new Error("Clé API Resend non configurée dans les paramètres.");
 
-  if (!resendClient) resendClient = new Resend(apiKey);
+  // Reset the cached client if the resolved key changed (e.g. an admin just updated it).
+  resendClient = new Resend(apiKey);
   return resendClient;
 }
 
@@ -61,9 +56,9 @@ function wrap(content: string, title: string): string {
   .badge-error { background: #fee2e2; color: #991b1b; padding: 4px 12px; border-radius: 20px; font-size: 13px; font-weight: 600; display: inline-block; margin-bottom: 16px; }
 </style></head>
 <body><div class="card">
-  <div class="logo"><div class="logo-icon">LM</div><span class="logo-name">LocalMarket</span></div>
+  <div class="logo"><div class="logo-icon">GR</div><span class="logo-name">Grainily</span></div>
   ${content}
-  <div class="footer">Vous recevez cet email car vous avez un compte sur LocalMarket.<br>Si vous n'êtes pas à l'origine de cette action, ignorez cet email.</div>
+  <div class="footer">Vous recevez cet email car vous avez un compte sur Grainily.<br>Si vous n'êtes pas à l'origine de cette action, ignorez cet email.</div>
 </div></body></html>`;
 }
 
@@ -71,32 +66,32 @@ export const EmailService = {
   async sendWelcome(to: string, name: string): Promise<void> {
     const html = wrap(`
       <span class="badge-success">Bienvenue !</span>
-      <h2>Bonjour ${name}, bienvenue sur LocalMarket</h2>
+      <h2>Bonjour ${name}, bienvenue sur Grainily</h2>
       <p>Votre compte a été créé avec succès. Vous pouvez maintenant parcourir les annonces locales, contacter des commerçants et rejoindre notre communauté d'échanges.</p>
       <p>Pour commencer, explorez les annonces disponibles près de chez vous.</p>
-      <a href="${process.env.SITE_URL ?? "https://localmarket.fr"}" class="btn">Découvrir LocalMarket</a>
+      <a href="${process.env.SITE_URL ?? "https://grainily.com"}" class="btn">Découvrir Grainily</a>
       <p>Si vous avez des questions, n'hésitez pas à nous contacter.</p>
-    `, "Bienvenue sur LocalMarket");
-    await sendEmail(to, "Bienvenue sur LocalMarket !", html);
+    `, "Bienvenue sur Grainily");
+    await sendEmail(to, "Bienvenue sur Grainily !", html);
   },
 
   async sendEmailVerification(to: string, name: string, token: string): Promise<void> {
-    const siteUrl = process.env.SITE_URL ?? "https://localmarket.fr";
+    const siteUrl = process.env.SITE_URL ?? "https://grainily.com";
     const link = `${siteUrl}/verification-email?token=${token}`;
     const html = wrap(`
       <span class="badge-warning">Action requise</span>
       <h2>Vérifiez votre adresse email</h2>
       <p>Bonjour ${name},</p>
-      <p>Cliquez sur le bouton ci-dessous pour confirmer votre adresse email et activer votre compte LocalMarket.</p>
+      <p>Cliquez sur le bouton ci-dessous pour confirmer votre adresse email et activer votre compte Grainily.</p>
       <a href="${link}" class="btn">Vérifier mon email</a>
       <p>Ce lien expire dans <strong>24 heures</strong>.</p>
       <p style="font-size:13px;color:#94a3b8;">Lien direct : <a href="${link}" style="color:#2563eb;">${link}</a></p>
     `, "Vérification de votre email");
-    await sendEmail(to, "Vérifiez votre adresse email — LocalMarket", html);
+    await sendEmail(to, "Vérifiez votre adresse email — Grainily", html);
   },
 
   async sendPasswordReset(to: string, name: string, token: string): Promise<void> {
-    const siteUrl = process.env.SITE_URL ?? "https://localmarket.fr";
+    const siteUrl = process.env.SITE_URL ?? "https://grainily.com";
     const link = `${siteUrl}/reinitialiser-mot-de-passe?token=${token}`;
     const html = wrap(`
       <span class="badge-warning">Sécurité</span>
@@ -106,16 +101,16 @@ export const EmailService = {
       <a href="${link}" class="btn">Réinitialiser mon mot de passe</a>
       <p>Ce lien expire dans <strong>1 heure</strong>. Si vous n'avez pas fait cette demande, ignorez cet email.</p>
     `, "Réinitialisation de mot de passe");
-    await sendEmail(to, "Réinitialisation de votre mot de passe — LocalMarket", html);
+    await sendEmail(to, "Réinitialisation de votre mot de passe — Grainily", html);
   },
 
   async sendAdApproved(to: string, name: string, adTitle: string): Promise<void> {
-    const siteUrl = process.env.SITE_URL ?? "https://localmarket.fr";
+    const siteUrl = process.env.SITE_URL ?? "https://grainily.com";
     const html = wrap(`
       <span class="badge-success">Annonce publiée</span>
       <h2>Votre annonce a été approuvée</h2>
       <p>Bonjour ${name},</p>
-      <p>Bonne nouvelle ! Votre annonce <strong>"${adTitle}"</strong> a été approuvée par notre équipe et est maintenant visible par tous les utilisateurs de LocalMarket.</p>
+      <p>Bonne nouvelle ! Votre annonce <strong>"${adTitle}"</strong> a été approuvée par notre équipe et est maintenant visible par tous les utilisateurs de Grainily.</p>
       <a href="${siteUrl}/publicites" class="btn">Voir mes annonces</a>
     `, "Annonce approuvée");
     await sendEmail(to, `Annonce approuvée : "${adTitle}"`, html);
@@ -137,9 +132,9 @@ export const EmailService = {
       <span class="badge-success">Abonnement actif</span>
       <h2>Votre abonnement ${planName} est confirmé</h2>
       <p>Bonjour ${name},</p>
-      <p>Votre abonnement <strong>${planName}</strong> est maintenant actif. Vous pouvez dès à présent publier vos annonces sur LocalMarket.</p>
+      <p>Votre abonnement <strong>${planName}</strong> est maintenant actif. Vous pouvez dès à présent publier vos annonces sur Grainily.</p>
     `, "Abonnement confirmé");
-    await sendEmail(to, `Abonnement ${planName} confirmé — LocalMarket`, html);
+    await sendEmail(to, `Abonnement ${planName} confirmé — Grainily`, html);
   },
 
   async sendSubscriptionCancelled(to: string, name: string, planName: string): Promise<void> {
@@ -149,7 +144,7 @@ export const EmailService = {
       <p>Bonjour ${name},</p>
       <p>Votre abonnement <strong>${planName}</strong> a été annulé. Vos annonces resteront visibles jusqu'à la fin de la période en cours.</p>
     `, "Abonnement annulé");
-    await sendEmail(to, `Abonnement ${planName} annulé — LocalMarket`, html);
+    await sendEmail(to, `Abonnement ${planName} annulé — Grainily`, html);
   },
 
   async sendDonationConfirmation(to: string, name: string, amount: number): Promise<void> {
@@ -157,20 +152,20 @@ export const EmailService = {
       <span class="badge-success">Merci !</span>
       <h2>Merci pour votre don de ${amount} €</h2>
       <p>Bonjour ${name},</p>
-      <p>Votre don de <strong>${amount} €</strong> a bien été reçu. Merci de soutenir LocalMarket et notre mission d'échanges locaux.</p>
+      <p>Votre don de <strong>${amount} €</strong> a bien été reçu. Merci de soutenir Grainily et notre mission d'échanges locaux.</p>
       <p>Votre générosité aide à maintenir une plateforme libre et accessible à toute la communauté.</p>
     `, "Confirmation de don");
-    await sendEmail(to, `Merci pour votre don de ${amount} € — LocalMarket`, html);
+    await sendEmail(to, `Merci pour votre don de ${amount} € — Grainily`, html);
   },
 
   async sendStorageAlert(to: string, usedPercent: number, usedGb: number, totalGb: number): Promise<void> {
     const html = wrap(`
       <span class="badge-error">Alerte stockage</span>
       <h2>Alerte : espace de stockage critique</h2>
-      <p>L'espace de stockage de la plateforme LocalMarket est à <strong>${usedPercent}%</strong> de sa capacité.</p>
+      <p>L'espace de stockage de la plateforme Grainily est à <strong>${usedPercent}%</strong> de sa capacité.</p>
       <p>Utilisé : <strong>${usedGb} Go</strong> sur <strong>${totalGb} Go</strong></p>
       <p>Veuillez libérer de l'espace ou augmenter la capacité de stockage dès que possible.</p>
     `, "Alerte stockage critique");
-    await sendEmail(to, `Alerte stockage : ${usedPercent}% utilisé — LocalMarket`, html);
+    await sendEmail(to, `Alerte stockage : ${usedPercent}% utilisé — Grainily`, html);
   },
 };

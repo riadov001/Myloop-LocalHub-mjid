@@ -6,10 +6,12 @@
   "scripts": {
     "hello": "tsx ./src/hello.ts",
     "seed-defaults": "tsx ./src/seed-defaults.ts",
+    "send-test-email": "tsx ./src/send-test-email.ts",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
-    "@workspace/db": "workspace:*"
+    "@workspace/db": "workspace:*",
+    "@workspace/email": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "catalog:",

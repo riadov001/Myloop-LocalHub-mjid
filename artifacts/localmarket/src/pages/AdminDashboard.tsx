@@ -109,7 +109,7 @@ function OverviewTab() {
 
   return (
     <div className="space-y-6">
-      <TabHeader title="Vue d'ensemble" description="Tableau de bord en temps réel de la plateforme LocalMarket." />
+      <TabHeader title="Vue d'ensemble" description="Tableau de bord en temps réel de la plateforme Grainily." />
 
       {isLoading ? (
         <div className="flex items-center gap-2 text-muted-foreground py-10">
@@ -397,7 +397,7 @@ function AdminsTab() {
               </div>
               <div className="space-y-1">
                 <Label>Email *</Label>
-                <Input type="email" placeholder="marie@localmarket.fr" value={form.email} onChange={e => setField("email", e.target.value)} />
+                <Input type="email" placeholder="marie@grainily.com" value={form.email} onChange={e => setField("email", e.target.value)} />
               </div>
               <div className="space-y-1">
                 <Label>{editingId ? "Nouveau mot de passe (laisser vide pour conserver)" : "Mot de passe *"}</Label>
@@ -1488,7 +1488,7 @@ function ParametresTab() {
 
   return (
     <div className="space-y-6">
-      <TabHeader title="Paramètres plateforme" description="Contrôle total — configurez chaque aspect de LocalMarket." />
+      <TabHeader title="Paramètres plateforme" description="Contrôle total — configurez chaque aspect de Grainily." />
       {CONFIG_GROUPS.map((group) => {
         const groupConfigs = group.keys.map(k => configByKey[k]).filter(Boolean) as NonNullable<typeof configs>[number][];
         const GroupIcon = group.icon;
@@ -1521,7 +1521,7 @@ function BrandingTab() {
 
   useEffect(() => {
     if (branding) {
-      setFormState({ siteName: branding.siteName || "LocalMarket", primaryColor: branding.primaryColor || "#2563eb", accentColor: branding.accentColor || "#1d4ed8", backgroundColor: branding.backgroundColor || "#ffffff", fontFamily: branding.fontFamily || "Inter", logoUrl: branding.logoUrl || "" });
+      setFormState({ siteName: branding.siteName || "Grainily", primaryColor: branding.primaryColor || "#2563eb", accentColor: branding.accentColor || "#1d4ed8", backgroundColor: branding.backgroundColor || "#ffffff", fontFamily: branding.fontFamily || "Inter", logoUrl: branding.logoUrl || "" });
     }
   }, [branding]);
 
@@ -1536,7 +1536,7 @@ function BrandingTab() {
 
   return (
     <div className="space-y-6">
-      <TabHeader title="Branding & Identité visuelle" description="Personnalisez l'apparence globale de la plateforme LocalMarket." />
+      <TabHeader title="Branding & Identité visuelle" description="Personnalisez l'apparence globale de la plateforme Grainily." />
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <Card className="border-border/50">
           <CardHeader className="bg-muted/30 border-b pb-4">

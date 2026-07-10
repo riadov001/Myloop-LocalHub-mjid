@@ -68,7 +68,7 @@ export default function VideoTemplate() {
           <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center shadow-lg shadow-blue-500/30">
             <div className="w-3 h-3 bg-white rounded-sm" />
           </div>
-          <span className="text-white font-semibold text-xl tracking-tight">LocalMarket</span>
+          <span className="text-white font-semibold text-xl tracking-tight">Grainily</span>
         </div>
       </motion.div>
 

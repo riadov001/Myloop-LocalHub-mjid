@@ -711,6 +711,9 @@ importers:
       '@workspace/db':
         specifier: workspace:*
         version: link:../lib/db
+      '@workspace/email':
+        specifier: workspace:*
+        version: link:../lib/email
     devDependencies:
       '@types/node':
         specifier: 'catalog:'

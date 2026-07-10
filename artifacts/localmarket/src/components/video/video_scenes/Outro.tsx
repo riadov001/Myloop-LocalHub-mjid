@@ -38,7 +38,7 @@ export function Outro() {
           animate={phase >= 2 ? { y: 0 } : { y: "100%" }}
           transition={{ type: "spring", stiffness: 400, damping: 30 }}
         >
-          LocalMarket
+          Grainily
         </motion.h1>
       </div>
 
@@ -66,7 +66,7 @@ export function Outro() {
         animate={phase >= 3 ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
         transition={{ duration: 0.8, delay: 0.4 }}
       >
-        <p className="text-white/60 font-mono text-sm">localmarket.app</p>
+        <p className="text-white/60 font-mono text-sm">grainily.com</p>
       </motion.div>
     </motion.div>
   );

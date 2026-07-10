@@ -1,13 +1,13 @@
 #!/bin/bash
 # ============================================================
-# LocalMarket — Script de build pour déploiement Hostinger
+# Grainily — Script de build pour déploiement Hostinger
 # Usage : bash deployment/hostinger/build.sh
 # ============================================================
 set -e
 
 echo ""
 echo "=============================="
-echo "  LocalMarket — Build prod"
+echo "  Grainily — Build prod"
 echo "=============================="
 echo ""
 
@@ -40,7 +40,8 @@ pnpm --filter @workspace/api-server run build
 
 echo ""
 echo "[4/5] Build du frontend React..."
-BASE_PATH=/ pnpm --filter @workspace/localmarket run build
+# PORT n'est utilisé que par le serveur de dev Vite, mais la config exige la variable même en build.
+BASE_PATH=/ PORT="${PORT:-8080}" pnpm --filter @workspace/localmarket run build
 
 echo ""
 echo "[5/5] Préparation du dossier de déploiement..."

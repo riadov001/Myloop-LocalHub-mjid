@@ -19,7 +19,7 @@ router.get("/admin/branding", adminAuth, async (req, res) => {
           accentColor: "#1d4ed8",
           backgroundColor: "#ffffff",
           fontFamily: "Inter",
-          siteName: "LocalMarket",
+          siteName: "Grainily",
         })
         .returning();
     }

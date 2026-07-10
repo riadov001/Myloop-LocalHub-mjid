@@ -59,7 +59,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
             <Triangle className="h-4 w-4 fill-current" />
           </div>
           <div className="min-w-0">
-            <div className="font-bold text-sm text-sidebar-foreground leading-tight">LocalMarket</div>
+            <div className="font-bold text-sm text-sidebar-foreground leading-tight">Grainily</div>
             <div className="text-[10px] text-sidebar-foreground/50 leading-tight">{t("admin.header.title")}</div>
           </div>
         </Link>
@@ -103,7 +103,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
               <div className="text-xs font-semibold text-sidebar-foreground truncate">
                 {t("admin.user.role")}
               </div>
-              <div className="text-[10px] text-sidebar-foreground/50">LocalMarket</div>
+              <div className="text-[10px] text-sidebar-foreground/50">Grainily</div>
             </div>
           </div>
         </div>

@@ -9,7 +9,7 @@ export const brandingTable = pgTable("branding", {
   accentColor: text("accent_color").notNull().default("#1d4ed8"),
   backgroundColor: text("background_color").notNull().default("#ffffff"),
   fontFamily: text("font_family").notNull().default("Inter"),
-  siteName: text("site_name").notNull().default("LocalMarket"),
+  siteName: text("site_name").notNull().default("Grainily"),
 });
 
 export const insertBrandingSchema = createInsertSchema(brandingTable).omit({ id: true });

@@ -1,6 +1,7 @@
-# LocalMarket — Guide de déploiement Hostinger (VPS)
+# Grainily — Guide de déploiement Hostinger (VPS)
 
-> Guide complet pas-à-pas pour déployer LocalMarket sur un VPS Hostinger (Ubuntu 22.04 LTS).
+> Guide complet pas-à-pas pour déployer Grainily (anciennement LocalMarket) sur un VPS Hostinger (Ubuntu 22.04 LTS).
+> Note : les identifiants système (utilisateur Linux, base de données, process PM2) conservent le nom technique `localmarket` — seul le nom de marque affiché a changé.
 > Temps estimé : 30-45 minutes pour un premier déploiement.
 
 ---

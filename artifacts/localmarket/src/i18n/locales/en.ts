@@ -11,7 +11,7 @@ const en = {
   // Header
   header: {
     support: "Support us",
-    support_full: "Support LocalMarket",
+    support_full: "Support Grainily",
     menu_sr: "Menu",
     login: "Sign in",
     register: "Sign up",
@@ -20,7 +20,7 @@ const en = {
 
   // User menu
   user: {
-    account_type: "LocalMarket Account",
+    account_type: "Grainily Account",
     post_ad: "Post a listing",
     merchant_space: "My merchant space",
     logout: "Sign out",
@@ -39,7 +39,7 @@ const en = {
     cgu: "Terms of use",
     privacy: "Privacy policy",
     admin: "Administration",
-    copyright: "{{year}} LocalMarket. All rights reserved.",
+    copyright: "{{year}} Grainily. All rights reserved.",
   },
 
   // Home page
@@ -48,7 +48,7 @@ const en = {
       badge: "Local exchange platform",
       title_part1: "Find what you need",
       title_highlight: "near you",
-      subtitle: "LocalMarket connects neighbors, farmers and artisans to exchange products and resources locally.",
+      subtitle: "Grainily connects neighbors, farmers and artisans to exchange products and resources locally.",
     },
     search: {
       location_label: "Location",
@@ -211,7 +211,7 @@ const en = {
   // Login
   login: {
     title: "Sign in",
-    subtitle: "Access your LocalMarket account",
+    subtitle: "Access your Grainily account",
     email: "Email address",
     email_placeholder: "your@email.com",
     password: "Password",
@@ -232,12 +232,12 @@ const en = {
   register: {
     title_customer: "Create an account",
     title_merchant: "Create a merchant account",
-    subtitle_customer: "Join the LocalMarket community",
-    subtitle_merchant: "Create your merchant account to post listings on LocalMarket",
+    subtitle_customer: "Join the Grainily community",
+    subtitle_merchant: "Create your merchant account to post listings on Grainily",
     role_label: "Account type",
     role_customer: "Individual",
     role_merchant: "Merchant",
-    merchant_hint: "A merchant account allows you to post listings on LocalMarket.",
+    merchant_hint: "A merchant account allows you to post listings on Grainily.",
     name: "Full name",
     name_placeholder: "John Smith",
     email: "Email address",
@@ -250,7 +250,7 @@ const en = {
     login_link: "Sign in",
     back_home: "Back to home",
     success_title: "Account created",
-    success_desc: "Welcome to LocalMarket, {{name}}!",
+    success_desc: "Welcome to Grainily, {{name}}!",
     error_title: "Error",
     error_password_short: "Password too short",
     error_password_short_desc: "Password must be at least 8 characters.",
@@ -281,10 +281,10 @@ const en = {
 
   // Donations
   donations: {
-    badge: "Support LocalMarket",
+    badge: "Support Grainily",
     title_part1: "Together, let's grow",
     title_highlight: "local exchanges",
-    subtitle: "LocalMarket is a community platform. Your donation, even a small one, makes a real difference in keeping this service free and open to everyone.",
+    subtitle: "Grainily is a community platform. Your donation, even a small one, makes a real difference in keeping this service free and open to everyone.",
     impact: {
       exchanges_title: "Local exchanges",
       exchanges_desc: "Each donation supports thousands of local product exchanges between neighbors.",
@@ -310,7 +310,7 @@ const en = {
       submit: "Donate {{amount}} €",
       submit_generic: "Donate",
       processing: "Processing...",
-      security_note: "100% secure payment by Stripe. You will receive a receipt by email.\nLocalMarket does not store your banking data.",
+      security_note: "100% secure payment by Stripe. You will receive a receipt by email.\nGrainily does not store your banking data.",
     },
     error_amount: "Invalid amount",
     error_amount_desc: "Please enter an amount of at least €1.",
@@ -406,9 +406,9 @@ const en = {
   legal: {
     title: "Legal notice",
     date: "Effective 01/01/2024",
-    description: "In accordance with the provisions of Articles 6-III and 19 of Law No. 2004-575 of June 21, 2004 on Confidence in the Digital Economy, the following legal notices are brought to the attention of users and visitors of the LocalMarket site.",
+    description: "In accordance with the provisions of Articles 6-III and 19 of Law No. 2004-575 of June 21, 2004 on Confidence in the Digital Economy, the following legal notices are brought to the attention of users and visitors of the Grainily site.",
     editor_title: "Site publisher",
-    editor_desc: "The LocalMarket site is published by the LocalMarket association, located at 1 rue de la Mairie, 75000 Paris.",
+    editor_desc: "The Grainily site is published by the Grainily association, located at 1 rue de la Mairie, 75000 Paris.",
     hosting_title: "Hosting",
     hosting_desc: "The site is hosted by Replit.",
   },
@@ -416,7 +416,7 @@ const en = {
   // CGU
   cgu: {
     title: "Terms of Use",
-    intro: "These Terms of Use aim to legally frame the terms of service provision by LocalMarket and to define the conditions of access and use of services by \"the User\".",
+    intro: "These Terms of Use aim to legally frame the terms of service provision by Grainily and to define the conditions of access and use of services by \"the User\".",
     access_title: "Site access",
     access_desc: "The site is freely accessible anywhere to any User with Internet access. All costs incurred by the User to access the service (computer hardware, software, Internet connection, etc.) are their responsibility.",
     liability_title: "Liability",
@@ -426,7 +426,7 @@ const en = {
   // Privacy
   privacy: {
     title: "Privacy policy",
-    intro: "The protection of your personal data is a priority for LocalMarket.",
+    intro: "The protection of your personal data is a priority for Grainily.",
     collection_title: "Data collection",
     collection_desc: "We collect the following data when posting a listing: name, email, phone, location.",
     usage_title: "Data use",

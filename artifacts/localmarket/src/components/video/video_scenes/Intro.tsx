@@ -43,7 +43,7 @@ export function Intro() {
           animate={phase >= 2 ? { y: 0 } : { y: "100%" }}
           transition={{ type: "spring", stiffness: 400, damping: 30 }}
         >
-          LocalMarket
+          Grainily
         </motion.h1>
       </div>
 

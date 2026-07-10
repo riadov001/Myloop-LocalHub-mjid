@@ -43,7 +43,7 @@ router.post("/donations/checkout", optionalUserAuth, async (req: AuthRequest, re
     }).parse(req.body);
 
     const config = await getPlatformConfig();
-    const orgName = config.site_name ?? "LocalMarket";
+    const orgName = config.site_name ?? "Grainily";
 
     const { getUncachableStripeClient } = await import("../stripeClient.js");
     const stripe = await getUncachableStripeClient();

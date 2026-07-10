@@ -88,7 +88,7 @@ export function PublicLayout({ children }: { children: React.ReactNode }) {
             <div className="flex h-8 w-8 items-center justify-center rounded bg-primary text-primary-foreground">
               <Triangle className="h-5 w-5 fill-current" />
             </div>
-            <span className="text-xl font-bold tracking-tight text-foreground">LocalMarket</span>
+            <span className="text-xl font-bold tracking-tight text-foreground">Grainily</span>
           </Link>
 
           <Sheet open={open} onOpenChange={setOpen}>
@@ -105,7 +105,7 @@ export function PublicLayout({ children }: { children: React.ReactNode }) {
                     <div className="flex h-8 w-8 items-center justify-center rounded bg-primary text-primary-foreground">
                       <Triangle className="h-5 w-5 fill-current" />
                     </div>
-                    <span className="font-bold text-foreground">LocalMarket</span>
+                    <span className="font-bold text-foreground">Grainily</span>
                   </div>
                   <LanguageSwitcher />
                 </div>
@@ -195,7 +195,7 @@ export function PublicLayout({ children }: { children: React.ReactNode }) {
               <div className="flex h-8 w-8 items-center justify-center rounded bg-primary text-primary-foreground">
                 <Triangle className="h-5 w-5 fill-current" />
               </div>
-              <span className="text-xl font-bold tracking-tight text-white">LocalMarket</span>
+              <span className="text-xl font-bold tracking-tight text-white">Grainily</span>
             </div>
             <p className="text-sm text-slate-400 max-w-xs">
               {t("footer.description")}

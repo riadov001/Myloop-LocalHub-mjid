@@ -64,7 +64,7 @@ export default function AdminLogin() {
             <div className="space-y-1">
               <CardTitle className="text-xl font-bold tracking-tight text-foreground">Espace Administrateur</CardTitle>
               <CardDescription className="text-muted-foreground">
-                Gérez la plateforme LocalMarket
+                Gérez la plateforme Grainily
               </CardDescription>
             </div>
           </CardHeader>
@@ -113,7 +113,7 @@ export default function AdminLogin() {
 
           <CardFooter className="justify-center border-t border-border/40 p-4">
             <p className="text-xs text-muted-foreground text-center">
-              Accès réservé à l'équipe de modération LocalMarket.
+              Accès réservé à l'équipe de modération Grainily.
             </p>
           </CardFooter>
         </Card>

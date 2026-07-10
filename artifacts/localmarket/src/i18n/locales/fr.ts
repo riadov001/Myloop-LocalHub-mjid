@@ -11,7 +11,7 @@ const fr = {
   // Header
   header: {
     support: "Soutenir",
-    support_full: "Soutenir LocalMarket",
+    support_full: "Soutenir Grainily",
     menu_sr: "Menu",
     login: "Se connecter",
     register: "S'inscrire",
@@ -20,7 +20,7 @@ const fr = {
 
   // User menu
   user: {
-    account_type: "Compte LocalMarket",
+    account_type: "Compte Grainily",
     post_ad: "Déposer une annonce",
     merchant_space: "Mon espace commerçant",
     logout: "Se déconnecter",
@@ -39,7 +39,7 @@ const fr = {
     cgu: "CGU",
     privacy: "Politique de confidentialité",
     admin: "Administration",
-    copyright: "{{year}} LocalMarket. Tous droits réservés.",
+    copyright: "{{year}} Grainily. Tous droits réservés.",
   },
 
   // Home page
@@ -48,7 +48,7 @@ const fr = {
       badge: "Plateforme d'échanges locaux",
       title_part1: "Trouvez ce dont vous avez besoin",
       title_highlight: "près de chez vous",
-      subtitle: "LocalMarket connecte voisins, agriculteurs et artisans pour échanger produits et ressources localement.",
+      subtitle: "Grainily connecte voisins, agriculteurs et artisans pour échanger produits et ressources localement.",
     },
     search: {
       location_label: "Localisation",
@@ -211,7 +211,7 @@ const fr = {
   // Login
   login: {
     title: "Se connecter",
-    subtitle: "Accédez à votre espace LocalMarket",
+    subtitle: "Accédez à votre espace Grainily",
     email: "Adresse email",
     email_placeholder: "votre@email.fr",
     password: "Mot de passe",
@@ -232,12 +232,12 @@ const fr = {
   register: {
     title_customer: "Créer un compte",
     title_merchant: "Créer un compte marchand",
-    subtitle_customer: "Rejoignez la communauté LocalMarket",
-    subtitle_merchant: "Créez votre compte marchand pour déposer des annonces sur LocalMarket",
+    subtitle_customer: "Rejoignez la communauté Grainily",
+    subtitle_merchant: "Créez votre compte marchand pour déposer des annonces sur Grainily",
     role_label: "Type de compte",
     role_customer: "Particulier",
     role_merchant: "Marchand",
-    merchant_hint: "Un compte marchand vous permet de déposer des annonces sur LocalMarket.",
+    merchant_hint: "Un compte marchand vous permet de déposer des annonces sur Grainily.",
     name: "Nom complet",
     name_placeholder: "Jean Dupont",
     email: "Adresse email",
@@ -250,7 +250,7 @@ const fr = {
     login_link: "Se connecter",
     back_home: "Retour à l'accueil",
     success_title: "Compte créé",
-    success_desc: "Bienvenue sur LocalMarket, {{name}} !",
+    success_desc: "Bienvenue sur Grainily, {{name}} !",
     error_title: "Erreur",
     error_password_short: "Mot de passe trop court",
     error_password_short_desc: "Le mot de passe doit contenir au moins 8 caractères.",
@@ -281,10 +281,10 @@ const fr = {
 
   // Donations
   donations: {
-    badge: "Soutenir LocalMarket",
+    badge: "Soutenir Grainily",
     title_part1: "Ensemble, faisons grandir",
     title_highlight: "les échanges locaux",
-    subtitle: "LocalMarket est une plateforme communautaire. Votre don, même modeste, fait une vraie différence pour maintenir ce service gratuit et ouvert à tous.",
+    subtitle: "Grainily est une plateforme communautaire. Votre don, même modeste, fait une vraie différence pour maintenir ce service gratuit et ouvert à tous.",
     impact: {
       exchanges_title: "Échanges locaux",
       exchanges_desc: "Chaque don soutient des milliers d'échanges de produits locaux entre voisins.",
@@ -310,7 +310,7 @@ const fr = {
       submit: "Donner {{amount}} €",
       submit_generic: "Donner",
       processing: "Traitement...",
-      security_note: "Paiement 100% sécurisé par Stripe. Vous recevrez un reçu par email.\nLocalMarket ne stocke pas vos données bancaires.",
+      security_note: "Paiement 100% sécurisé par Stripe. Vous recevrez un reçu par email.\nGrainily ne stocke pas vos données bancaires.",
     },
     error_amount: "Montant invalide",
     error_amount_desc: "Veuillez saisir un montant d'au moins 1 €.",
@@ -406,9 +406,9 @@ const fr = {
   legal: {
     title: "Mentions légales",
     date: "En vigueur au 01/01/2024",
-    description: "Conformément aux dispositions des Articles 6-III et 19 de la Loi n°2004-575 du 21 juin 2004 pour la Confiance dans l'économie numérique, dite L.C.E.N., il est porté à la connaissance des utilisateurs et visiteurs du site LocalMarket les présentes mentions légales.",
+    description: "Conformément aux dispositions des Articles 6-III et 19 de la Loi n°2004-575 du 21 juin 2004 pour la Confiance dans l'économie numérique, dite L.C.E.N., il est porté à la connaissance des utilisateurs et visiteurs du site Grainily les présentes mentions légales.",
     editor_title: "Éditeur du site",
-    editor_desc: "Le site LocalMarket est édité par l'association LocalMarket, domiciliée au 1 rue de la Mairie, 75000 Paris.",
+    editor_desc: "Le site Grainily est édité par l'association Grainily, domiciliée au 1 rue de la Mairie, 75000 Paris.",
     hosting_title: "Hébergement",
     hosting_desc: "Le site est hébergé par Replit.",
   },
@@ -416,7 +416,7 @@ const fr = {
   // CGU
   cgu: {
     title: "Conditions Générales d'Utilisation",
-    intro: "Les présentes CGU ont pour objet l'encadrement juridique des modalités de mise à disposition du site et des services par LocalMarket et de définir les conditions d'accès et d'utilisation des services par \"l'Utilisateur\".",
+    intro: "Les présentes CGU ont pour objet l'encadrement juridique des modalités de mise à disposition du site et des services par Grainily et de définir les conditions d'accès et d'utilisation des services par \"l'Utilisateur\".",
     access_title: "Accès au site",
     access_desc: "Le site est accessible gratuitement en tout lieu à tout Utilisateur ayant un accès à Internet. Tous les frais supportés par l'Utilisateur pour accéder au service (matériel informatique, logiciels, connexion Internet, etc.) sont à sa charge.",
     liability_title: "Responsabilité",
@@ -426,7 +426,7 @@ const fr = {
   // Privacy
   privacy: {
     title: "Politique de confidentialité",
-    intro: "La protection de vos données personnelles est une priorité pour LocalMarket.",
+    intro: "La protection de vos données personnelles est une priorité pour Grainily.",
     collection_title: "Collecte des données",
     collection_desc: "Nous collectons les données suivantes lors du dépôt d'une annonce : nom, email, téléphone, localisation.",
     usage_title: "Utilisation des données",

@@ -68,7 +68,7 @@ export default function ResetPassword() {
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-primary-foreground">
               <Triangle className="h-5 w-5 fill-current" />
             </div>
-            <span className="text-xl font-bold tracking-tight">LocalMarket</span>
+            <span className="text-xl font-bold tracking-tight">Grainily</span>
           </Link>
         </div>
 

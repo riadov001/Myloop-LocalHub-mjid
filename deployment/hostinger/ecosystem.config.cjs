@@ -1,5 +1,5 @@
 /**
- * PM2 Ecosystem — LocalMarket API Server
+ * PM2 Ecosystem — Grainily API Server
  * Usage : pm2 start ecosystem.config.cjs
  */
 module.exports = {

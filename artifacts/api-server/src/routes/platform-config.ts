@@ -28,9 +28,9 @@ const DEFAULT_CONFIG = [
   // Identité
   { key: "site_name", label: "Nom du site", description: "Nom affiché dans le titre et le footer", isSecret: false, configType: "string" as const, group: "identite" },
   { key: "site_tagline", label: "Accroche / Slogan", description: "Phrase d'accroche affichée sur la page d'accueil", isSecret: false, configType: "string" as const, group: "identite" },
-  { key: "site_url", label: "URL du site", description: "URL publique de la plateforme (ex: https://localmarket.fr)", isSecret: false, configType: "string" as const, group: "identite" },
+  { key: "site_url", label: "URL du site", description: "URL publique de la plateforme (ex: https://grainily.com)", isSecret: false, configType: "string" as const, group: "identite" },
   { key: "contact_email", label: "Email de contact", description: "Email affiché pour le support / contact", isSecret: false, configType: "string" as const, group: "identite" },
-  { key: "from_email", label: "Email expéditeur", description: "Adresse email utilisée pour les envois (ex: noreply@localmarket.fr)", isSecret: false, configType: "string" as const, group: "identite" },
+  { key: "from_email", label: "Email expéditeur", description: "Adresse email utilisée pour les envois (ex: noreply@grainily.com)", isSecret: false, configType: "string" as const, group: "identite" },
   { key: "footer_address", label: "Adresse (footer)", description: "Adresse physique ou région affichée dans le pied de page", isSecret: false, configType: "string" as const, group: "identite" },
   // SEO
   { key: "seo_title", label: "Titre SEO", description: "Titre de la page pour les moteurs de recherche (<title>)", isSecret: false, configType: "string" as const, group: "seo" },
