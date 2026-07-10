@@ -1,7 +1,7 @@
 import { Router } from "express";
 import bcrypt from "bcryptjs";
 import { db, adminUsersTable } from "@workspace/db";
-import { eq } from "drizzle-orm";
+import { eq, ne } from "drizzle-orm";
 import { rootAuth } from "../middleware/adminAuth";
 import { z } from "zod/v4";
 
@@ -35,10 +35,14 @@ function serializeUser(u: typeof adminUsersTable.$inferSelect) {
   };
 }
 
-// GET /admin/users (root only)
+// GET /admin/users (root only) — never exposes root-role accounts
 router.get("/admin/users", rootAuth, async (req, res) => {
   try {
-    const users = await db.select().from(adminUsersTable).orderBy(adminUsersTable.createdAt);
+    const users = await db
+      .select()
+      .from(adminUsersTable)
+      .where(ne(adminUsersTable.role, "root"))
+      .orderBy(adminUsersTable.createdAt);
     res.json(users.map(serializeUser));
   } catch (err) {
     req.log.error(err);

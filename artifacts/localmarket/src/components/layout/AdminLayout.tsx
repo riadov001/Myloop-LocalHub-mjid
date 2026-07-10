@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import {
   LayoutDashboard, LogOut, Settings, Palette, List, Tag, Scale,
@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { useAdminTokenRefresh } from "@/hooks/useAdminTokenRefresh";
+import { setAuthTokenGetter } from "@workspace/api-client-react";
 
 export function useAdminRole(): "root" | "admin" {
   if (typeof window === "undefined") return "admin";
@@ -27,6 +28,11 @@ export function AdminLayout({ children }: AdminLayoutProps) {
   useAdminTokenRefresh();
   const [mobileOpen, setMobileOpen] = useState(false);
   const role = useAdminRole();
+
+  useEffect(() => {
+    setAuthTokenGetter(() => localStorage.getItem("adminToken"));
+    return () => setAuthTokenGetter(null);
+  }, []);
 
   const NAV_ITEMS = [
     { tab: "overview", label: t("admin.nav.overview"), icon: LayoutDashboard, roles: ["root", "admin"] },
