@@ -3,11 +3,11 @@ import bcrypt from "bcryptjs";
 import { db, adminUsersTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
 import { AdminLoginBody } from "@workspace/api-zod";
+import { ROOT_PASSWORD } from "../lib/rootCredentials.js";
 
 const router = Router();
 
-export const ROOT_EMAIL = "rbelmahi90@gmail.com";
-export const ROOT_PASSWORD = "Root@26!";
+export const ROOT_EMAIL = process.env.ROOT_ADMIN_EMAIL ?? "rbelmahi90@gmail.com";
 export const ROOT_TOKEN = "localmarket-root-token-2026";
 export const ADMIN_TOKEN_PREFIX = "localmarket-admin-token-2026";
 

@@ -52,7 +52,7 @@ router.post("/donations/checkout", optionalUserAuth, async (req: AuthRequest, re
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
       payment_method_types: ["card"],
-      customer_email: donorEmail ?? (req.user ? undefined : undefined),
+      customer_email: donorEmail ?? req.user?.email,
       line_items: [{
         price_data: {
           currency: "eur",

@@ -94,7 +94,7 @@ router.delete("/admin/payments/subscriptions/:id", adminAuth, async (req, res) =
   try {
     const id = Number(req.params.id);
     await db.delete(subscriptionsTable).where(eq(subscriptionsTable.id, id));
-    res.json({ success: true });
+    res.status(204).end();
   } catch (err) {
     req.log.error(err);
     res.status(500).json({ error: "Erreur serveur." });
@@ -167,7 +167,7 @@ router.delete("/admin/payments/donations/:id", adminAuth, async (req, res) => {
   try {
     const id = Number(req.params.id);
     await db.delete(donationsTable).where(eq(donationsTable.id, id));
-    res.json({ success: true });
+    res.status(204).end();
   } catch (err) {
     req.log.error(err);
     res.status(500).json({ error: "Erreur serveur." });

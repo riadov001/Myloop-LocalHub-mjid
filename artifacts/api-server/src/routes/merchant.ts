@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { db, adsTable, subscriptionsTable, plansTable, adViewsTable, usersTable } from "@workspace/db";
-import { eq, and, count, desc, gte } from "drizzle-orm";
+import { eq, and, count, desc, gte, inArray } from "drizzle-orm";
 import { userAuth, type AuthRequest } from "../middleware/userAuth.js";
 import { z } from "zod/v4";
 
@@ -81,7 +81,7 @@ router.get("/merchant/stats", userAuth, async (req: AuthRequest, res) => {
     let totalViews30d = 0;
     if (userAdIds.length > 0) {
       const [viewRes] = await db.select({ total: count() }).from(adViewsTable)
-        .where(gte(adViewsTable.viewedAt, thirtyDaysAgo));
+        .where(and(inArray(adViewsTable.adId, userAdIds), gte(adViewsTable.viewedAt, thirtyDaysAgo)));
       totalViews30d = viewRes?.total ?? 0;
     }
 

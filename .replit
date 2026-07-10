@@ -39,3 +39,6 @@ channel = "stable-25_05"
 
 [userenv.shared]
 RESEND_FROM_EMAIL = "Contact@jatek.app"
+
+[objectStorage]
+defaultBucketID = "replit-objstore-20bb4e41-545d-4ec9-bdaf-44a58742d53c"
