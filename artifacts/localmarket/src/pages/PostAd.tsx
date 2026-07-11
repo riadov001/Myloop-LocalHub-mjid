@@ -48,10 +48,12 @@ export default function PostAd() {
   const isMerchant = Boolean(userToken) && userRole === "merchant";
 
   useEffect(() => {
-    if (!isMerchant) {
+    if (!userToken) {
+      setLocation("/connexion");
+    } else if (!isMerchant) {
       setLocation("/inscription-marchand");
     }
-  }, [isMerchant, setLocation]);
+  }, [userToken, isMerchant, setLocation]);
 
   const { data: categories } = useListCategories();
   const { data: units } = useListUnits();

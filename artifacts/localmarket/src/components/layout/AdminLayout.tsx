@@ -31,7 +31,10 @@ export function AdminLayout({ children }: AdminLayoutProps) {
 
   useEffect(() => {
     setAuthTokenGetter(() => localStorage.getItem("adminToken"));
-    return () => setAuthTokenGetter(null);
+    return () =>
+      setAuthTokenGetter(
+        () => localStorage.getItem("userToken") || localStorage.getItem("adminToken")
+      );
   }, []);
 
   const NAV_ITEMS = [

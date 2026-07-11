@@ -4,7 +4,7 @@ import "./index.css";
 import { setAuthTokenGetter } from "@workspace/api-client-react";
 
 setAuthTokenGetter(() =>
-  localStorage.getItem("adminToken") || localStorage.getItem("userToken")
+  localStorage.getItem("userToken") || localStorage.getItem("adminToken")
 );
 
 createRoot(document.getElementById("root")!).render(<App />);

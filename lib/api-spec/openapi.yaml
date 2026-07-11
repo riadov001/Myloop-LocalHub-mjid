@@ -65,6 +65,11 @@ paths:
           in: query
           schema:
             type: string
+        - name: sortBy
+          in: query
+          schema:
+            type: string
+            enum: [newest, oldest, price_asc, price_desc]
         - name: limit
           in: query
           schema:

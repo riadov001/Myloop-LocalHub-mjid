@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useLocation, useSearch } from "wouter";
-import { Search, MapPin, Package, Scale, Layers, Euro } from "lucide-react";
+import { Search, MapPin, Package, Scale, Layers, Euro, ArrowUpDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
@@ -21,6 +21,7 @@ export default function AdsList() {
   const [quantity, setQuantity] = useState(params.get("quantity") || "");
   const [unit, setUnit] = useState(params.get("unit") || "");
   const [listingType, setListingType] = useState(params.get("listingType") || "");
+  const [sortBy, setSortBy] = useState(params.get("sortBy") || "newest");
 
   const [, setUrlLocation] = useLocation();
 
@@ -34,6 +35,7 @@ export default function AdsList() {
     quantity: quantity || undefined,
     unit: unit && unit !== "all" ? unit : undefined,
     listingType: listingType && listingType !== "all" ? listingType : undefined,
+    sortBy: sortBy as "newest" | "oldest" | "price_asc" | "price_desc",
   });
 
   const handleSearch = (e: React.FormEvent) => {
@@ -45,6 +47,7 @@ export default function AdsList() {
     if (quantity) newParams.set("quantity", quantity);
     if (unit && unit !== "all") newParams.set("unit", unit);
     if (listingType && listingType !== "all") newParams.set("listingType", listingType);
+    if (sortBy && sortBy !== "newest") newParams.set("sortBy", sortBy);
     setUrlLocation(`/annonces?${newParams.toString()}`);
   };
 
@@ -55,6 +58,7 @@ export default function AdsList() {
     setQuantity("");
     setUnit("");
     setListingType("");
+    setSortBy("newest");
     setUrlLocation("/annonces");
   };
 
@@ -139,6 +143,21 @@ export default function AdsList() {
                     <SelectItem value="free">{t("ads.search.type_free")}</SelectItem>
                     <SelectItem value="flexible">{t("ads.search.type_flexible")}</SelectItem>
                     <SelectItem value="fixed">{t("ads.search.type_fixed")}</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="flex items-center px-3 bg-muted/30 rounded-md border border-transparent focus-within:border-primary focus-within:bg-background transition-colors">
+                <ArrowUpDown className="h-4 w-4 text-muted-foreground mr-2 shrink-0" />
+                <Select value={sortBy} onValueChange={setSortBy}>
+                  <SelectTrigger className="border-0 bg-transparent shadow-none focus:ring-0 px-0 h-10 flex-1">
+                    <SelectValue placeholder={t("ads.search.sort")} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="newest">{t("ads.search.sort_newest")}</SelectItem>
+                    <SelectItem value="oldest">{t("ads.search.sort_oldest")}</SelectItem>
+                    <SelectItem value="price_asc">{t("ads.search.sort_price_asc")}</SelectItem>
+                    <SelectItem value="price_desc">{t("ads.search.sort_price_desc")}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

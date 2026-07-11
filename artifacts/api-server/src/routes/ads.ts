@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { db, adsTable } from "@workspace/db";
-import { eq, and, inArray, ilike, sql } from "drizzle-orm";
+import { eq, and, inArray, ilike, sql, asc, desc } from "drizzle-orm";
 import {
   ListAdsQueryParams,
   CreateAdBody,
@@ -41,11 +41,21 @@ router.get("/ads", async (req, res) => {
       conditions.push(eq(adsTable.listingType, query.listingType as "free" | "flexible" | "fixed"));
     }
 
+    const sortBy = (req.query.sortBy as string) || "newest";
+    const orderClause =
+      sortBy === "oldest"
+        ? asc(adsTable.createdAt)
+        : sortBy === "price_asc"
+          ? asc(sql`CAST(${adsTable.price} AS NUMERIC)`)
+          : sortBy === "price_desc"
+            ? desc(sql`CAST(${adsTable.price} AS NUMERIC)`)
+            : desc(adsTable.createdAt);
+
     const ads = await db
       .select()
       .from(adsTable)
       .where(and(...conditions))
-      .orderBy(adsTable.createdAt)
+      .orderBy(orderClause)
       .limit(query.limit ?? 50)
       .offset(query.offset ?? 0);
 
