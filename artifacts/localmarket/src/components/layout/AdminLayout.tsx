@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import {
   LayoutDashboard, LogOut, Settings, Palette, List, Tag, Scale,
-  Star, Users, Shield, ToggleLeft, ChevronRight, Menu, CreditCard, Megaphone,
+  Star, Users, Shield, ToggleLeft, ChevronRight, Menu, CreditCard, Megaphone, UserCircle, UsersRound,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -47,8 +47,10 @@ export function AdminLayout({ children }: AdminLayoutProps) {
     { tab: "unites", label: t("admin.nav.units"), icon: Scale, roles: ["root", "admin"] },
     { tab: "branding", label: t("admin.nav.branding"), icon: Palette, roles: ["root", "admin"] },
     { tab: "paiements", label: t("admin.nav.payments"), icon: CreditCard, roles: ["root", "admin"] },
+    { tab: "membres", label: t("admin.nav.members"), icon: UsersRound, roles: ["root", "admin"] },
     { tab: "settings", label: t("admin.nav.settings"), icon: Settings, roles: ["root", "admin"] },
     { tab: "admins", label: t("admin.nav.admins"), icon: Users, roles: ["root"] },
+    { tab: "profil", label: t("admin.nav.profile"), icon: UserCircle, roles: ["root", "admin"] },
   ];
 
   const params = new URLSearchParams(location.includes("?") ? location.split("?")[1] : "");

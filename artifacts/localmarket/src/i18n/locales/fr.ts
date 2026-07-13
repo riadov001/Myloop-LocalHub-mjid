@@ -469,6 +469,8 @@ const fr = {
       payments: "Paiements",
       settings: "Paramètres",
       admins: "Gestion admins",
+      members: "Membres",
+      profile: "Mon profil",
     },
     header: {
       title: "Cockpit Admin",

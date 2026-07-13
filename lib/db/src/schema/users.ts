@@ -21,6 +21,8 @@ export const usersTable = pgTable("users", {
   resetTokenExpires: timestamp("reset_token_expires"),
   // Méta
   lastLoginAt: timestamp("last_login_at"),
+  // Coordonnées
+  phone: text("phone"),
 });
 
 export const insertUserSchema = createInsertSchema(usersTable).omit({

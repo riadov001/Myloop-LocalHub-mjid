@@ -8,6 +8,7 @@ import { RegisterBody, UserLoginBody } from "@workspace/api-zod";
 import { EmailService } from "@workspace/email";
 import { z } from "zod/v4";
 import { JWT_SECRET } from "../lib/jwtSecret.js";
+import { userAuth, AuthRequest } from "../middleware/userAuth.js";
 
 const router = Router();
 
@@ -27,6 +28,7 @@ function toProfile(user: typeof usersTable.$inferSelect) {
     name: user.name,
     email: user.email,
     role: user.role,
+    phone: (user as Record<string, unknown>).phone as string | null ?? null,
     emailVerified: user.emailVerified,
     createdAt: user.createdAt.toISOString(),
   };
@@ -123,6 +125,38 @@ router.post("/auth/reset-password", async (req, res) => {
     const passwordHash = await bcrypt.hash(password, 12);
     await db.update(usersTable).set({ passwordHash, resetToken: null, resetTokenExpires: null }).where(eq(usersTable.id, user.id));
     res.json({ message: "Mot de passe réinitialisé avec succès." });
+  } catch (err) {
+    req.log.error(err);
+    res.status(400).json({ error: "Données invalides." });
+  }
+});
+
+// PUT /auth/profile — update own profile (name, password, phone — email non modifiable)
+router.put("/auth/profile", userAuth, async (req: AuthRequest, res) => {
+  try {
+    const data = z.object({
+      name: z.string().min(2).optional(),
+      password: z.string().min(8).optional(),
+      phone: z.string().optional(),
+    }).parse(req.body);
+
+    const userId = req.user!.id;
+    const updateData: Record<string, unknown> = {};
+    if (data.name !== undefined) updateData.name = data.name;
+    if (data.phone !== undefined) updateData.phone = data.phone || null;
+    if (data.password) updateData.passwordHash = await bcrypt.hash(data.password, 12);
+
+    if (Object.keys(updateData).length === 0) {
+      res.status(400).json({ error: "Aucune donnée à mettre à jour" });
+      return;
+    }
+
+    const [updated] = await db.update(usersTable)
+      .set(updateData as Partial<typeof usersTable.$inferInsert>)
+      .where(eq(usersTable.id, userId))
+      .returning();
+    if (!updated) { res.status(404).json({ error: "Utilisateur introuvable" }); return; }
+    res.json(toProfile(updated));
   } catch (err) {
     req.log.error(err);
     res.status(400).json({ error: "Données invalides." });

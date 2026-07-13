@@ -21,6 +21,8 @@ import {
   useAdminListUsers, useAdminCreateUser, useAdminUpdateUser, useAdminDeleteUser,
   useAdminListAdvertisements, useAdminCreateAdvertisement, useAdminUpdateAdvertisement,
   useAdminDeleteAdvertisement, useAdminReorderAdvertisements,
+  useGetAdminProfile, useUpdateAdminProfile,
+  useAdminListMembers, useAdminCreateMember, useAdminUpdateMember, useAdminDeleteMember,
 } from "@workspace/api-client-react";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -29,6 +31,7 @@ import {
   TrendingUp, Clock, Activity, AlertTriangle, CheckSquare, Square, Globe, Hash,
   Share2, Wrench, Key, ChevronDown, ChevronRight, CreditCard, Heart, RefreshCw,
   Megaphone, Image, Video, Link2, ArrowUp, ArrowDown, ExternalLink,
+  UserCircle, Phone, Lock, Mail, UsersRound, Search,
 } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -60,6 +63,8 @@ export default function AdminDashboard() {
         {activeTab === "branding" && <BrandingTab />}
         {activeTab === "paiements" && <PaiementsTab />}
         {activeTab === "settings" && <ParametresTab />}
+        {activeTab === "membres" && <MembresTab />}
+        {activeTab === "profil" && <ProfilAdminTab />}
         {activeTab === "admins" && role === "root" && <AdminsTab />}
         {activeTab === "admins" && role !== "root" && (
           <div className="flex flex-col items-center justify-center py-20 text-muted-foreground gap-3">
@@ -1606,6 +1611,336 @@ function BrandingTab() {
           </Card>
         </div>
       </div>
+    </div>
+  );
+}
+
+// ─── Onglet Profil Admin ────────────────────────────────────────────────────
+
+function ProfilAdminTab() {
+  const { data: profile, isLoading, refetch } = useGetAdminProfile();
+  const updateProfile = useUpdateAdminProfile();
+  const { toast } = useToast();
+
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirm, setConfirm] = useState("");
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    if (profile) {
+      setName(profile.name ?? "");
+      setEmail(profile.email ?? "");
+      setPhone(profile.phone ?? "");
+    }
+  }, [profile]);
+
+  const handleSave = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (password && password !== confirm) {
+      toast({ title: "Les mots de passe ne correspondent pas", variant: "destructive" }); return;
+    }
+    setSaving(true);
+    try {
+      const body: Record<string, string> = {};
+      if (name !== profile?.name) body.name = name;
+      if (email !== profile?.email) body.email = email;
+      if (phone !== (profile?.phone ?? "")) body.phone = phone;
+      if (password) body.password = password;
+
+      if (Object.keys(body).length === 0) {
+        toast({ title: "Aucune modification détectée" }); setSaving(false); return;
+      }
+
+      await updateProfile.mutateAsync({ data: body });
+      toast({ title: "Profil mis à jour avec succès" });
+      setPassword(""); setConfirm("");
+      refetch();
+    } catch {
+      toast({ title: "Erreur lors de la mise à jour", variant: "destructive" });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  if (isLoading) return <div className="flex items-center gap-2 py-10 text-muted-foreground"><Loader2 className="h-5 w-5 animate-spin" /> Chargement...</div>;
+
+  const isRoot = profile?.isRoot === true;
+
+  return (
+    <div>
+      <TabHeader title="Mon profil" description="Gérez vos informations personnelles et vos identifiants de connexion." />
+      <div className="max-w-xl space-y-6">
+        {isRoot ? (
+          <Card className="border-amber-200 bg-amber-50">
+            <CardContent className="p-5 flex items-start gap-3">
+              <Shield className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
+              <div>
+                <p className="font-semibold text-amber-800">Compte racine</p>
+                <p className="text-sm text-amber-700 mt-1">
+                  Les identifiants du compte racine ({profile?.email}) sont définis via les variables d'environnement <span className="font-mono text-xs">ROOT_ADMIN_EMAIL</span> et <span className="font-mono text-xs">ROOT_ADMIN_PASSWORD</span>.
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        ) : (
+          <form onSubmit={handleSave} className="space-y-5">
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base flex items-center gap-2"><UserCircle className="h-4 w-4" /> Informations générales</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <Label htmlFor="admin-name">Nom</Label>
+                  <Input id="admin-name" value={name} onChange={e => setName(e.target.value)} className="mt-1" required minLength={2} />
+                </div>
+                <div>
+                  <Label htmlFor="admin-email" className="flex items-center gap-1.5"><Mail className="h-3.5 w-3.5" /> Email</Label>
+                  <Input id="admin-email" type="email" value={email} onChange={e => setEmail(e.target.value)} className="mt-1" required />
+                </div>
+                <div>
+                  <Label htmlFor="admin-phone" className="flex items-center gap-1.5"><Phone className="h-3.5 w-3.5" /> Téléphone (coordonnées)</Label>
+                  <Input id="admin-phone" type="tel" value={phone} onChange={e => setPhone(e.target.value)} className="mt-1" placeholder="+33 6 00 00 00 00" />
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base flex items-center gap-2"><Lock className="h-4 w-4" /> Changer le mot de passe</CardTitle>
+                <p className="text-xs text-muted-foreground">Laissez vide pour conserver le mot de passe actuel.</p>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <Label htmlFor="admin-pwd">Nouveau mot de passe</Label>
+                  <Input id="admin-pwd" type="password" value={password} onChange={e => setPassword(e.target.value)} className="mt-1" placeholder="••••••••" minLength={6} />
+                </div>
+                <div>
+                  <Label htmlFor="admin-pwd2">Confirmer le mot de passe</Label>
+                  <Input id="admin-pwd2" type="password" value={confirm} onChange={e => setConfirm(e.target.value)} className="mt-1" placeholder="••••••••" minLength={6} />
+                </div>
+              </CardContent>
+            </Card>
+
+            <Button type="submit" disabled={saving} className="w-full gap-2">
+              {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+              Enregistrer les modifications
+            </Button>
+          </form>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ─── Onglet Membres ─────────────────────────────────────────────────────────
+
+interface MemberFormState {
+  name: string; email: string; role: "customer" | "merchant" | "moderator"; phone: string; password: string; emailVerified: boolean;
+}
+
+const defaultMemberForm: MemberFormState = { name: "", email: "", role: "customer", phone: "", password: "", emailVerified: false };
+
+function MembresTab() {
+  const { toast } = useToast();
+  const [roleFilter, setRoleFilter] = useState<"customer" | "merchant" | "">("");
+  const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [showForm, setShowForm] = useState(false);
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [form, setForm] = useState<MemberFormState>(defaultMemberForm);
+  const [saving, setSaving] = useState(false);
+
+  const params: { role?: "customer" | "merchant" | "moderator"; search?: string } = {};
+  if (roleFilter) params.role = roleFilter;
+  if (debouncedSearch) params.search = debouncedSearch;
+
+  const { data: members = [], isLoading, refetch } = useAdminListMembers(params);
+  const createMember = useAdminCreateMember();
+  const updateMember = useAdminUpdateMember();
+  const deleteMember = useAdminDeleteMember();
+
+  useEffect(() => {
+    const t = setTimeout(() => setDebouncedSearch(search), 350);
+    return () => clearTimeout(t);
+  }, [search]);
+
+  const openCreate = () => { setEditingId(null); setForm(defaultMemberForm); setShowForm(true); };
+  const openEdit = (m: (typeof members)[number]) => {
+    setEditingId(m.id);
+    setForm({ name: m.name, email: m.email, role: m.role as "customer" | "merchant" | "moderator", phone: m.phone ?? "", password: "", emailVerified: m.emailVerified });
+    setShowForm(true);
+  };
+
+  const handleSave = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSaving(true);
+    try {
+      const body = { name: form.name, email: form.email, role: form.role, phone: form.phone, emailVerified: form.emailVerified, ...(form.password ? { password: form.password } : {}) };
+      if (editingId !== null) {
+        await updateMember.mutateAsync({ id: editingId, data: body });
+        toast({ title: "Membre mis à jour" });
+      } else {
+        await createMember.mutateAsync({ data: { ...body, password: form.password || undefined } });
+        toast({ title: "Membre créé" });
+      }
+      setShowForm(false); refetch();
+    } catch (err: unknown) {
+      const msg = (err as { response?: { data?: { error?: string } } })?.response?.data?.error;
+      toast({ title: msg ?? "Erreur lors de l'enregistrement", variant: "destructive" });
+    } finally { setSaving(false); }
+  };
+
+  const handleDelete = async (id: number, name: string) => {
+    if (!confirm(`Supprimer le membre "${name}" ? Cette action est irréversible.`)) return;
+    try {
+      await deleteMember.mutateAsync({ id });
+      toast({ title: "Membre supprimé" });
+      refetch();
+    } catch { toast({ title: "Erreur lors de la suppression", variant: "destructive" }); }
+  };
+
+  const roleBadge = (role: string) => {
+    if (role === "merchant") return <Badge className="bg-blue-100 text-blue-800">Marchand</Badge>;
+    if (role === "moderator") return <Badge className="bg-purple-100 text-purple-700">Moderateur</Badge>;
+    return <Badge className="bg-slate-100 text-slate-700">Client</Badge>;
+  };
+
+  return (
+    <div>
+      <TabHeader
+        title="Membres"
+        description="Gérez les clients et marchands inscrits sur la plateforme."
+        action={
+          <Button size="sm" className="gap-1.5" onClick={openCreate}>
+            <Plus className="h-4 w-4" /> Nouveau membre
+          </Button>
+        }
+      />
+
+      {/* Filters */}
+      <div className="flex flex-col sm:flex-row gap-3 mb-5">
+        <div className="relative flex-1 max-w-xs">
+          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input placeholder="Rechercher..." value={search} onChange={e => setSearch(e.target.value)} className="pl-8 h-9" />
+        </div>
+        <div className="flex gap-2">
+          {(["", "customer", "merchant"] as const).map(r => (
+            <Button key={r} size="sm" variant={roleFilter === r ? "default" : "outline"} onClick={() => setRoleFilter(r)} className="gap-1">
+              {r === "" ? "Tous" : r === "customer" ? "Clients" : "Marchands"}
+            </Button>
+          ))}
+        </div>
+      </div>
+
+      {/* Inline form */}
+      {showForm && (
+        <Card className="mb-5 border-primary/30 bg-primary/5">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base">{editingId ? "Modifier le membre" : "Nouveau membre"}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSave} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <Label>Nom</Label>
+                <Input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} required minLength={2} className="mt-1" />
+              </div>
+              <div>
+                <Label>Email</Label>
+                <Input type="email" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} required className="mt-1" />
+              </div>
+              <div>
+                <Label>Rôle</Label>
+                <Select value={form.role} onValueChange={v => setForm(f => ({ ...f, role: v as MemberFormState["role"] }))}>
+                  <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="customer">Client</SelectItem>
+                    <SelectItem value="merchant">Marchand</SelectItem>
+                    <SelectItem value="moderator">Modérateur</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label className="flex items-center gap-1.5"><Phone className="h-3.5 w-3.5" /> Téléphone</Label>
+                <Input type="tel" value={form.phone} onChange={e => setForm(f => ({ ...f, phone: e.target.value }))} className="mt-1" placeholder="+33 6 00 00 00 00" />
+              </div>
+              <div>
+                <Label>{editingId ? "Nouveau mot de passe (laisser vide pour ne pas changer)" : "Mot de passe"}</Label>
+                <Input type="password" value={form.password} onChange={e => setForm(f => ({ ...f, password: e.target.value }))} className="mt-1" minLength={editingId ? 0 : 8} required={!editingId} placeholder="••••••••" />
+              </div>
+              <div className="flex items-center gap-2 pt-6">
+                <Switch checked={form.emailVerified} onCheckedChange={v => setForm(f => ({ ...f, emailVerified: v }))} />
+                <Label className="cursor-pointer">Email vérifié</Label>
+              </div>
+              <div className="sm:col-span-2 flex gap-2">
+                <Button type="submit" disabled={saving} size="sm" className="gap-1.5">
+                  {saving && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+                  {editingId ? "Mettre à jour" : "Créer"}
+                </Button>
+                <Button type="button" variant="outline" size="sm" onClick={() => setShowForm(false)}>Annuler</Button>
+              </div>
+            </form>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Table */}
+      {isLoading ? (
+        <div className="flex items-center gap-2 py-10 text-muted-foreground"><Loader2 className="h-5 w-5 animate-spin" /> Chargement...</div>
+      ) : (
+        <Card>
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Membre</TableHead>
+                  <TableHead>Rôle</TableHead>
+                  <TableHead className="hidden md:table-cell">Téléphone</TableHead>
+                  <TableHead className="hidden md:table-cell">Email vérifié</TableHead>
+                  <TableHead className="hidden lg:table-cell">Inscrit le</TableHead>
+                  <TableHead>Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {members.length === 0 ? (
+                  <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground py-10">Aucun membre trouvé</TableCell></TableRow>
+                ) : members.map(m => (
+                  <TableRow key={m.id}>
+                    <TableCell>
+                      <div className="font-medium text-sm">{m.name}</div>
+                      <div className="text-xs text-muted-foreground">{m.email}</div>
+                    </TableCell>
+                    <TableCell>{roleBadge(m.role)}</TableCell>
+                    <TableCell className="hidden md:table-cell text-sm text-muted-foreground">
+                      {m.phone || "—"}
+                    </TableCell>
+                    <TableCell className="hidden md:table-cell">
+                      {m.emailVerified
+                        ? <Badge className="bg-green-100 text-green-700">Oui</Badge>
+                        : <Badge className="bg-yellow-100 text-yellow-700">Non</Badge>}
+                    </TableCell>
+                    <TableCell className="hidden lg:table-cell text-sm text-muted-foreground">
+                      {format(new Date(m.createdAt), "dd/MM/yyyy", { locale: fr })}
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-1">
+                        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => openEdit(m)}>
+                          <Pencil className="h-3.5 w-3.5" />
+                        </Button>
+                        <Button variant="ghost" size="icon" className="h-7 w-7 text-red-500 hover:text-red-600" onClick={() => handleDelete(m.id, m.name)}>
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        </Card>
+      )}
     </div>
   );
 }

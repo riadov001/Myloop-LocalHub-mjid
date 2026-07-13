@@ -19,6 +19,8 @@ import merchantRouter from "./merchant";
 import webhookRouter from "./webhook";
 import adminPaymentsRouter from "./admin-payments";
 import advertisementsRouter from "./advertisements";
+import adminProfileRouter from "./admin-profile";
+import adminMembersRouter from "./admin-members";
 
 const router: IRouter = Router();
 
@@ -42,5 +44,7 @@ router.use(donationsRouter);
 router.use(merchantRouter);
 router.use(webhookRouter);
 router.use(adminPaymentsRouter);
+router.use(adminProfileRouter);
+router.use(adminMembersRouter);
 
 export default router;

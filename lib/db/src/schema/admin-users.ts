@@ -11,6 +11,7 @@ export const adminUsersTable = pgTable("admin_users", {
   passwordHash: text("password_hash").notNull(),
   role: adminRoleEnum("role").notNull().default("admin"),
   isActive: boolean("is_active").notNull().default(true),
+  phone: text("phone"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   lastLoginAt: timestamp("last_login_at"),
   resetToken: text("reset_token"),

@@ -5,13 +5,17 @@
  * Grainily API
  * OpenAPI spec version: 0.1.0
  */
+import type { MemberUserRole } from './memberUserRole';
 
-export interface UserProfile {
+export interface MemberUser {
   id: number;
   name: string;
   email: string;
-  role?: string;
+  role: MemberUserRole;
   /** @nullable */
   phone?: string | null;
+  emailVerified: boolean;
   createdAt: string;
+  /** @nullable */
+  lastLoginAt?: string | null;
 }

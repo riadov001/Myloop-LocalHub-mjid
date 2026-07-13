@@ -563,6 +563,7 @@ export const UserLoginResponse = zod.object({
   "name": zod.string(),
   "email": zod.string(),
   "role": zod.string().optional(),
+  "phone": zod.string().nullish(),
   "createdAt": zod.string()
 })
 })
@@ -576,6 +577,7 @@ export const GetMeResponse = zod.object({
   "name": zod.string(),
   "email": zod.string(),
   "role": zod.string().optional(),
+  "phone": zod.string().nullish(),
   "createdAt": zod.string()
 })
 
@@ -808,6 +810,150 @@ export const AdminUpdateModeResponse = zod.object({
   "label": zod.string(),
   "description": zod.string().nullish(),
   "enabled": zod.boolean()
+})
+
+
+/**
+ * @summary Admin - get own profile
+ */
+export const GetAdminProfileResponse = zod.object({
+  "id": zod.number().nullish(),
+  "name": zod.string(),
+  "email": zod.string(),
+  "role": zod.enum(['root', 'admin']),
+  "phone": zod.string().nullish(),
+  "createdAt": zod.string().nullish(),
+  "isRoot": zod.boolean().optional()
+})
+
+
+/**
+ * @summary Admin - update own profile
+ */
+export const updateAdminProfileBodyNameMin = 2;
+
+export const updateAdminProfileBodyPasswordMin = 6;
+
+
+
+export const UpdateAdminProfileBody = zod.object({
+  "name": zod.string().min(updateAdminProfileBodyNameMin).optional(),
+  "email": zod.string().email().optional(),
+  "password": zod.string().min(updateAdminProfileBodyPasswordMin).optional(),
+  "phone": zod.string().optional()
+})
+
+export const UpdateAdminProfileResponse = zod.object({
+  "id": zod.number().nullish(),
+  "name": zod.string(),
+  "email": zod.string(),
+  "role": zod.enum(['root', 'admin']),
+  "phone": zod.string().nullish(),
+  "createdAt": zod.string().nullish(),
+  "isRoot": zod.boolean().optional()
+})
+
+
+/**
+ * @summary Update authenticated user profile (name, password, phone — not email)
+ */
+export const updateUserProfileBodyNameMin = 2;
+
+export const updateUserProfileBodyPasswordMin = 8;
+
+
+
+export const UpdateUserProfileBody = zod.object({
+  "name": zod.string().min(updateUserProfileBodyNameMin).optional(),
+  "password": zod.string().min(updateUserProfileBodyPasswordMin).optional(),
+  "phone": zod.string().optional()
+})
+
+export const UpdateUserProfileResponse = zod.object({
+  "id": zod.number(),
+  "name": zod.string(),
+  "email": zod.string(),
+  "role": zod.string().optional(),
+  "phone": zod.string().nullish(),
+  "createdAt": zod.string()
+})
+
+
+/**
+ * @summary Admin - list regular users (customers/merchants)
+ */
+export const AdminListMembersQueryParams = zod.object({
+  "role": zod.enum(['customer', 'merchant', 'moderator']).optional(),
+  "search": zod.coerce.string().optional()
+})
+
+export const AdminListMembersResponseItem = zod.object({
+  "id": zod.number(),
+  "name": zod.string(),
+  "email": zod.string(),
+  "role": zod.enum(['customer', 'merchant', 'moderator']),
+  "phone": zod.string().nullish(),
+  "emailVerified": zod.boolean(),
+  "createdAt": zod.string(),
+  "lastLoginAt": zod.string().nullish()
+})
+export const AdminListMembersResponse = zod.array(AdminListMembersResponseItem)
+
+
+/**
+ * @summary Admin - create a regular user
+ */
+export const adminCreateMemberBodyPasswordMin = 8;
+
+
+
+export const AdminCreateMemberBody = zod.object({
+  "name": zod.string(),
+  "email": zod.string().email(),
+  "password": zod.string().min(adminCreateMemberBodyPasswordMin).optional(),
+  "role": zod.enum(['customer', 'merchant', 'moderator']),
+  "phone": zod.string().optional(),
+  "emailVerified": zod.boolean().optional()
+})
+
+
+/**
+ * @summary Admin - update a regular user
+ */
+export const AdminUpdateMemberParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const adminUpdateMemberBodyPasswordMin = 8;
+
+
+
+export const AdminUpdateMemberBody = zod.object({
+  "name": zod.string(),
+  "email": zod.string().email(),
+  "password": zod.string().min(adminUpdateMemberBodyPasswordMin).optional(),
+  "role": zod.enum(['customer', 'merchant', 'moderator']),
+  "phone": zod.string().optional(),
+  "emailVerified": zod.boolean().optional()
+})
+
+export const AdminUpdateMemberResponse = zod.object({
+  "id": zod.number(),
+  "name": zod.string(),
+  "email": zod.string(),
+  "role": zod.enum(['customer', 'merchant', 'moderator']),
+  "phone": zod.string().nullish(),
+  "emailVerified": zod.boolean(),
+  "createdAt": zod.string(),
+  "lastLoginAt": zod.string().nullish()
+})
+
+
+/**
+ * @summary Admin - delete a regular user
+ */
+export const AdminDeleteMemberParams = zod.object({
+  "id": zod.coerce.number()
 })
 
 

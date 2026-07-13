@@ -374,11 +374,92 @@ export interface LoginInput {
   password: string;
 }
 
+export type AdminProfileRole = typeof AdminProfileRole[keyof typeof AdminProfileRole];
+
+
+export const AdminProfileRole = {
+  root: 'root',
+  admin: 'admin',
+} as const;
+
+export interface AdminProfile {
+  /** @nullable */
+  id?: number | null;
+  name: string;
+  email: string;
+  role: AdminProfileRole;
+  /** @nullable */
+  phone?: string | null;
+  /** @nullable */
+  createdAt?: string | null;
+  isRoot?: boolean;
+}
+
+export interface AdminProfileInput {
+  /** @minLength 2 */
+  name?: string;
+  email?: string;
+  /** @minLength 6 */
+  password?: string;
+  phone?: string;
+}
+
+export interface UserProfileInput {
+  /** @minLength 2 */
+  name?: string;
+  /** @minLength 8 */
+  password?: string;
+  phone?: string;
+}
+
+export type MemberUserRole = typeof MemberUserRole[keyof typeof MemberUserRole];
+
+
+export const MemberUserRole = {
+  customer: 'customer',
+  merchant: 'merchant',
+  moderator: 'moderator',
+} as const;
+
+export interface MemberUser {
+  id: number;
+  name: string;
+  email: string;
+  role: MemberUserRole;
+  /** @nullable */
+  phone?: string | null;
+  emailVerified: boolean;
+  createdAt: string;
+  /** @nullable */
+  lastLoginAt?: string | null;
+}
+
+export type MemberUserInputRole = typeof MemberUserInputRole[keyof typeof MemberUserInputRole];
+
+
+export const MemberUserInputRole = {
+  customer: 'customer',
+  merchant: 'merchant',
+  moderator: 'moderator',
+} as const;
+
+export interface MemberUserInput {
+  name: string;
+  email: string;
+  /** @minLength 8 */
+  password?: string;
+  role: MemberUserInputRole;
+  phone?: string;
+  emailVerified?: boolean;
+}
+
 export interface UserProfile {
   id: number;
   name: string;
   email: string;
   role?: string;
+  /** @nullable */
+  phone?: string | null;
   createdAt: string;
 }
 
@@ -412,4 +493,18 @@ export const ListAdsSortBy = {
 export type AdminListAdsParams = {
 status?: string;
 };
+
+export type AdminListMembersParams = {
+role?: AdminListMembersRole;
+search?: string;
+};
+
+export type AdminListMembersRole = typeof AdminListMembersRole[keyof typeof AdminListMembersRole];
+
+
+export const AdminListMembersRole = {
+  customer: 'customer',
+  merchant: 'merchant',
+  moderator: 'moderator',
+} as const;
 

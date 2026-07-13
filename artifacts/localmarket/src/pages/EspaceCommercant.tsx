@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
-import { Store, BarChart2, ListChecks, Settings, LogOut, ChevronRight, Plus, Eye, Clock, CheckCircle, XCircle, CreditCard, User } from "lucide-react";
+import { Store, BarChart2, ListChecks, Settings, LogOut, ChevronRight, Plus, Eye, Clock, CheckCircle, XCircle, CreditCard, User, Phone, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -17,6 +17,7 @@ interface UserProfile {
   name: string;
   email: string;
   role: string;
+  phone?: string | null;
   emailVerified: boolean;
   subscription: {
     status: string;
@@ -61,6 +62,9 @@ export default function EspaceCommercant() {
   const [stats, setStats] = useState<Stats | null>(null);
   const [loading, setLoading] = useState(true);
   const [profileName, setProfileName] = useState("");
+  const [profilePhone, setProfilePhone] = useState("");
+  const [profilePassword, setProfilePassword] = useState("");
+  const [profilePasswordConfirm, setProfilePasswordConfirm] = useState("");
   const [savingProfile, setSavingProfile] = useState(false);
 
   useEffect(() => {
@@ -83,6 +87,7 @@ export default function EspaceCommercant() {
       const [p, a, s] = await Promise.all([profileRes.json(), adsRes.json(), statsRes.json()]);
       setProfile(p);
       setProfileName(p.name);
+      setProfilePhone(p.phone ?? "");
       setAds(Array.isArray(a) ? a : []);
       setStats(s);
     } catch {
@@ -101,18 +106,31 @@ export default function EspaceCommercant() {
 
   const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (profilePassword && profilePassword !== profilePasswordConfirm) {
+      toast({ title: t("common.error"), description: "Les mots de passe ne correspondent pas.", variant: "destructive" }); return;
+    }
     setSavingProfile(true);
     try {
-      const res = await fetch(`/api/merchant/profile`, {
+      const body: Record<string, string> = {};
+      if (profileName !== profile?.name) body.name = profileName;
+      if (profilePhone !== (profile?.phone ?? "")) body.phone = profilePhone;
+      if (profilePassword) body.password = profilePassword;
+
+      if (Object.keys(body).length === 0) {
+        toast({ title: "Aucune modification détectée" }); setSavingProfile(false); return;
+      }
+
+      const res = await fetch(`/api/auth/profile`, {
         method: "PUT",
         headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
-        body: JSON.stringify({ name: profileName }),
+        body: JSON.stringify(body),
       });
       if (!res.ok) throw new Error();
       const updated = await res.json();
       setProfile((p) => p ? { ...p, name: updated.name } : p);
-      localStorage.setItem("userName", updated.name);
+      if (body.name) localStorage.setItem("userName", updated.name);
       window.dispatchEvent(new Event("auth-change"));
+      setProfilePassword(""); setProfilePasswordConfirm("");
       toast({ title: t("merchant.profile.updated") });
     } catch {
       toast({ title: t("common.error"), description: t("merchant.profile.error"), variant: "destructive" });
@@ -276,14 +294,19 @@ export default function EspaceCommercant() {
                 <CardDescription>{t("merchant.profile.subtitle")}</CardDescription>
               </CardHeader>
               <CardContent>
-                <form onSubmit={handleSaveProfile} className="space-y-4 max-w-md">
+                <form onSubmit={handleSaveProfile} className="space-y-5 max-w-md">
                   <div>
                     <Label htmlFor="name">{t("merchant.profile.name")}</Label>
-                    <Input id="name" value={profileName} onChange={(e) => setProfileName(e.target.value)} className="mt-1" />
+                    <Input id="name" value={profileName} onChange={(e) => setProfileName(e.target.value)} className="mt-1" minLength={2} />
+                  </div>
+                  <div>
+                    <Label className="flex items-center gap-1.5"><Phone className="h-3.5 w-3.5" /> Téléphone</Label>
+                    <Input type="tel" value={profilePhone} onChange={(e) => setProfilePhone(e.target.value)} className="mt-1" placeholder="+33 6 00 00 00 00" />
                   </div>
                   <div>
                     <Label>{t("merchant.profile.email")}</Label>
                     <Input value={profile?.email ?? ""} disabled className="mt-1 bg-slate-50" />
+                    <p className="text-xs text-slate-400 mt-1">L'adresse email ne peut pas être modifiée.</p>
                   </div>
                   <div>
                     <Label>{t("merchant.profile.role")}</Label>
@@ -294,6 +317,17 @@ export default function EspaceCommercant() {
                     <span className="text-sm text-slate-600">
                       {profile?.emailVerified ? t("merchant.profile.email_verified") : t("merchant.profile.email_not_verified")}
                     </span>
+                  </div>
+                  <div className="border-t pt-4 space-y-3">
+                    <p className="text-sm font-medium text-slate-700 flex items-center gap-1.5"><Lock className="h-3.5 w-3.5" /> Changer le mot de passe</p>
+                    <div>
+                      <Label>Nouveau mot de passe</Label>
+                      <Input type="password" value={profilePassword} onChange={(e) => setProfilePassword(e.target.value)} className="mt-1" placeholder="••••••••" minLength={8} />
+                    </div>
+                    <div>
+                      <Label>Confirmer le mot de passe</Label>
+                      <Input type="password" value={profilePasswordConfirm} onChange={(e) => setProfilePasswordConfirm(e.target.value)} className="mt-1" placeholder="••••••••" minLength={8} />
+                    </div>
                   </div>
                   <Button type="submit" disabled={savingProfile}>
                     {savingProfile ? t("merchant.profile.saving") : t("merchant.profile.save")}
