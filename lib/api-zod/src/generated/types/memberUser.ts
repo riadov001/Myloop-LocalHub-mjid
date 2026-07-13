@@ -18,4 +18,5 @@ export interface MemberUser {
   createdAt: string;
   /** @nullable */
   lastLoginAt?: string | null;
+  isSuspended: boolean;
 }

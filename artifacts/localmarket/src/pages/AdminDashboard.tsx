@@ -23,6 +23,7 @@ import {
   useAdminDeleteAdvertisement, useAdminReorderAdvertisements,
   useGetAdminProfile, useUpdateAdminProfile,
   useAdminListMembers, useAdminCreateMember, useAdminUpdateMember, useAdminDeleteMember,
+  useAdminSuspendMember, useAdminUnsuspendMember, useAdminImpersonateMember,
 } from "@workspace/api-client-react";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -31,7 +32,7 @@ import {
   TrendingUp, Clock, Activity, AlertTriangle, CheckSquare, Square, Globe, Hash,
   Share2, Wrench, Key, ChevronDown, ChevronRight, CreditCard, Heart, RefreshCw,
   Megaphone, Image, Video, Link2, ArrowUp, ArrowDown, ExternalLink,
-  UserCircle, Phone, Lock, Mail, UsersRound, Search,
+  UserCircle, Phone, Lock, Mail, UsersRound, Search, Ban, LogIn,
 } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";

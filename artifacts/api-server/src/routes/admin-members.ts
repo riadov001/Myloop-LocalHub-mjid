@@ -1,9 +1,11 @@
 import { Router } from "express";
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
+import jwt from "jsonwebtoken";
 import { db, usersTable } from "@workspace/db";
 import { eq, ilike, or, and } from "drizzle-orm";
-import { adminAuth } from "../middleware/adminAuth.js";
+import { adminAuth, rootAuth } from "../middleware/adminAuth.js";
+import { JWT_SECRET } from "../lib/jwtSecret.js";
 import { z } from "zod/v4";
 
 const router = Router();
@@ -36,6 +38,7 @@ function serializeMember(u: typeof usersTable.$inferSelect) {
     emailVerified: u.emailVerified,
     createdAt: u.createdAt.toISOString(),
     lastLoginAt: u.lastLoginAt ? u.lastLoginAt.toISOString() : null,
+    isSuspended: u.isSuspended,
   };
 }
 
@@ -126,6 +129,61 @@ router.delete("/admin/members/:id", adminAuth, async (req, res) => {
   } catch (err) {
     req.log.error(err);
     res.status(500).json({ error: "Erreur lors de la suppression" });
+  }
+});
+
+// PATCH /admin/members/:id/suspend — root only : bloque immédiatement le compte (login + sessions actives)
+router.patch("/admin/members/:id/suspend", rootAuth, async (req, res) => {
+  try {
+    const id = parseInt(req.params.id as string, 10);
+    const [updated] = await db.update(usersTable)
+      .set({ isSuspended: true })
+      .where(eq(usersTable.id, id))
+      .returning();
+    if (!updated) { res.status(404).json({ error: "Membre introuvable" }); return; }
+    res.json(serializeMember(updated));
+  } catch (err) {
+    req.log.error(err);
+    res.status(500).json({ error: "Erreur lors de la suspension" });
+  }
+});
+
+// PATCH /admin/members/:id/unsuspend — root only : réactive le compte
+router.patch("/admin/members/:id/unsuspend", rootAuth, async (req, res) => {
+  try {
+    const id = parseInt(req.params.id as string, 10);
+    const [updated] = await db.update(usersTable)
+      .set({ isSuspended: false })
+      .where(eq(usersTable.id, id))
+      .returning();
+    if (!updated) { res.status(404).json({ error: "Membre introuvable" }); return; }
+    res.json(serializeMember(updated));
+  } catch (err) {
+    req.log.error(err);
+    res.status(500).json({ error: "Erreur lors de la réactivation" });
+  }
+});
+
+// POST /admin/members/:id/impersonate — root only : émet un jeton utilisateur pour se connecter en tant que ce membre
+router.post("/admin/members/:id/impersonate", rootAuth, async (req, res) => {
+  try {
+    const id = parseInt(req.params.id as string, 10);
+    const [user] = await db.select().from(usersTable).where(eq(usersTable.id, id)).limit(1);
+    if (!user) { res.status(404).json({ error: "Membre introuvable" }); return; }
+    if (user.isSuspended) { res.status(400).json({ error: "Impossible d'usurper un compte suspendu." }); return; }
+
+    const token = jwt.sign(
+      { id: user.id, name: user.name, email: user.email, role: user.role, impersonatedByRoot: true },
+      JWT_SECRET,
+      { expiresIn: "2h" },
+    );
+    res.json({
+      token,
+      user: { id: user.id, name: user.name, email: user.email, role: user.role },
+    });
+  } catch (err) {
+    req.log.error(err);
+    res.status(500).json({ error: "Erreur lors de la connexion en tant qu'utilisateur" });
   }
 });
 

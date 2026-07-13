@@ -1042,6 +1042,69 @@ paths:
         "204":
           description: Deleted
 
+  /admin/members/{id}/suspend:
+    patch:
+      operationId: adminSuspendMember
+      tags: [admin]
+      summary: Root - suspend a user account, blocking login and active sessions
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Updated member
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MemberUser"
+
+  /admin/members/{id}/unsuspend:
+    patch:
+      operationId: adminUnsuspendMember
+      tags: [admin]
+      summary: Root - reactivate a suspended user account
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Updated member
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MemberUser"
+
+  /admin/members/{id}/impersonate:
+    post:
+      operationId: adminImpersonateMember
+      tags: [admin]
+      summary: Root - issue a login token for a member to browse the app as them
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Impersonation token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ImpersonationResult"
+
   /admin/login:
     post:
       operationId: adminLogin
@@ -1587,7 +1650,7 @@ components:
 
     MemberUser:
       type: object
-      required: [id, name, email, role, createdAt, emailVerified]
+      required: [id, name, email, role, createdAt, emailVerified, isSuspended]
       properties:
         id:
           type: integer
@@ -1606,6 +1669,27 @@ components:
           type: string
         lastLoginAt:
           type: ["string", "null"]
+        isSuspended:
+          type: boolean
+
+    ImpersonationResult:
+      type: object
+      required: [token, user]
+      properties:
+        token:
+          type: string
+        user:
+          type: object
+          required: [id, name, email, role]
+          properties:
+            id:
+              type: integer
+            name:
+              type: string
+            email:
+              type: string
+            role:
+              type: string
 
     MemberUserInput:
       type: object

@@ -88,6 +88,10 @@ router.post("/auth/login", loginIpRateLimit, accountLockoutGuard, async (req, re
       res.status(401).json({ error: "Identifiants incorrects.", retryAfterSeconds });
       return;
     }
+    if (user.isSuspended) {
+      res.status(403).json({ error: "Ce compte a été suspendu." });
+      return;
+    }
     resetLoginFailures(email);
     await db.update(usersTable).set({ lastLoginAt: new Date() }).where(eq(usersTable.id, user.id));
     const token = makeToken(user);

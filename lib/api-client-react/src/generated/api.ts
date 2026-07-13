@@ -41,6 +41,7 @@ import type {
   Category,
   CategoryInput,
   HealthStatus,
+  ImpersonationResult,
   ListAdsParams,
   LoginInput,
   LoginResult,
@@ -4132,6 +4133,216 @@ export const useAdminDeleteMember = <TError = ErrorType<unknown>,
         TContext
       > => {
       return useMutation(getAdminDeleteMemberMutationOptions(options));
+    }
+
+export const getAdminSuspendMemberUrl = (id: number,) => {
+
+
+
+
+  return `/api/admin/members/${id}/suspend`
+}
+
+/**
+ * @summary Root - suspend a user account, blocking login and active sessions
+ */
+export const adminSuspendMember = async (id: number, options?: RequestInit): Promise<MemberUser> => {
+
+  return customFetch<MemberUser>(getAdminSuspendMemberUrl(id),
+  {
+    ...options,
+    method: 'PATCH'
+
+
+  }
+);}
+
+
+
+
+export const getAdminSuspendMemberMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminSuspendMember>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof adminSuspendMember>>, TError,{id: number}, TContext> => {
+
+const mutationKey = ['adminSuspendMember'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminSuspendMember>>, {id: number}> = (props) => {
+          const {id} = props ?? {};
+
+          return  adminSuspendMember(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AdminSuspendMemberMutationResult = NonNullable<Awaited<ReturnType<typeof adminSuspendMember>>>
+
+    export type AdminSuspendMemberMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Root - suspend a user account, blocking login and active sessions
+ */
+export const useAdminSuspendMember = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminSuspendMember>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof adminSuspendMember>>,
+        TError,
+        {id: number},
+        TContext
+      > => {
+      return useMutation(getAdminSuspendMemberMutationOptions(options));
+    }
+
+export const getAdminUnsuspendMemberUrl = (id: number,) => {
+
+
+
+
+  return `/api/admin/members/${id}/unsuspend`
+}
+
+/**
+ * @summary Root - reactivate a suspended user account
+ */
+export const adminUnsuspendMember = async (id: number, options?: RequestInit): Promise<MemberUser> => {
+
+  return customFetch<MemberUser>(getAdminUnsuspendMemberUrl(id),
+  {
+    ...options,
+    method: 'PATCH'
+
+
+  }
+);}
+
+
+
+
+export const getAdminUnsuspendMemberMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminUnsuspendMember>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof adminUnsuspendMember>>, TError,{id: number}, TContext> => {
+
+const mutationKey = ['adminUnsuspendMember'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminUnsuspendMember>>, {id: number}> = (props) => {
+          const {id} = props ?? {};
+
+          return  adminUnsuspendMember(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AdminUnsuspendMemberMutationResult = NonNullable<Awaited<ReturnType<typeof adminUnsuspendMember>>>
+
+    export type AdminUnsuspendMemberMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Root - reactivate a suspended user account
+ */
+export const useAdminUnsuspendMember = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminUnsuspendMember>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof adminUnsuspendMember>>,
+        TError,
+        {id: number},
+        TContext
+      > => {
+      return useMutation(getAdminUnsuspendMemberMutationOptions(options));
+    }
+
+export const getAdminImpersonateMemberUrl = (id: number,) => {
+
+
+
+
+  return `/api/admin/members/${id}/impersonate`
+}
+
+/**
+ * @summary Root - issue a login token for a member to browse the app as them
+ */
+export const adminImpersonateMember = async (id: number, options?: RequestInit): Promise<ImpersonationResult> => {
+
+  return customFetch<ImpersonationResult>(getAdminImpersonateMemberUrl(id),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+export const getAdminImpersonateMemberMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminImpersonateMember>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof adminImpersonateMember>>, TError,{id: number}, TContext> => {
+
+const mutationKey = ['adminImpersonateMember'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminImpersonateMember>>, {id: number}> = (props) => {
+          const {id} = props ?? {};
+
+          return  adminImpersonateMember(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AdminImpersonateMemberMutationResult = NonNullable<Awaited<ReturnType<typeof adminImpersonateMember>>>
+
+    export type AdminImpersonateMemberMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Root - issue a login token for a member to browse the app as them
+ */
+export const useAdminImpersonateMember = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminImpersonateMember>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof adminImpersonateMember>>,
+        TError,
+        {id: number},
+        TContext
+      > => {
+      return useMutation(getAdminImpersonateMemberMutationOptions(options));
     }
 
 export const getAdminLoginUrl = () => {

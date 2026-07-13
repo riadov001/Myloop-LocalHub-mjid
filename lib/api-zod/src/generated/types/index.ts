@@ -40,6 +40,8 @@ export * from './bulkResult';
 export * from './category';
 export * from './categoryInput';
 export * from './healthStatus';
+export * from './impersonationResult';
+export * from './impersonationResultUser';
 export * from './listAdsParams';
 export * from './listAdsSortBy';
 export * from './loginInput';

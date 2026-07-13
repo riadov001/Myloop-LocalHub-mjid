@@ -4,7 +4,7 @@ import { db, adminUsersTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
 import { adminAuth, AdminJwtPayload } from "../middleware/adminAuth.js";
 import { z } from "zod/v4";
-import { ROOT_EMAIL } from "./admin.js";
+import { ROOT_EMAIL } from "../lib/rootCredentials.js";
 
 const router = Router();
 

@@ -5,7 +5,7 @@ import jwt from "jsonwebtoken";
 import { db, adminUsersTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
 import { AdminLoginBody } from "@workspace/api-zod";
-import { ROOT_PASSWORD } from "../lib/rootCredentials.js";
+import { ROOT_PASSWORD, ROOT_EMAIL } from "../lib/rootCredentials.js";
 import { EmailService } from "@workspace/email";
 import { JWT_SECRET } from "../lib/jwtSecret.js";
 import { adminAuth, AdminJwtPayload } from "../middleware/adminAuth.js";
@@ -20,7 +20,6 @@ import { z } from "zod/v4";
 
 const router = Router();
 
-export const ROOT_EMAIL = process.env.ROOT_ADMIN_EMAIL ?? "rbelmahi90@gmail.com";
 
 const JWT_EXPIRY = "8h";
 

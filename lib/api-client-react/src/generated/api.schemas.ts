@@ -432,6 +432,19 @@ export interface MemberUser {
   createdAt: string;
   /** @nullable */
   lastLoginAt?: string | null;
+  isSuspended: boolean;
+}
+
+export type ImpersonationResultUser = {
+  id: number;
+  name: string;
+  email: string;
+  role: string;
+};
+
+export interface ImpersonationResult {
+  token: string;
+  user: ImpersonationResultUser;
 }
 
 export type MemberUserInputRole = typeof MemberUserInputRole[keyof typeof MemberUserInputRole];

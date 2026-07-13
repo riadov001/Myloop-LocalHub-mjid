@@ -895,7 +895,8 @@ export const AdminListMembersResponseItem = zod.object({
   "phone": zod.string().nullish(),
   "emailVerified": zod.boolean(),
   "createdAt": zod.string(),
-  "lastLoginAt": zod.string().nullish()
+  "lastLoginAt": zod.string().nullish(),
+  "isSuspended": zod.boolean()
 })
 export const AdminListMembersResponse = zod.array(AdminListMembersResponseItem)
 
@@ -945,7 +946,8 @@ export const AdminUpdateMemberResponse = zod.object({
   "phone": zod.string().nullish(),
   "emailVerified": zod.boolean(),
   "createdAt": zod.string(),
-  "lastLoginAt": zod.string().nullish()
+  "lastLoginAt": zod.string().nullish(),
+  "isSuspended": zod.boolean()
 })
 
 
@@ -954,6 +956,64 @@ export const AdminUpdateMemberResponse = zod.object({
  */
 export const AdminDeleteMemberParams = zod.object({
   "id": zod.coerce.number()
+})
+
+
+/**
+ * @summary Root - suspend a user account, blocking login and active sessions
+ */
+export const AdminSuspendMemberParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const AdminSuspendMemberResponse = zod.object({
+  "id": zod.number(),
+  "name": zod.string(),
+  "email": zod.string(),
+  "role": zod.enum(['customer', 'merchant', 'moderator']),
+  "phone": zod.string().nullish(),
+  "emailVerified": zod.boolean(),
+  "createdAt": zod.string(),
+  "lastLoginAt": zod.string().nullish(),
+  "isSuspended": zod.boolean()
+})
+
+
+/**
+ * @summary Root - reactivate a suspended user account
+ */
+export const AdminUnsuspendMemberParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const AdminUnsuspendMemberResponse = zod.object({
+  "id": zod.number(),
+  "name": zod.string(),
+  "email": zod.string(),
+  "role": zod.enum(['customer', 'merchant', 'moderator']),
+  "phone": zod.string().nullish(),
+  "emailVerified": zod.boolean(),
+  "createdAt": zod.string(),
+  "lastLoginAt": zod.string().nullish(),
+  "isSuspended": zod.boolean()
+})
+
+
+/**
+ * @summary Root - issue a login token for a member to browse the app as them
+ */
+export const AdminImpersonateMemberParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const AdminImpersonateMemberResponse = zod.object({
+  "token": zod.string(),
+  "user": zod.object({
+  "id": zod.number(),
+  "name": zod.string(),
+  "email": zod.string(),
+  "role": zod.string()
+})
 })
 
 
