@@ -23,6 +23,8 @@ export const usersTable = pgTable("users", {
   lastLoginAt: timestamp("last_login_at"),
   // Coordonnées
   phone: text("phone"),
+  // Modération — suspension de compte par un admin root
+  isSuspended: boolean("is_suspended").notNull().default(false),
 });
 
 export const insertUserSchema = createInsertSchema(usersTable).omit({
