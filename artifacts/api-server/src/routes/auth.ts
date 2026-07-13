@@ -82,16 +82,13 @@ router.post("/auth/login", async (req, res) => {
 });
 
 // GET /auth/me (comportement existant préservé + champs étendus)
-router.get("/auth/me", async (req, res) => {
+router.get("/auth/me", userAuth, async (req: AuthRequest, res) => {
   try {
-    const authHeader = req.headers.authorization;
-    if (!authHeader?.startsWith("Bearer ")) { res.status(401).json({ error: "Token manquant." }); return; }
-    const token = authHeader.slice(7);
-    const payload = jwt.verify(token, JWT_SECRET) as { id: number };
-    const [user] = await db.select().from(usersTable).where(eq(usersTable.id, payload.id)).limit(1);
+    const [user] = await db.select().from(usersTable).where(eq(usersTable.id, req.user!.id)).limit(1);
     if (!user) { res.status(401).json({ error: "Utilisateur introuvable." }); return; }
     res.json(toProfile(user));
-  } catch {
+  } catch (err) {
+    req.log.error(err);
     res.status(401).json({ error: "Token invalide ou expiré." });
   }
 });

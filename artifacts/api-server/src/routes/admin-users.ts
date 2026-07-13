@@ -1,4 +1,4 @@
-import { Router } from "express";
+import { Router, type Request } from "express";
 import bcrypt from "bcryptjs";
 import { db, adminUsersTable } from "@workspace/db";
 import { eq, ne } from "drizzle-orm";
@@ -96,6 +96,11 @@ router.put("/admin/users/:id", rootAuth, async (req, res) => {
 router.delete("/admin/users/:id", rootAuth, async (req, res) => {
   try {
     const id = parseInt(req.params.id as string, 10);
+    const r = req as Request & { adminPayload: { sub: string } };
+    if (r.adminPayload.sub === String(id)) {
+      res.status(400).json({ error: "Vous ne pouvez pas supprimer votre propre compte." });
+      return;
+    }
     await db.delete(adminUsersTable).where(eq(adminUsersTable.id, id));
     res.status(204).end();
   } catch (err) {
