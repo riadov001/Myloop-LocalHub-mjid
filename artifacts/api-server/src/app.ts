@@ -7,6 +7,11 @@ import { logger } from "./lib/logger";
 
 const app: Express = express();
 
+// Replit serves this app behind a reverse proxy, so req.ip would otherwise resolve to the
+// proxy's address for every request. Trusting the first hop lets express-rate-limit (and
+// anything else keying off req.ip) see the real client IP instead of one shared IP for all users.
+app.set("trust proxy", 1);
+
 // Gzip compression for all responses
 app.use(compression({
   level: 6,

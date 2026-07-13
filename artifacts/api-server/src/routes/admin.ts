@@ -9,6 +9,13 @@ import { ROOT_PASSWORD } from "../lib/rootCredentials.js";
 import { EmailService } from "@workspace/email";
 import { JWT_SECRET } from "../lib/jwtSecret.js";
 import { adminAuth, AdminJwtPayload } from "../middleware/adminAuth.js";
+import {
+  loginIpRateLimit,
+  accountLockoutGuard,
+  checkAccountLockout,
+  recordFailedLogin,
+  resetLoginFailures,
+} from "../middleware/loginRateLimit.js";
 import { z } from "zod/v4";
 
 const router = Router();
@@ -22,12 +29,13 @@ function signAdminToken(payload: Omit<AdminJwtPayload, "iat" | "exp">): string {
 }
 
 // POST /admin/login — checks root hardcoded creds first, then DB admin users
-router.post("/admin/login", async (req, res) => {
+router.post("/admin/login", loginIpRateLimit, accountLockoutGuard, async (req, res) => {
   try {
     const { email, password } = AdminLoginBody.parse(req.body);
 
     // Root admin (hardcoded credentials — issues a signed JWT)
     if (email === ROOT_EMAIL && password === ROOT_PASSWORD) {
+      resetLoginFailures(email);
       const token = signAdminToken({ sub: "root", role: "root" });
       res.json({ success: true, token, role: "root" });
       return;
@@ -42,6 +50,7 @@ router.post("/admin/login", async (req, res) => {
     if (user && user.isActive) {
       const valid = await bcrypt.compare(password, user.passwordHash);
       if (valid) {
+        resetLoginFailures(email);
         await db
           .update(adminUsersTable)
           .set({ lastLoginAt: new Date() })
@@ -52,7 +61,9 @@ router.post("/admin/login", async (req, res) => {
       }
     }
 
-    res.status(401).json({ success: false, token: "", role: null });
+    recordFailedLogin(email);
+    const { retryAfterSeconds } = checkAccountLockout(email);
+    res.status(401).json({ success: false, token: "", role: null, retryAfterSeconds });
   } catch (err) {
     req.log.error(err);
     res.status(400).json({ error: "Invalid credentials format" });

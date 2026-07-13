@@ -12,3 +12,4 @@
 - [platform_config group pitfall](platform-config-group-pitfall.md) — rows are seeded with group='general' even for Stripe/Resend keys; filter platform_config by key name, not by an assumed group label.
 - [Credential precedence pattern](credential-precedence-pattern.md) — Stripe/Resend clients resolve DB (admin panel) config first, then env var, then connector, so admin-panel changes take effect without redeploying.
 - [Subscription row selection](subscription-row-selection.md) — picking "most recent subscription row" for a user is wrong once pending/cancelled rows exist; filter by isNotNull(stripeCustomerId) and/or active-like status before ordering by createdAt desc.
+- [Login brute-force protection](login-brute-force-protection.md) — /admin/login & /auth/login use per-IP rate limit + per-account lockout; requires `trust proxy` set in app.ts.

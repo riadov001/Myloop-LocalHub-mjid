@@ -9,6 +9,13 @@ import { EmailService } from "@workspace/email";
 import { z } from "zod/v4";
 import { JWT_SECRET } from "../lib/jwtSecret.js";
 import { userAuth, AuthRequest } from "../middleware/userAuth.js";
+import {
+  loginIpRateLimit,
+  accountLockoutGuard,
+  checkAccountLockout,
+  recordFailedLogin,
+  resetLoginFailures,
+} from "../middleware/loginRateLimit.js";
 
 const router = Router();
 
@@ -65,13 +72,23 @@ router.post("/auth/register", async (req, res) => {
 });
 
 // POST /auth/login (comportement existant préservé + rôle dans le token)
-router.post("/auth/login", async (req, res) => {
+router.post("/auth/login", loginIpRateLimit, accountLockoutGuard, async (req, res) => {
   try {
     const { email, password } = UserLoginBody.parse(req.body);
     const [user] = await db.select().from(usersTable).where(eq(usersTable.email, email)).limit(1);
-    if (!user) { res.status(401).json({ error: "Identifiants incorrects." }); return; }
+    if (!user) {
+      recordFailedLogin(email);
+      res.status(401).json({ error: "Identifiants incorrects." });
+      return;
+    }
     const valid = await bcrypt.compare(password, user.passwordHash);
-    if (!valid) { res.status(401).json({ error: "Identifiants incorrects." }); return; }
+    if (!valid) {
+      recordFailedLogin(email);
+      const { retryAfterSeconds } = checkAccountLockout(email);
+      res.status(401).json({ error: "Identifiants incorrects.", retryAfterSeconds });
+      return;
+    }
+    resetLoginFailures(email);
     await db.update(usersTable).set({ lastLoginAt: new Date() }).where(eq(usersTable.id, user.id));
     const token = makeToken(user);
     res.json({ token, user: toProfile(user) });
