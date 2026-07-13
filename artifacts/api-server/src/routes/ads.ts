@@ -1,6 +1,8 @@
 import { Router } from "express";
-import { db, adsTable } from "@workspace/db";
-import { eq, and, inArray, ilike, sql, asc, desc } from "drizzle-orm";
+import { db, adsTable, subscriptionsTable, plansTable } from "@workspace/db";
+import { eq, and, inArray, ilike, sql, asc, desc, count, ne, isNotNull } from "drizzle-orm";
+
+const AD_ACTIVE_STATUSES = ["active", "trialing", "past_due"] as const;
 import {
   ListAdsQueryParams,
   CreateAdBody,
@@ -75,10 +77,39 @@ router.get("/ads", async (req, res) => {
 router.post("/ads", userAuth, requireRole("merchant"), async (req: AuthRequest, res) => {
   try {
     const body = CreateAdBody.parse(req.body);
+    const userId = req.user!.id;
+
+    // Vérifier la limite maxAds du plan actif
+    const [activeSub] = await db
+      .select({ maxAds: plansTable.maxAds })
+      .from(subscriptionsTable)
+      .leftJoin(plansTable, eq(subscriptionsTable.planId, plansTable.id))
+      .where(and(
+        eq(subscriptionsTable.userId, userId),
+        inArray(subscriptionsTable.status, [...AD_ACTIVE_STATUSES]),
+        isNotNull(subscriptionsTable.stripeCustomerId),
+      ))
+      .orderBy(desc(subscriptionsTable.createdAt))
+      .limit(1);
+
+    const maxAds = activeSub?.maxAds ?? null;
+    if (maxAds !== null) {
+      const [{ total }] = await db
+        .select({ total: count() })
+        .from(adsTable)
+        .where(and(eq(adsTable.userId, userId), ne(adsTable.status, "rejected")));
+      if ((total ?? 0) >= maxAds) {
+        res.status(403).json({
+          error: `Votre plan limite la création à ${maxAds} annonce(s) actives. Supprimez-en une ou passez à un plan supérieur.`,
+        });
+        return;
+      }
+    }
+
     const [ad] = await db
       .insert(adsTable)
       .values({
-        userId: req.user!.id,
+        userId,
         title: body.title,
         description: body.description,
         location: body.location,

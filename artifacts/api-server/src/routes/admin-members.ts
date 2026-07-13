@@ -32,7 +32,7 @@ function serializeMember(u: typeof usersTable.$inferSelect) {
     name: u.name,
     email: u.email,
     role: u.role,
-    phone: (u as Record<string, unknown>).phone as string | null ?? null,
+    phone: u.phone ?? null,
     emailVerified: u.emailVerified,
     createdAt: u.createdAt.toISOString(),
     lastLoginAt: u.lastLoginAt ? u.lastLoginAt.toISOString() : null,

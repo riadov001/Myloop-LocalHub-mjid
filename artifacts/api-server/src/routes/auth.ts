@@ -28,7 +28,7 @@ function toProfile(user: typeof usersTable.$inferSelect) {
     name: user.name,
     email: user.email,
     role: user.role,
-    phone: (user as Record<string, unknown>).phone as string | null ?? null,
+    phone: user.phone ?? null,
     emailVerified: user.emailVerified,
     createdAt: user.createdAt.toISOString(),
   };

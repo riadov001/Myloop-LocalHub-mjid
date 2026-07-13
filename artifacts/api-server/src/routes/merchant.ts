@@ -1,8 +1,10 @@
 import { Router } from "express";
 import { db, adsTable, subscriptionsTable, plansTable, adViewsTable, usersTable } from "@workspace/db";
-import { eq, and, count, desc, gte, inArray } from "drizzle-orm";
+import { eq, and, count, desc, gte, inArray, isNotNull } from "drizzle-orm";
 import { userAuth, type AuthRequest } from "../middleware/userAuth.js";
 import { z } from "zod/v4";
+
+const ACTIVE_STATUSES = ["active", "trialing", "past_due"] as const;
 
 const router = Router();
 
@@ -16,7 +18,11 @@ router.get("/merchant/me", userAuth, async (req: AuthRequest, res) => {
     const [sub] = await db.select({ sub: subscriptionsTable, plan: plansTable })
       .from(subscriptionsTable)
       .leftJoin(plansTable, eq(subscriptionsTable.planId, plansTable.id))
-      .where(eq(subscriptionsTable.userId, userId))
+      .where(and(
+        eq(subscriptionsTable.userId, userId),
+        inArray(subscriptionsTable.status, [...ACTIVE_STATUSES]),
+        isNotNull(subscriptionsTable.stripeCustomerId),
+      ))
       .orderBy(desc(subscriptionsTable.createdAt))
       .limit(1);
 
@@ -25,6 +31,7 @@ router.get("/merchant/me", userAuth, async (req: AuthRequest, res) => {
       name: user.name,
       email: user.email,
       role: user.role,
+      phone: user.phone ?? null,
       emailVerified: user.emailVerified,
       subscription: sub ? {
         status: sub.sub.status,

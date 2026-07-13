@@ -959,6 +959,8 @@ paths:
       operationId: adminListMembers
       tags: [admin]
       summary: Admin - list regular users (customers/merchants)
+      security:
+        - bearerAuth: []
       parameters:
         - name: role
           in: query
@@ -982,6 +984,8 @@ paths:
       operationId: adminCreateMember
       tags: [admin]
       summary: Admin - create a regular user
+      security:
+        - bearerAuth: []
       requestBody:
         required: true
         content:
@@ -1001,6 +1005,8 @@ paths:
       operationId: adminUpdateMember
       tags: [admin]
       summary: Admin - update a regular user
+      security:
+        - bearerAuth: []
       parameters:
         - name: id
           in: path
@@ -1024,6 +1030,8 @@ paths:
       operationId: adminDeleteMember
       tags: [admin]
       summary: Admin - delete a regular user
+      security:
+        - bearerAuth: []
       parameters:
         - name: id
           in: path

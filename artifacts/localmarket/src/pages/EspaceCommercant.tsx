@@ -127,7 +127,7 @@ export default function EspaceCommercant() {
       });
       if (!res.ok) throw new Error();
       const updated = await res.json();
-      setProfile((p) => p ? { ...p, name: updated.name } : p);
+      setProfile((p) => p ? { ...p, name: updated.name, phone: updated.phone ?? null } : p);
       if (body.name) localStorage.setItem("userName", updated.name);
       window.dispatchEvent(new Event("auth-change"));
       setProfilePassword(""); setProfilePasswordConfirm("");
@@ -257,12 +257,18 @@ export default function EspaceCommercant() {
                 <CardDescription>{t("merchant.subscription.subtitle")}</CardDescription>
               </CardHeader>
               <CardContent>
-                {profile?.subscription && profile.subscription.status === "active" ? (
+                {profile?.subscription && ["active", "trialing", "past_due"].includes(profile.subscription.status) ? (
                   <div className="space-y-4">
                     <div className="flex items-center gap-3 p-4 bg-green-50 rounded-lg border border-green-200">
                       <CheckCircle className="h-5 w-5 text-green-600 shrink-0" />
-                      <div>
+                      <div className="flex-1">
                         <div className="font-medium text-green-800">{profile.subscription.plan?.name ?? t("merchant.subscription.title")}</div>
+                        {profile.subscription.status === "trialing" && (
+                          <div className="text-sm text-blue-600 mt-0.5">Période d'essai en cours</div>
+                        )}
+                        {profile.subscription.status === "past_due" && (
+                          <div className="text-sm text-red-600 mt-0.5">Paiement en retard — veuillez mettre à jour votre moyen de paiement</div>
+                        )}
                         {profile.subscription.currentPeriodEnd && (
                           <div className="text-sm text-green-600">
                             {t("merchant.subscription.renewal", { date: new Date(profile.subscription.currentPeriodEnd).toLocaleDateString(i18n.language === "en" ? "en-GB" : "fr-FR") })}
@@ -271,8 +277,21 @@ export default function EspaceCommercant() {
                         {profile.subscription.cancelAtPeriodEnd && (
                           <div className="text-sm text-amber-600 mt-1">{t("merchant.subscription.cancel_end")}</div>
                         )}
+                        {profile.subscription.plan?.maxAds != null && (
+                          <div className="text-sm text-slate-600 mt-1">Limite : {stats?.totalAds ?? 0} / {profile.subscription.plan.maxAds} annonce{profile.subscription.plan.maxAds > 1 ? "s" : ""}</div>
+                        )}
                       </div>
                     </div>
+                    <Button variant="outline" size="sm" className="gap-1.5" onClick={async () => {
+                      try {
+                        const res = await fetch(`/api/billing/portal`, { method: "POST", headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" } });
+                        const data = await res.json();
+                        if (data.url) window.location.href = data.url;
+                        else toast({ title: "Erreur lors de l'ouverture du portail", variant: "destructive" });
+                      } catch { toast({ title: "Erreur lors de l'ouverture du portail", variant: "destructive" }); }
+                    }}>
+                      <CreditCard className="h-4 w-4" /> Gérer mon abonnement
+                    </Button>
                   </div>
                 ) : (
                   <div className="space-y-4">
