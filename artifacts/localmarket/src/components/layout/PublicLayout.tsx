@@ -1,11 +1,20 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
-import { Menu, Activity, Heart, LogOut, User, X } from "lucide-react";
+import { Menu, Activity, Heart, LogOut, User, X, ShieldAlert } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useHealthCheck } from "@workspace/api-client-react";
 import { useTranslation } from "react-i18next";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+
+function parseJwtPayload(token: string): { impersonatedByRoot?: boolean; [key: string]: unknown } | null {
+  try {
+    const parts = token.split(".");
+    if (parts.length !== 3) return null;
+    const payload = JSON.parse(atob(parts[1].replace(/-/g, "+").replace(/_/g, "/")));
+    return payload;
+  } catch { return null; }
+}
 
 function useAuth() {
   const [user, setUser] = useState<{ name: string; token: string; role: string | null } | null>(null);
@@ -27,6 +36,8 @@ function useAuth() {
     return () => { window.removeEventListener("storage", handler); window.removeEventListener("auth-change", handler); };
   }, []);
 
+  const isImpersonating = user ? parseJwtPayload(user.token)?.impersonatedByRoot === true : false;
+
   const logout = () => {
     localStorage.removeItem("userToken");
     localStorage.removeItem("userName");
@@ -35,7 +46,18 @@ function useAuth() {
     window.dispatchEvent(new Event("auth-change"));
   };
 
-  return { user, logout };
+  const exitImpersonation = () => {
+    const adminToken = localStorage.getItem("adminTokenBackup");
+    if (adminToken) localStorage.setItem("adminToken", adminToken);
+    localStorage.removeItem("adminTokenBackup");
+    localStorage.removeItem("userToken");
+    localStorage.removeItem("userName");
+    localStorage.removeItem("userRole");
+    setUser(null);
+    window.dispatchEvent(new Event("auth-change"));
+  };
+
+  return { user, logout, isImpersonating, exitImpersonation };
 }
 
 function useIsAdmin() {
@@ -48,11 +70,16 @@ export function PublicLayout({ children }: { children: React.ReactNode }) {
   const [, setLocation] = useLocation();
   const { data: health } = useHealthCheck();
   const isAdmin = useIsAdmin();
-  const { user, logout } = useAuth();
+  const { user, logout, isImpersonating, exitImpersonation } = useAuth();
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const isMerchant = user?.role === "merchant";
   const postAdHref = isMerchant ? "/deposer" : "/inscription-marchand";
+
+  const handleExitImpersonation = () => {
+    exitImpersonation();
+    setLocation("/admin/dashboard?tab=membres");
+  };
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
@@ -175,6 +202,16 @@ export function PublicLayout({ children }: { children: React.ReactNode }) {
           </Sheet>
         </div>
       </header>
+
+      {isImpersonating && (
+        <div className="bg-amber-500 text-white px-4 py-2 text-sm font-medium flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <ShieldAlert className="h-4 w-4" />
+            <span>Mode usurpation : vous agissez en tant que {user?.name}.</span>
+          </div>
+          <button className="underline hover:no-underline" onClick={handleExitImpersonation}>Quitter l'usurpation</button>
+        </div>
+      )}
 
       <main className="flex-1">
         {children}

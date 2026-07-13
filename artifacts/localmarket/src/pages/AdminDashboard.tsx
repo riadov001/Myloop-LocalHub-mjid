@@ -1746,6 +1746,7 @@ const defaultMemberForm: MemberFormState = { name: "", email: "", role: "custome
 
 function MembresTab() {
   const { toast } = useToast();
+  const [, setLocation] = useLocation();
   const [roleFilter, setRoleFilter] = useState<"customer" | "merchant" | "">("");
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
@@ -1762,6 +1763,9 @@ function MembresTab() {
   const createMember = useAdminCreateMember();
   const updateMember = useAdminUpdateMember();
   const deleteMember = useAdminDeleteMember();
+  const suspendMember = useAdminSuspendMember();
+  const unsuspendMember = useAdminUnsuspendMember();
+  const impersonateMember = useAdminImpersonateMember();
 
   useEffect(() => {
     const t = setTimeout(() => setDebouncedSearch(search), 350);
@@ -1801,6 +1805,30 @@ function MembresTab() {
       toast({ title: "Membre supprimé" });
       refetch();
     } catch { toast({ title: "Erreur lors de la suppression", variant: "destructive" }); }
+  };
+
+  const handleSuspend = async (id: number, suspended: boolean) => {
+    const mutation = suspended ? unsuspendMember : suspendMember;
+    try {
+      await mutation.mutateAsync({ id });
+      toast({ title: suspended ? "Compte réactivé" : "Compte suspendu" });
+      refetch();
+    } catch { toast({ title: "Erreur", variant: "destructive" }); }
+  };
+
+  const handleImpersonate = async (id: number, name: string) => {
+    if (!confirm(`Se connecter en tant que "${name}" ? Vous naviguerez sur le site avec son compte.`)) return;
+    try {
+      const result = await impersonateMember.mutateAsync({ id });
+      const adminToken = localStorage.getItem("adminToken") ?? "";
+      localStorage.setItem("adminTokenBackup", adminToken);
+      localStorage.setItem("userToken", result.token);
+      localStorage.setItem("userName", result.user.name);
+      localStorage.setItem("userRole", result.user.role);
+      window.dispatchEvent(new Event("auth-change"));
+      setLocation("/");
+      toast({ title: `Connecté en tant que ${result.user.name}` });
+    } catch { toast({ title: "Erreur lors de l'usurpation", variant: "destructive" }); }
   };
 
   const roleBadge = (role: string) => {
@@ -1929,6 +1957,16 @@ function MembresTab() {
                       <div className="flex items-center gap-1">
                         <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => openEdit(m)}>
                           <Pencil className="h-3.5 w-3.5" />
+                        </Button>
+                        <Button
+                          variant="ghost" size="icon" className="h-7 w-7"
+                          title={m.isSuspended ? "Réactiver" : "Suspendre"}
+                          onClick={() => handleSuspend(m.id, m.isSuspended)}
+                        >
+                          {m.isSuspended ? <CheckCircle2 className="h-3.5 w-3.5 text-green-600" /> : <Ban className="h-3.5 w-3.5 text-amber-600" />}
+                        </Button>
+                        <Button variant="ghost" size="icon" className="h-7 w-7 text-blue-600 hover:text-blue-700" title="Se connecter en tant que" onClick={() => handleImpersonate(m.id, m.name)}>
+                          <LogIn className="h-3.5 w-3.5" />
                         </Button>
                         <Button variant="ghost" size="icon" className="h-7 w-7 text-red-500 hover:text-red-600" onClick={() => handleDelete(m.id, m.name)}>
                           <Trash2 className="h-3.5 w-3.5" />
