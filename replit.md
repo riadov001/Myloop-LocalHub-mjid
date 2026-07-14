@@ -47,9 +47,9 @@ Plateforme d'échanges locaux connectant voisins, agriculteurs et artisans pour 
 
 ## Admin credentials (dev only)
 
-- Email: `rbelmahi90@gmail.com`
-- Password: `Root@26!`
-- This root account is hardcoded in `artifacts/api-server/src/routes/admin.ts`. Additional admins can be created from the admin dashboard and are stored in the `admin_users` table.
+- Root credentials are configured via the `ROOT_ADMIN_EMAIL` and `ROOT_ADMIN_PASSWORD` environment variables (or their development fallbacks). They are not stored in source code.
+- In production, both variables are required at startup and the server fails fast if they are missing.
+- Additional admins can be created from the admin dashboard and are stored in the `admin_users` table.
 
 ## User preferences
 
