@@ -66,6 +66,10 @@ export interface Ad {
   contactEmail?: string | null;
   status: AdStatus;
   createdAt: string;
+  /** @nullable */
+  lastEditedByAdmin?: string | null;
+  /** @nullable */
+  lastEditedAt?: string | null;
 }
 
 export type AdInputListingType = typeof AdInputListingType[keyof typeof AdInputListingType];
@@ -117,6 +121,42 @@ export const AdStatusUpdateStatus = {
 
 export interface AdStatusUpdate {
   status: AdStatusUpdateStatus;
+}
+
+export type AdUpdateListingType = typeof AdUpdateListingType[keyof typeof AdUpdateListingType];
+
+
+export const AdUpdateListingType = {
+  free: 'free',
+  flexible: 'flexible',
+  fixed: 'fixed',
+} as const;
+
+export type AdUpdateStatus = typeof AdUpdateStatus[keyof typeof AdUpdateStatus];
+
+
+export const AdUpdateStatus = {
+  pending: 'pending',
+  published: 'published',
+  rejected: 'rejected',
+} as const;
+
+export interface AdUpdate {
+  title?: string;
+  description?: string;
+  location?: string;
+  product?: string;
+  quantity?: string;
+  unit?: string;
+  category?: string;
+  listingType?: AdUpdateListingType;
+  price?: string;
+  isPromoted?: boolean;
+  promotionDuration?: number;
+  promotionPrice?: string;
+  contactPhone?: string;
+  contactEmail?: string;
+  status?: AdUpdateStatus;
 }
 
 export type AdvertisementMediaType = typeof AdvertisementMediaType[keyof typeof AdvertisementMediaType];

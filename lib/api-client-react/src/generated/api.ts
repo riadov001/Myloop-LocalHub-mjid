@@ -23,6 +23,7 @@ import type {
   Ad,
   AdInput,
   AdStatusUpdate,
+  AdUpdate,
   AdminCredentials,
   AdminListAdsParams,
   AdminListMembersParams,
@@ -769,6 +770,78 @@ export const useUpdateAdStatus = <TError = ErrorType<unknown>,
         TContext
       > => {
       return useMutation(getUpdateAdStatusMutationOptions(options));
+    }
+
+export const getUpdateAdUrl = (id: number,) => {
+
+
+
+
+  return `/api/admin/ads/${id}`
+}
+
+/**
+ * @summary Admin - edit any field of an ad
+ */
+export const updateAd = async (id: number,
+    adUpdate: AdUpdate, options?: RequestInit): Promise<Ad> => {
+
+  return customFetch<Ad>(getUpdateAdUrl(id),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      adUpdate,)
+  }
+);}
+
+
+
+
+export const getUpdateAdMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateAd>>, TError,{id: number;data: BodyType<AdUpdate>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateAd>>, TError,{id: number;data: BodyType<AdUpdate>}, TContext> => {
+
+const mutationKey = ['updateAd'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateAd>>, {id: number;data: BodyType<AdUpdate>}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  updateAd(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateAdMutationResult = NonNullable<Awaited<ReturnType<typeof updateAd>>>
+    export type UpdateAdMutationBody = BodyType<AdUpdate>
+    export type UpdateAdMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Admin - edit any field of an ad
+ */
+export const useUpdateAd = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateAd>>, TError,{id: number;data: BodyType<AdUpdate>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof updateAd>>,
+        TError,
+        {id: number;data: BodyType<AdUpdate>},
+        TContext
+      > => {
+      return useMutation(getUpdateAdMutationOptions(options));
     }
 
 export const getDeleteAdUrl = (id: number,) => {

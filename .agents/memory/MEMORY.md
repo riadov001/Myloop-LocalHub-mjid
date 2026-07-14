@@ -3,7 +3,7 @@
 - [bcrypt replacement](bcrypt-note.md) — Use `bcryptjs` (pure JS) instead of `bcrypt` (native build blocked by pnpm approve-builds in this env).
 - [Platform modes](platform-modes.md) — Boolean configs stored in `platform_config` table with `group='modes'`, `configType='boolean'`. Served via `/admin/modes` separate from `/admin/config`.
 - [RBAC user roles](rbac-user-roles.md) — users table has role enum (customer/merchant/moderator), emailVerified, resetToken, emailVerifyToken; userAuth middleware at api-server/src/middleware/userAuth.ts.
-- [Ads schema notes](ads-schema-notes.md) — adsTable.userId is nullable integer (backward compat); status enum is "pending"/"published"/"rejected" (NOT "active").
+- [Ads schema notes](ads-schema-notes.md) — nullable userId, status enum, plus lastEditedByAdmin/lastEditedAt attribution fields for admin full-edit (PATCH /admin/ads/:id).
 - [Stripe client location](stripe-client-location.md) — Stripe client at src/stripeClient.ts (exports getUncachableStripeClient, getStripeSync); no stripe/ subdirectory.
 - [Workspace pkg linking](workspace-pkg-linking.md) — @workspace/* packages must be added by editing package.json directly, then run pnpm install; pnpm add fails for workspace packages.
 - [Stripe webhook raw body](stripe-webhook-raw.md) — Webhook must mount express.raw() at /api/webhooks/stripe BEFORE express.json() in app.ts; adminAuth is named export (not default) from middleware/adminAuth.ts; constructEvent() needs `as unknown as typeof event` cast to avoid TS2352.

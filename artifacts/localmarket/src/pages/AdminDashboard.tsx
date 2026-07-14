@@ -9,8 +9,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
+import { Textarea } from "@/components/ui/textarea";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import {
-  useAdminListAds, useUpdateAdStatus, useDeleteAd, useAdminBulkUpdateAds,
+  useAdminListAds, useUpdateAdStatus, useDeleteAd, useAdminBulkUpdateAds, useUpdateAd, type Ad,
   useGetBranding, useUpdateBranding,
   useAdminListCategories, useAdminCreateCategory, useAdminUpdateCategory, useAdminDeleteCategory,
   useAdminListUnits, useAdminCreateUnit, useAdminUpdateUnit, useAdminDeleteUnit,
@@ -492,9 +494,19 @@ function AdminsTab() {
   );
 }
 
+type AdRow = Ad;
+
+const emptyAdEditForm = {
+  title: "", description: "", location: "", product: "", quantity: "", unit: "",
+  category: "", listingType: "flexible" as "free" | "flexible" | "fixed", price: "",
+  contactPhone: "", contactEmail: "",
+};
+
 function AnnoncesTab() {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [selected, setSelected] = useState<Set<number>>(new Set());
+  const [editingAd, setEditingAd] = useState<AdRow | null>(null);
+  const [editForm, setEditForm] = useState(emptyAdEditForm);
   const { toast } = useToast();
 
   const { data: ads, isLoading, refetch } = useAdminListAds({
@@ -504,6 +516,58 @@ function AnnoncesTab() {
   const updateStatus = useUpdateAdStatus();
   const deleteAd = useDeleteAd();
   const bulkUpdate = useAdminBulkUpdateAds();
+  const updateAd = useUpdateAd();
+
+  const openEdit = (ad: AdRow) => {
+    setEditingAd(ad);
+    setEditForm({
+      title: ad.title ?? "",
+      description: ad.description ?? "",
+      location: ad.location ?? "",
+      product: ad.product ?? "",
+      quantity: ad.quantity ?? "",
+      unit: ad.unit ?? "",
+      category: ad.category ?? "",
+      listingType: (ad.listingType as "free" | "flexible" | "fixed") ?? "flexible",
+      price: ad.price ?? "",
+      contactPhone: ad.contactPhone ?? "",
+      contactEmail: ad.contactEmail ?? "",
+    });
+  };
+
+  const setEditField = (key: keyof typeof emptyAdEditForm, value: string) => {
+    setEditForm((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const handleSaveEdit = () => {
+    if (!editingAd) return;
+    updateAd.mutate(
+      {
+        id: editingAd.id,
+        data: {
+          title: editForm.title,
+          description: editForm.description || undefined,
+          location: editForm.location,
+          product: editForm.product,
+          quantity: editForm.quantity || undefined,
+          unit: editForm.unit || undefined,
+          category: editForm.category,
+          listingType: editForm.listingType,
+          price: editForm.price || undefined,
+          contactPhone: editForm.contactPhone || undefined,
+          contactEmail: editForm.contactEmail || undefined,
+        },
+      },
+      {
+        onSuccess: () => {
+          toast({ title: "Annonce modifiée avec succès." });
+          setEditingAd(null);
+          refetch();
+        },
+        onError: () => toast({ title: "Erreur lors de la modification", variant: "destructive" }),
+      }
+    );
+  };
 
   const allIds = (ads ?? []).map(a => a.id);
   const allSelected = allIds.length > 0 && allIds.every(id => selected.has(id));
@@ -671,6 +735,9 @@ function AnnoncesTab() {
                           </Button>
                         </>
                       )}
+                      <Button size="icon" variant="outline" className="h-8 w-8 text-muted-foreground hover:bg-muted" onClick={() => openEdit(ad)} title="Modifier">
+                        <Pencil className="h-4 w-4" />
+                      </Button>
                       <Button size="icon" variant="outline" className="h-8 w-8 text-destructive hover:bg-destructive/10" onClick={() => handleDelete(ad.id)} title="Supprimer">
                         <Trash2 className="h-4 w-4" />
                       </Button>
@@ -684,6 +751,83 @@ function AnnoncesTab() {
           </Table>
         </CardContent>
       </Card>
+
+      <Dialog open={!!editingAd} onOpenChange={(open) => !open && setEditingAd(null)}>
+        <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Modifier l'annonce #{editingAd?.id}</DialogTitle>
+            <DialogDescription>
+              Cette modification remplace le contenu de l'annonce et sera enregistrée comme une action de l'administrateur.
+              {editingAd?.lastEditedByAdmin && (
+                <span className="block mt-1 text-xs text-amber-600">
+                  Dernière modification admin : {editingAd.lastEditedByAdmin}
+                  {editingAd.lastEditedAt && ` — ${format(new Date(editingAd.lastEditedAt), "dd MMM yyyy HH:mm", { locale: fr })}`}
+                </span>
+              )}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="col-span-2 space-y-1.5">
+              <Label>Titre</Label>
+              <Input value={editForm.title} onChange={(e) => setEditField("title", e.target.value)} />
+            </div>
+            <div className="col-span-2 space-y-1.5">
+              <Label>Description</Label>
+              <Textarea rows={4} value={editForm.description} onChange={(e) => setEditField("description", e.target.value)} />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Localisation</Label>
+              <Input value={editForm.location} onChange={(e) => setEditField("location", e.target.value)} />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Catégorie</Label>
+              <Input value={editForm.category} onChange={(e) => setEditField("category", e.target.value)} />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Produit</Label>
+              <Input value={editForm.product} onChange={(e) => setEditField("product", e.target.value)} />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Quantité</Label>
+              <Input value={editForm.quantity} onChange={(e) => setEditField("quantity", e.target.value)} />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Unité</Label>
+              <Input value={editForm.unit} onChange={(e) => setEditField("unit", e.target.value)} />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Type d'annonce</Label>
+              <Select value={editForm.listingType} onValueChange={(v) => setEditField("listingType", v)}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="free">Don</SelectItem>
+                  <SelectItem value="flexible">Prix libre</SelectItem>
+                  <SelectItem value="fixed">Prix fixe</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1.5">
+              <Label>Prix</Label>
+              <Input value={editForm.price} onChange={(e) => setEditField("price", e.target.value)} />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Téléphone de contact</Label>
+              <Input value={editForm.contactPhone} onChange={(e) => setEditField("contactPhone", e.target.value)} />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Email de contact</Label>
+              <Input value={editForm.contactEmail} onChange={(e) => setEditField("contactEmail", e.target.value)} />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditingAd(null)}>Annuler</Button>
+            <Button onClick={handleSaveEdit} disabled={updateAd.isPending}>
+              {updateAd.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+              Enregistrer
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

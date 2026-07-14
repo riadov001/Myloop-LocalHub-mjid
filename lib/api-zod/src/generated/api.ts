@@ -50,7 +50,9 @@ export const ListAdsResponseItem = zod.object({
   "contactPhone": zod.string().nullish(),
   "contactEmail": zod.string().nullish(),
   "status": zod.enum(['pending', 'published', 'rejected']),
-  "createdAt": zod.string()
+  "createdAt": zod.string(),
+  "lastEditedByAdmin": zod.string().nullish(),
+  "lastEditedAt": zod.string().nullish()
 })
 export const ListAdsResponse = zod.array(ListAdsResponseItem)
 
@@ -104,7 +106,9 @@ export const GetAdResponse = zod.object({
   "contactPhone": zod.string().nullish(),
   "contactEmail": zod.string().nullish(),
   "status": zod.enum(['pending', 'published', 'rejected']),
-  "createdAt": zod.string()
+  "createdAt": zod.string(),
+  "lastEditedByAdmin": zod.string().nullish(),
+  "lastEditedAt": zod.string().nullish()
 })
 
 
@@ -168,7 +172,9 @@ export const AdminListAdsResponseItem = zod.object({
   "contactPhone": zod.string().nullish(),
   "contactEmail": zod.string().nullish(),
   "status": zod.enum(['pending', 'published', 'rejected']),
-  "createdAt": zod.string()
+  "createdAt": zod.string(),
+  "lastEditedByAdmin": zod.string().nullish(),
+  "lastEditedAt": zod.string().nullish()
 })
 export const AdminListAdsResponse = zod.array(AdminListAdsResponseItem)
 
@@ -203,7 +209,59 @@ export const UpdateAdStatusResponse = zod.object({
   "contactPhone": zod.string().nullish(),
   "contactEmail": zod.string().nullish(),
   "status": zod.enum(['pending', 'published', 'rejected']),
-  "createdAt": zod.string()
+  "createdAt": zod.string(),
+  "lastEditedByAdmin": zod.string().nullish(),
+  "lastEditedAt": zod.string().nullish()
+})
+
+
+/**
+ * @summary Admin - edit any field of an ad
+ */
+export const UpdateAdParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const UpdateAdBody = zod.object({
+  "title": zod.string().optional(),
+  "description": zod.string().optional(),
+  "location": zod.string().optional(),
+  "product": zod.string().optional(),
+  "quantity": zod.string().optional(),
+  "unit": zod.string().optional(),
+  "category": zod.string().optional(),
+  "listingType": zod.enum(['free', 'flexible', 'fixed']).optional(),
+  "price": zod.string().optional(),
+  "isPromoted": zod.boolean().optional(),
+  "promotionDuration": zod.number().optional(),
+  "promotionPrice": zod.string().optional(),
+  "contactPhone": zod.string().optional(),
+  "contactEmail": zod.string().optional(),
+  "status": zod.enum(['pending', 'published', 'rejected']).optional()
+})
+
+export const UpdateAdResponse = zod.object({
+  "id": zod.number(),
+  "title": zod.string(),
+  "description": zod.string().nullish(),
+  "location": zod.string(),
+  "product": zod.string(),
+  "quantity": zod.string().nullish(),
+  "unit": zod.string().nullish(),
+  "category": zod.string(),
+  "listingType": zod.enum(['free', 'flexible', 'fixed']).optional(),
+  "price": zod.string().nullish(),
+  "isPromoted": zod.boolean().optional(),
+  "promotionDuration": zod.number().nullish(),
+  "promotionPrice": zod.string().nullish(),
+  "subscriptionType": zod.enum(['none', 'weekly', 'monthly', 'annual']).optional(),
+  "subscriptionPrice": zod.string().nullish(),
+  "contactPhone": zod.string().nullish(),
+  "contactEmail": zod.string().nullish(),
+  "status": zod.enum(['pending', 'published', 'rejected']),
+  "createdAt": zod.string(),
+  "lastEditedByAdmin": zod.string().nullish(),
+  "lastEditedAt": zod.string().nullish()
 })
 
 

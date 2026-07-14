@@ -27,6 +27,8 @@ export const adsTable = pgTable("ads", {
   contactEmail: text("contact_email"),
   status: adStatusEnum("status").notNull().default("pending"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
+  lastEditedByAdmin: text("last_edited_by_admin"),
+  lastEditedAt: timestamp("last_edited_at", { withTimezone: true }),
 });
 
 export const insertAdSchema = createInsertSchema(adsTable).omit({ id: true, createdAt: true, status: true });

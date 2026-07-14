@@ -11,6 +11,8 @@ import {
   UpdateAdStatusParams,
   UpdateAdStatusBody,
   DeleteAdParams,
+  UpdateAdParams,
+  UpdateAdBody,
 } from "@workspace/api-zod";
 import { adminAuth } from "../middleware/adminAuth";
 import { userAuth, requireRole, type AuthRequest } from "../middleware/userAuth.js";
@@ -180,6 +182,42 @@ router.patch("/admin/ads/:id/status", adminAuth, async (req, res) => {
       .returning();
     if (!updated) { res.status(404).json({ error: "Ad not found" }); return; }
     res.json({ ...updated, createdAt: updated.createdAt.toISOString() });
+  } catch (err) {
+    req.log.error(err);
+    res.status(400).json({ error: "Invalid data" });
+  }
+});
+
+// PATCH /admin/ads/:id — edit any field of any ad — PROTECTED
+router.patch("/admin/ads/:id", adminAuth, async (req, res) => {
+  try {
+    const { id } = UpdateAdParams.parse(req.params);
+    const body = UpdateAdBody.parse(req.body);
+    const adminRole = (req as typeof req & { adminRole?: string; adminPayload?: { sub: string; role: string } }).adminPayload;
+    const adminLabel = adminRole ? `${adminRole.role}:${adminRole.sub}` : "admin";
+
+    if (Object.keys(body).length === 0) {
+      res.status(400).json({ error: "Aucune modification fournie" });
+      return;
+    }
+
+    const [updated] = await db
+      .update(adsTable)
+      .set({
+        ...body,
+        listingType: body.listingType as "free" | "flexible" | "fixed" | undefined,
+        status: body.status as "pending" | "published" | "rejected" | undefined,
+        lastEditedByAdmin: adminLabel,
+        lastEditedAt: new Date(),
+      })
+      .where(eq(adsTable.id, id))
+      .returning();
+    if (!updated) { res.status(404).json({ error: "Ad not found" }); return; }
+    res.json({
+      ...updated,
+      createdAt: updated.createdAt.toISOString(),
+      lastEditedAt: updated.lastEditedAt ? updated.lastEditedAt.toISOString() : null,
+    });
   } catch (err) {
     req.log.error(err);
     res.status(400).json({ error: "Invalid data" });

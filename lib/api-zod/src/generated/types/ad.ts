@@ -38,4 +38,8 @@ export interface Ad {
   contactEmail?: string | null;
   status: AdStatus;
   createdAt: string;
+  /** @nullable */
+  lastEditedByAdmin?: string | null;
+  /** @nullable */
+  lastEditedAt?: string | null;
 }

@@ -213,6 +213,29 @@ paths:
                 $ref: "#/components/schemas/Ad"
 
   /admin/ads/{id}:
+    patch:
+      operationId: updateAd
+      tags: [admin]
+      summary: Admin - edit any field of an ad
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AdUpdate"
+      responses:
+        "200":
+          description: Updated ad
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Ad"
     delete:
       operationId: deleteAd
       tags: [admin]
@@ -1181,6 +1204,10 @@ components:
           enum: [pending, published, rejected]
         createdAt:
           type: string
+        lastEditedByAdmin:
+          type: ["string", "null"]
+        lastEditedAt:
+          type: ["string", "null"]
 
     AdInput:
       type: object
@@ -1225,6 +1252,42 @@ components:
       type: object
       required: [status]
       properties:
+        status:
+          type: string
+          enum: [pending, published, rejected]
+
+    AdUpdate:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        location:
+          type: string
+        product:
+          type: string
+        quantity:
+          type: string
+        unit:
+          type: string
+        category:
+          type: string
+        listingType:
+          type: string
+          enum: [free, flexible, fixed]
+        price:
+          type: string
+        isPromoted:
+          type: boolean
+        promotionDuration:
+          type: integer
+        promotionPrice:
+          type: string
+        contactPhone:
+          type: string
+        contactEmail:
+          type: string
         status:
           type: string
           enum: [pending, published, rejected]
