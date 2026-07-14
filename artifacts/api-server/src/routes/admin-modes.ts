@@ -2,6 +2,7 @@ import { Router } from "express";
 import { db, platformConfigTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
 import { adminAuth } from "../middleware/adminAuth";
+import { recordAuditLog } from "../lib/auditLog.js";
 import { z } from "zod/v4";
 
 const router = Router();
@@ -79,6 +80,15 @@ router.put("/admin/modes/:key", adminAuth, async (req, res) => {
       .set({ value: enabled ? "true" : "false" })
       .where(eq(platformConfigTable.key, key))
       .returning();
+
+    await recordAuditLog({
+      req,
+      action: "modes.update",
+      targetType: "platform_config",
+      targetId: key,
+      summary: `Mode "${row.label}" ${enabled ? "activé" : "désactivé"}`,
+      metadata: { key, enabled },
+    });
 
     res.json(rowToMode(updated));
   } catch (err) {

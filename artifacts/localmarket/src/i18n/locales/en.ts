@@ -469,6 +469,7 @@ const en = {
       payments: "Payments",
       settings: "Settings",
       admins: "Admin management",
+      audit_log: "Audit log",
       members: "Members",
       profile: "My profile",
     },

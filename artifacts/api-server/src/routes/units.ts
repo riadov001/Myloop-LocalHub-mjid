@@ -2,6 +2,7 @@ import { Router } from "express";
 import { db, unitsTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
 import { adminAuth } from "../middleware/adminAuth";
+import { recordAuditLog } from "../lib/auditLog.js";
 import { z } from "zod";
 
 const router = Router();
@@ -45,6 +46,13 @@ router.post("/admin/units", adminAuth, async (req, res) => {
   try {
     const body = unitInputSchema.parse(req.body);
     const [unit] = await db.insert(unitsTable).values(body).returning();
+    await recordAuditLog({
+      req,
+      action: "units.create",
+      targetType: "unit",
+      targetId: unit.id,
+      summary: `Unité "${unit.name}" créée`,
+    });
     res.status(201).json(unit);
   } catch (err) {
     req.log.error(err);
@@ -59,6 +67,13 @@ router.put("/admin/units/:id", adminAuth, async (req, res) => {
     const body = unitInputSchema.parse(req.body);
     const [unit] = await db.update(unitsTable).set(body).where(eq(unitsTable.id, id)).returning();
     if (!unit) { res.status(404).json({ error: "Unité introuvable" }); return; }
+    await recordAuditLog({
+      req,
+      action: "units.update",
+      targetType: "unit",
+      targetId: unit.id,
+      summary: `Unité "${unit.name}" modifiée`,
+    });
     res.json(unit);
   } catch (err) {
     req.log.error(err);
@@ -71,6 +86,13 @@ router.delete("/admin/units/:id", adminAuth, async (req, res) => {
   try {
     const { id } = idParamSchema.parse(req.params);
     await db.delete(unitsTable).where(eq(unitsTable.id, id));
+    await recordAuditLog({
+      req,
+      action: "units.delete",
+      targetType: "unit",
+      targetId: id,
+      summary: `Unité #${id} supprimée`,
+    });
     res.status(204).send();
   } catch (err) {
     req.log.error(err);

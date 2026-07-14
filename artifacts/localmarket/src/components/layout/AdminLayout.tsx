@@ -3,6 +3,7 @@ import { Link, useLocation } from "wouter";
 import {
   LayoutDashboard, LogOut, Settings, Palette, List, Tag, Scale,
   Star, Users, Shield, ToggleLeft, ChevronRight, Menu, CreditCard, Megaphone, UserCircle, UsersRound,
+  ScrollText,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -50,6 +51,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
     { tab: "membres", label: t("admin.nav.members"), icon: UsersRound, roles: ["root", "admin"] },
     { tab: "settings", label: t("admin.nav.settings"), icon: Settings, roles: ["root", "admin"] },
     { tab: "admins", label: t("admin.nav.admins"), icon: Users, roles: ["root"] },
+    { tab: "audit-log", label: t("admin.nav.audit_log"), icon: ScrollText, roles: ["root"] },
     { tab: "profil", label: t("admin.nav.profile"), icon: UserCircle, roles: ["root", "admin"] },
   ];
 
@@ -94,7 +96,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
             >
               <item.icon className={cn("h-4 w-4 shrink-0", isActive ? "text-primary-foreground" : "text-sidebar-foreground/50 group-hover:text-sidebar-accent-foreground")} />
               <span className="flex-1 text-left">{item.label}</span>
-              {item.tab === "admins" && (
+              {(item.tab === "admins" || item.tab === "audit-log") && (
                 <Shield className="h-3 w-3 text-amber-400 shrink-0" />
               )}
               {isActive && <ChevronRight className="h-3 w-3 shrink-0 opacity-60" />}

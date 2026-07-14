@@ -2,6 +2,7 @@ import { Router } from "express";
 import { db, platformConfigTable } from "@workspace/db";
 import { eq, ne } from "drizzle-orm";
 import { adminAuth } from "../middleware/adminAuth";
+import { recordAuditLog } from "../lib/auditLog.js";
 import { z } from "zod/v4";
 
 const router = Router();
@@ -102,6 +103,17 @@ router.put("/admin/config/:key", adminAuth, async (req, res) => {
       .set({ value: newValue })
       .where(eq(platformConfigTable.key, key))
       .returning();
+
+    await recordAuditLog({
+      req,
+      action: "config.update",
+      targetType: "platform_config",
+      targetId: key,
+      summary: existing.isSecret
+        ? `Configuration "${existing.label}" mise à jour (valeur secrète masquée)`
+        : `Configuration "${existing.label}" mise à jour`,
+      metadata: existing.isSecret ? undefined : { value: newValue },
+    });
 
     res.json(maskConfig(updated));
   } catch (err) {

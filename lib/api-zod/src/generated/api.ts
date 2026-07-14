@@ -1076,6 +1076,45 @@ export const AdminImpersonateMemberResponse = zod.object({
 
 
 /**
+ * @summary Root - list/filter the audit log of admin & root actions
+ */
+export const AdminListAuditLogQueryParams = zod.object({
+  "actorId": zod.coerce.string().optional(),
+  "action": zod.coerce.string().optional(),
+  "targetType": zod.coerce.string().optional(),
+  "dateFrom": zod.coerce.string().optional(),
+  "dateTo": zod.coerce.string().optional(),
+  "page": zod.coerce.number().optional(),
+  "limit": zod.coerce.number().optional()
+})
+
+export const AdminListAuditLogResponse = zod.object({
+  "rows": zod.array(zod.object({
+  "id": zod.number(),
+  "actorId": zod.string(),
+  "actorRole": zod.enum(['root', 'admin']),
+  "actorLabel": zod.string(),
+  "action": zod.string(),
+  "targetType": zod.string(),
+  "targetId": zod.string().nullish(),
+  "summary": zod.string(),
+  "metadata": zod.unknown().nullish(),
+  "createdAt": zod.string()
+})),
+  "total": zod.number(),
+  "page": zod.number(),
+  "limit": zod.number()
+})
+
+
+/**
+ * @summary Root - list distinct action types recorded in the audit log
+ */
+export const AdminListAuditLogActionsResponseItem = zod.string()
+export const AdminListAuditLogActionsResponse = zod.array(AdminListAuditLogActionsResponseItem)
+
+
+/**
  * @summary Admin login
  */
 export const AdminLoginBody = zod.object({

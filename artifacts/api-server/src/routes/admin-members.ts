@@ -6,6 +6,7 @@ import { db, usersTable } from "@workspace/db";
 import { eq, ilike, or, and } from "drizzle-orm";
 import { adminAuth, rootAuth } from "../middleware/adminAuth.js";
 import { JWT_SECRET } from "../lib/jwtSecret.js";
+import { recordAuditLog } from "../lib/auditLog.js";
 import { z } from "zod/v4";
 
 const router = Router();
@@ -83,6 +84,13 @@ router.post("/admin/members", adminAuth, async (req, res) => {
       role: data.role,
       emailVerified: data.emailVerified ?? false,
     }).returning();
+    await recordAuditLog({
+      req,
+      action: "members.create",
+      targetType: "user",
+      targetId: created.id,
+      summary: `Membre "${created.name}" (${created.email}) créé avec le rôle ${created.role}`,
+    });
     res.status(201).json(serializeMember(created));
   } catch (err) {
     req.log.error(err);
@@ -113,6 +121,14 @@ router.put("/admin/members/:id", adminAuth, async (req, res) => {
       .where(eq(usersTable.id, id))
       .returning();
     if (!updated) { res.status(404).json({ error: "Membre introuvable" }); return; }
+    await recordAuditLog({
+      req,
+      action: "members.update",
+      targetType: "user",
+      targetId: updated.id,
+      summary: `Membre "${updated.name}" (${updated.email}) modifié (${Object.keys(updateData).join(", ")})`,
+      metadata: { changedFields: Object.keys(updateData) },
+    });
     res.json(serializeMember(updated));
   } catch (err) {
     req.log.error(err);
@@ -125,6 +141,13 @@ router.delete("/admin/members/:id", adminAuth, async (req, res) => {
   try {
     const id = parseInt(req.params.id as string, 10);
     await db.delete(usersTable).where(eq(usersTable.id, id));
+    await recordAuditLog({
+      req,
+      action: "members.delete",
+      targetType: "user",
+      targetId: id,
+      summary: `Membre #${id} supprimé`,
+    });
     res.status(204).end();
   } catch (err) {
     req.log.error(err);
@@ -141,6 +164,13 @@ router.patch("/admin/members/:id/suspend", rootAuth, async (req, res) => {
       .where(eq(usersTable.id, id))
       .returning();
     if (!updated) { res.status(404).json({ error: "Membre introuvable" }); return; }
+    await recordAuditLog({
+      req,
+      action: "members.suspend",
+      targetType: "user",
+      targetId: updated.id,
+      summary: `Membre "${updated.name}" (${updated.email}) suspendu`,
+    });
     res.json(serializeMember(updated));
   } catch (err) {
     req.log.error(err);
@@ -157,6 +187,13 @@ router.patch("/admin/members/:id/unsuspend", rootAuth, async (req, res) => {
       .where(eq(usersTable.id, id))
       .returning();
     if (!updated) { res.status(404).json({ error: "Membre introuvable" }); return; }
+    await recordAuditLog({
+      req,
+      action: "members.unsuspend",
+      targetType: "user",
+      targetId: updated.id,
+      summary: `Membre "${updated.name}" (${updated.email}) réactivé`,
+    });
     res.json(serializeMember(updated));
   } catch (err) {
     req.log.error(err);
@@ -177,6 +214,13 @@ router.post("/admin/members/:id/impersonate", rootAuth, async (req, res) => {
       JWT_SECRET,
       { expiresIn: "2h" },
     );
+    await recordAuditLog({
+      req,
+      action: "members.impersonate",
+      targetType: "user",
+      targetId: user.id,
+      summary: `Connexion en tant que "${user.name}" (${user.email}) initiée par root`,
+    });
     res.json({
       token,
       user: { id: user.id, name: user.name, email: user.email, role: user.role },

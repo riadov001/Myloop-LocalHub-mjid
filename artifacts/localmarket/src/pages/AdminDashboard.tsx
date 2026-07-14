@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, Fragment } from "react";
 import { useLocation, useSearch } from "wouter";
 import { AdminLayout, useAdminRole } from "@/components/layout/AdminLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -26,6 +26,7 @@ import {
   useGetAdminProfile, useUpdateAdminProfile,
   useAdminListMembers, useAdminCreateMember, useAdminUpdateMember, useAdminDeleteMember,
   useAdminSuspendMember, useAdminUnsuspendMember, useAdminImpersonateMember,
+  useAdminListAuditLog, useAdminListAuditLogActions,
 } from "@workspace/api-client-react";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -35,6 +36,7 @@ import {
   Share2, Wrench, Key, ChevronDown, ChevronRight, CreditCard, Heart, RefreshCw,
   Megaphone, Image, Video, Link2, ArrowUp, ArrowDown, ExternalLink,
   UserCircle, Phone, Lock, Mail, UsersRound, Search, Ban, LogIn,
+  ScrollText, ChevronLeft, X,
 } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -69,15 +71,21 @@ export default function AdminDashboard() {
         {activeTab === "membres" && <MembresTab />}
         {activeTab === "profil" && <ProfilAdminTab />}
         {activeTab === "admins" && role === "root" && <AdminsTab />}
-        {activeTab === "admins" && role !== "root" && (
-          <div className="flex flex-col items-center justify-center py-20 text-muted-foreground gap-3">
-            <Shield className="h-10 w-10 text-amber-500" />
-            <p className="font-semibold text-lg">Accès réservé</p>
-            <p className="text-sm">Vous n'avez pas les droits pour accéder à cette section.</p>
-          </div>
-        )}
+        {activeTab === "admins" && role !== "root" && <RootOnlyNotice />}
+        {activeTab === "audit-log" && role === "root" && <AuditLogTab />}
+        {activeTab === "audit-log" && role !== "root" && <RootOnlyNotice />}
       </div>
     </AdminLayout>
+  );
+}
+
+function RootOnlyNotice() {
+  return (
+    <div className="flex flex-col items-center justify-center py-20 text-muted-foreground gap-3">
+      <Shield className="h-10 w-10 text-amber-500" />
+      <p className="font-semibold text-lg">Accès réservé</p>
+      <p className="text-sm">Vous n'avez pas les droits pour accéder à cette section.</p>
+    </div>
   );
 }
 
@@ -490,6 +498,177 @@ function AdminsTab() {
           </Table>
         </CardContent>
       </Card>
+    </div>
+  );
+}
+
+const AUDIT_LOG_PAGE_SIZE = 25;
+
+function AuditLogTab() {
+  const [page, setPage] = useState(1);
+  const [actionFilter, setActionFilter] = useState<string>("all");
+  const [actorFilter, setActorFilter] = useState<string>("");
+  const [dateFrom, setDateFrom] = useState<string>("");
+  const [dateTo, setDateTo] = useState<string>("");
+  const [expandedId, setExpandedId] = useState<number | null>(null);
+
+  const { data: actions } = useAdminListAuditLogActions();
+
+  const params = {
+    page,
+    limit: AUDIT_LOG_PAGE_SIZE,
+    ...(actionFilter !== "all" ? { action: actionFilter } : {}),
+    ...(actorFilter ? { actorId: actorFilter } : {}),
+    ...(dateFrom ? { dateFrom: new Date(dateFrom).toISOString() } : {}),
+    ...(dateTo ? { dateTo: new Date(`${dateTo}T23:59:59`).toISOString() } : {}),
+  };
+
+  const { data, isLoading, isFetching } = useAdminListAuditLog(params);
+
+  const rows = data?.rows ?? [];
+  const total = data?.total ?? 0;
+  const totalPages = Math.max(1, Math.ceil(total / AUDIT_LOG_PAGE_SIZE));
+
+  const resetFilters = () => {
+    setActionFilter("all");
+    setActorFilter("");
+    setDateFrom("");
+    setDateTo("");
+    setPage(1);
+  };
+
+  const hasActiveFilters = actionFilter !== "all" || actorFilter || dateFrom || dateTo;
+
+  return (
+    <div className="space-y-6">
+      <TabHeader
+        title="Journal d'audit"
+        description="Historique complet des actions effectuées par les administrateurs et le compte root."
+      />
+
+      <Card className="border-border/50">
+        <CardContent className="pt-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 items-end">
+            <div className="space-y-1">
+              <Label>Type d'action</Label>
+              <Select value={actionFilter} onValueChange={v => { setActionFilter(v); setPage(1); }}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Toutes les actions</SelectItem>
+                  {(actions ?? []).map(a => (
+                    <SelectItem key={a} value={a}>{a}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1">
+              <Label>Auteur (root ou id admin)</Label>
+              <Input
+                placeholder="ex: root ou 3"
+                value={actorFilter}
+                onChange={e => { setActorFilter(e.target.value); setPage(1); }}
+              />
+            </div>
+            <div className="space-y-1">
+              <Label>Depuis</Label>
+              <Input type="date" value={dateFrom} onChange={e => { setDateFrom(e.target.value); setPage(1); }} />
+            </div>
+            <div className="space-y-1">
+              <Label>Jusqu'au</Label>
+              <Input type="date" value={dateTo} onChange={e => { setDateTo(e.target.value); setPage(1); }} />
+            </div>
+            <div>
+              <Button variant="outline" onClick={resetFilters} disabled={!hasActiveFilters} className="gap-2 w-full">
+                <X className="h-4 w-4" /> Réinitialiser
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card className="border-border/50">
+        <CardContent className="p-0 overflow-x-auto">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Date</TableHead>
+                <TableHead>Auteur</TableHead>
+                <TableHead>Action</TableHead>
+                <TableHead>Cible</TableHead>
+                <TableHead>Résumé</TableHead>
+                <TableHead className="text-right">Détails</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {isLoading ? (
+                <TableRow><TableCell colSpan={6} className="text-center py-8"><Loader2 className="h-5 w-5 animate-spin inline" /></TableCell></TableRow>
+              ) : rows.length ? rows.map(entry => (
+                <Fragment key={entry.id}>
+                  <TableRow>
+                    <TableCell className="text-xs text-muted-foreground whitespace-nowrap">
+                      {format(new Date(entry.createdAt), "dd MMM yyyy HH:mm", { locale: fr })}
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant="outline" className="text-xs gap-1">
+                        <Shield className="h-3 w-3" /> {entry.actorLabel}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <code className="text-xs bg-muted px-1.5 py-0.5 rounded">{entry.action}</code>
+                    </TableCell>
+                    <TableCell className="text-xs text-muted-foreground">
+                      {entry.targetType}{entry.targetId ? ` #${entry.targetId}` : ""}
+                    </TableCell>
+                    <TableCell className="text-sm max-w-md truncate">{entry.summary}</TableCell>
+                    <TableCell className="text-right">
+                      {entry.metadata != null && (
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className="h-8 w-8"
+                          onClick={() => setExpandedId(expandedId === entry.id ? null : entry.id)}
+                        >
+                          {expandedId === entry.id ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
+                        </Button>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                  {expandedId === entry.id && entry.metadata != null && (
+                    <TableRow>
+                      <TableCell colSpan={6} className="bg-muted/30">
+                        <pre className="text-xs whitespace-pre-wrap p-2">{JSON.stringify(entry.metadata, null, 2)}</pre>
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </Fragment>
+              )) : (
+                <TableRow>
+                  <TableCell colSpan={6} className="text-center py-10 text-muted-foreground text-sm">
+                    Aucune action enregistrée pour ces filtres.
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
+
+      {total > 0 && (
+        <div className="flex items-center justify-between text-sm text-muted-foreground">
+          <span>
+            {total} action{total > 1 ? "s" : ""} au total {isFetching && <Loader2 className="h-3 w-3 animate-spin inline ml-1" />}
+          </span>
+          <div className="flex items-center gap-2">
+            <Button size="sm" variant="outline" disabled={page <= 1} onClick={() => setPage(p => Math.max(1, p - 1))} className="gap-1">
+              <ChevronLeft className="h-3 w-3" /> Précédent
+            </Button>
+            <span>Page {page} / {totalPages}</span>
+            <Button size="sm" variant="outline" disabled={page >= totalPages} onClick={() => setPage(p => Math.min(totalPages, p + 1))} className="gap-1">
+              Suivant <ChevronRight className="h-3 w-3" />
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

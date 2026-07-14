@@ -3,6 +3,7 @@ import { db, brandingTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
 import { UpdateBrandingBody } from "@workspace/api-zod";
 import { adminAuth } from "../middleware/adminAuth";
+import { recordAuditLog } from "../lib/auditLog.js";
 
 const router = Router();
 
@@ -49,6 +50,14 @@ router.put("/admin/branding", adminAuth, async (req, res) => {
         .set(body)
         .where(eq(brandingTable.id, existing.id))
         .returning();
+      await recordAuditLog({
+        req,
+        action: "branding.update",
+        targetType: "branding",
+        targetId: updated.id,
+        summary: `Charte graphique mise à jour (${Object.keys(body).join(", ")})`,
+        metadata: { changedFields: Object.keys(body) },
+      });
       res.json({
         logoUrl: updated.logoUrl ?? null,
         primaryColor: updated.primaryColor,
@@ -59,6 +68,13 @@ router.put("/admin/branding", adminAuth, async (req, res) => {
       });
     } else {
       const [created] = await db.insert(brandingTable).values(body as any).returning();
+      await recordAuditLog({
+        req,
+        action: "branding.create",
+        targetType: "branding",
+        targetId: created.id,
+        summary: `Charte graphique initialisée`,
+      });
       res.json({
         logoUrl: created.logoUrl ?? null,
         primaryColor: created.primaryColor,

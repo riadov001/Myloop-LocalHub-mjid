@@ -469,6 +469,7 @@ const fr = {
       payments: "Paiements",
       settings: "Paramètres",
       admins: "Gestion admins",
+      audit_log: "Journal d'audit",
       members: "Membres",
       profile: "Mon profil",
     },

@@ -2,6 +2,7 @@ import { Router } from "express";
 import { db, categoriesTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
 import { adminAuth } from "../middleware/adminAuth";
+import { recordAuditLog } from "../lib/auditLog.js";
 import { z } from "zod";
 
 const router = Router();
@@ -45,6 +46,13 @@ router.post("/admin/categories", adminAuth, async (req, res) => {
   try {
     const body = categoryInputSchema.parse(req.body);
     const [cat] = await db.insert(categoriesTable).values(body).returning();
+    await recordAuditLog({
+      req,
+      action: "categories.create",
+      targetType: "category",
+      targetId: cat.id,
+      summary: `Catégorie "${cat.name}" créée`,
+    });
     res.status(201).json(cat);
   } catch (err) {
     req.log.error(err);
@@ -59,6 +67,13 @@ router.put("/admin/categories/:id", adminAuth, async (req, res) => {
     const body = categoryInputSchema.parse(req.body);
     const [cat] = await db.update(categoriesTable).set(body).where(eq(categoriesTable.id, id)).returning();
     if (!cat) { res.status(404).json({ error: "Catégorie introuvable" }); return; }
+    await recordAuditLog({
+      req,
+      action: "categories.update",
+      targetType: "category",
+      targetId: cat.id,
+      summary: `Catégorie "${cat.name}" modifiée`,
+    });
     res.json(cat);
   } catch (err) {
     req.log.error(err);
@@ -71,6 +86,13 @@ router.delete("/admin/categories/:id", adminAuth, async (req, res) => {
   try {
     const { id } = idParamSchema.parse(req.params);
     await db.delete(categoriesTable).where(eq(categoriesTable.id, id));
+    await recordAuditLog({
+      req,
+      action: "categories.delete",
+      targetType: "category",
+      targetId: id,
+      summary: `Catégorie #${id} supprimée`,
+    });
     res.status(204).send();
   } catch (err) {
     req.log.error(err);

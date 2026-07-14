@@ -521,6 +521,35 @@ export interface AuthResult {
   user: UserProfile;
 }
 
+export type AuditLogEntryActorRole = typeof AuditLogEntryActorRole[keyof typeof AuditLogEntryActorRole];
+
+
+export const AuditLogEntryActorRole = {
+  root: 'root',
+  admin: 'admin',
+} as const;
+
+export interface AuditLogEntry {
+  id: number;
+  actorId: string;
+  actorRole: AuditLogEntryActorRole;
+  actorLabel: string;
+  action: string;
+  targetType: string;
+  /** @nullable */
+  targetId?: string | null;
+  summary: string;
+  metadata?: unknown | null;
+  createdAt: string;
+}
+
+export interface AuditLogList {
+  rows: AuditLogEntry[];
+  total: number;
+  page: number;
+  limit: number;
+}
+
 export type ListAdsParams = {
 category?: string;
 location?: string;
@@ -560,4 +589,14 @@ export const AdminListMembersRole = {
   merchant: 'merchant',
   moderator: 'moderator',
 } as const;
+
+export type AdminListAuditLogParams = {
+actorId?: string;
+action?: string;
+targetType?: string;
+dateFrom?: string;
+dateTo?: string;
+page?: number;
+limit?: number;
+};
 

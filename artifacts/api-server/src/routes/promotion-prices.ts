@@ -2,6 +2,7 @@ import { Router } from "express";
 import { db, promotionPricesTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
 import { adminAuth } from "../middleware/adminAuth";
+import { recordAuditLog } from "../lib/auditLog.js";
 import { z } from "zod";
 
 const router = Router();
@@ -49,6 +50,13 @@ router.post("/admin/promotion-prices", adminAuth, async (req, res) => {
   try {
     const body = promotionPriceInputSchema.parse(req.body);
     const [price] = await db.insert(promotionPricesTable).values(body).returning();
+    await recordAuditLog({
+      req,
+      action: "promotion_prices.create",
+      targetType: "promotion_price",
+      targetId: price.id,
+      summary: `Tarif de promotion "${price.label}" créé`,
+    });
     res.status(201).json(price);
   } catch (err) {
     req.log.error(err);
@@ -67,6 +75,13 @@ router.put("/admin/promotion-prices/:id", adminAuth, async (req, res) => {
       .where(eq(promotionPricesTable.id, id))
       .returning();
     if (!price) { res.status(404).json({ error: "Tarif introuvable" }); return; }
+    await recordAuditLog({
+      req,
+      action: "promotion_prices.update",
+      targetType: "promotion_price",
+      targetId: price.id,
+      summary: `Tarif de promotion "${price.label}" modifié`,
+    });
     res.json(price);
   } catch (err) {
     req.log.error(err);
@@ -79,6 +94,13 @@ router.delete("/admin/promotion-prices/:id", adminAuth, async (req, res) => {
   try {
     const { id } = idParamSchema.parse(req.params);
     await db.delete(promotionPricesTable).where(eq(promotionPricesTable.id, id));
+    await recordAuditLog({
+      req,
+      action: "promotion_prices.delete",
+      targetType: "promotion_price",
+      targetId: id,
+      summary: `Tarif de promotion #${id} supprimé`,
+    });
     res.status(204).send();
   } catch (err) {
     req.log.error(err);

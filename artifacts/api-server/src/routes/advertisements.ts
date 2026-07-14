@@ -9,6 +9,7 @@ import {
   AdminReorderAdvertisementsBody,
 } from "@workspace/api-zod";
 import { adminAuth } from "../middleware/adminAuth";
+import { recordAuditLog } from "../lib/auditLog.js";
 
 const router = Router();
 
@@ -84,6 +85,13 @@ router.post("/admin/advertisements", adminAuth, async (req, res) => {
         endDate: body.endDate ? new Date(body.endDate) : null,
       })
       .returning();
+    await recordAuditLog({
+      req,
+      action: "advertisements.create",
+      targetType: "advertisement",
+      targetId: created.id,
+      summary: `Publicité "${created.title}" créée`,
+    });
     res.status(201).json(serialize(created));
   } catch (err) {
     req.log.error(err);
@@ -107,6 +115,13 @@ router.post("/admin/advertisements/reorder", adminAuth, async (req, res) => {
       .from(advertisementsTable)
       .where(inArray(advertisementsTable.id, ids))
       .orderBy(asc(advertisementsTable.displayOrder));
+    await recordAuditLog({
+      req,
+      action: "advertisements.reorder",
+      targetType: "advertisement",
+      summary: `Ordre des publicités mis à jour (${ids.length} élément(s))`,
+      metadata: { ids },
+    });
     res.json(ads.map(serialize));
   } catch (err) {
     req.log.error(err);
@@ -135,6 +150,13 @@ router.put("/admin/advertisements/:id", adminAuth, async (req, res) => {
       .where(eq(advertisementsTable.id, id))
       .returning();
     if (!updated) { res.status(404).json({ error: "Advertisement not found" }); return; }
+    await recordAuditLog({
+      req,
+      action: "advertisements.update",
+      targetType: "advertisement",
+      targetId: updated.id,
+      summary: `Publicité "${updated.title}" modifiée`,
+    });
     res.json(serialize(updated));
   } catch (err) {
     req.log.error(err);
@@ -147,6 +169,13 @@ router.delete("/admin/advertisements/:id", adminAuth, async (req, res) => {
   try {
     const { id } = AdminDeleteAdvertisementParams.parse(req.params);
     await db.delete(advertisementsTable).where(eq(advertisementsTable.id, id));
+    await recordAuditLog({
+      req,
+      action: "advertisements.delete",
+      targetType: "advertisement",
+      targetId: id,
+      summary: `Publicité #${id} supprimée`,
+    });
     res.status(204).send();
   } catch (err) {
     req.log.error(err);

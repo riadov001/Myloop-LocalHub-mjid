@@ -3,6 +3,7 @@ import bcrypt from "bcryptjs";
 import { db, adminUsersTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
 import { adminAuth, AdminJwtPayload } from "../middleware/adminAuth.js";
+import { recordAuditLog } from "../lib/auditLog.js";
 import { z } from "zod/v4";
 import { ROOT_EMAIL } from "../lib/rootCredentials.js";
 
@@ -87,6 +88,14 @@ router.put("/admin/profile", adminAuth, async (req, res) => {
       .where(eq(adminUsersTable.id, id))
       .returning();
     if (!updated) { res.status(404).json({ error: "Administrateur introuvable" }); return; }
+    await recordAuditLog({
+      req,
+      action: "profile.update",
+      targetType: "admin_user",
+      targetId: updated.id,
+      summary: `Profil de "${updated.name}" (${updated.email}) mis à jour (${Object.keys(updateData).join(", ")})`,
+      metadata: { changedFields: Object.keys(updateData) },
+    });
     res.json(serializeProfile(updated));
   } catch (err) {
     req.log.error(err);

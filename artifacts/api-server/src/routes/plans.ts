@@ -2,6 +2,7 @@ import { Router } from "express";
 import { db, plansTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
 import { adminAuth } from "../middleware/adminAuth";
+import { recordAuditLog } from "../lib/auditLog.js";
 import { z } from "zod/v4";
 
 const router = Router();
@@ -65,6 +66,13 @@ router.post("/admin/plans", adminAuth, async (req, res) => {
       .insert(plansTable)
       .values({ ...body, features: JSON.stringify(body.features) })
       .returning();
+    await recordAuditLog({
+      req,
+      action: "plans.create",
+      targetType: "plan",
+      targetId: plan.id,
+      summary: `Plan "${plan.name}" créé`,
+    });
     res.status(201).json(serializePlan(plan));
   } catch (err) {
     req.log.error(err);
@@ -83,6 +91,13 @@ router.put("/admin/plans/:id", adminAuth, async (req, res) => {
       .where(eq(plansTable.id, id))
       .returning();
     if (!plan) { res.status(404).json({ error: "Plan introuvable" }); return; }
+    await recordAuditLog({
+      req,
+      action: "plans.update",
+      targetType: "plan",
+      targetId: plan.id,
+      summary: `Plan "${plan.name}" modifié`,
+    });
     res.json(serializePlan(plan));
   } catch (err) {
     req.log.error(err);
@@ -95,6 +110,13 @@ router.delete("/admin/plans/:id", adminAuth, async (req, res) => {
   try {
     const id = Number(req.params.id);
     await db.delete(plansTable).where(eq(plansTable.id, id));
+    await recordAuditLog({
+      req,
+      action: "plans.delete",
+      targetType: "plan",
+      targetId: id,
+      summary: `Plan #${id} supprimé`,
+    });
     res.status(204).send();
   } catch (err) {
     req.log.error(err);

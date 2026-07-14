@@ -3,6 +3,7 @@ import bcrypt from "bcryptjs";
 import { db, adminUsersTable } from "@workspace/db";
 import { eq, ne } from "drizzle-orm";
 import { rootAuth } from "../middleware/adminAuth";
+import { recordAuditLog } from "../lib/auditLog.js";
 import { z } from "zod/v4";
 
 const router = Router();
@@ -59,6 +60,13 @@ router.post("/admin/users", rootAuth, async (req, res) => {
       .insert(adminUsersTable)
       .values({ email: data.email, name: data.name, passwordHash, role: data.role, isActive: data.isActive })
       .returning();
+    await recordAuditLog({
+      req,
+      action: "admins.create",
+      targetType: "admin_user",
+      targetId: created.id,
+      summary: `Administrateur "${created.name}" (${created.email}) créé avec le rôle ${created.role}`,
+    });
     res.status(201).json(serializeUser(created));
   } catch (err) {
     req.log.error(err);
@@ -85,6 +93,14 @@ router.put("/admin/users/:id", rootAuth, async (req, res) => {
       .returning();
 
     if (!updated) { res.status(404).json({ error: "Admin introuvable" }); return; }
+    await recordAuditLog({
+      req,
+      action: "admins.update",
+      targetType: "admin_user",
+      targetId: updated.id,
+      summary: `Administrateur "${updated.name}" (${updated.email}) modifié (${Object.keys(updateData).join(", ")})`,
+      metadata: { changedFields: Object.keys(updateData) },
+    });
     res.json(serializeUser(updated));
   } catch (err) {
     req.log.error(err);
@@ -102,6 +118,13 @@ router.delete("/admin/users/:id", rootAuth, async (req, res) => {
       return;
     }
     await db.delete(adminUsersTable).where(eq(adminUsersTable.id, id));
+    await recordAuditLog({
+      req,
+      action: "admins.delete",
+      targetType: "admin_user",
+      targetId: id,
+      summary: `Administrateur #${id} supprimé`,
+    });
     res.status(204).end();
   } catch (err) {
     req.log.error(err);

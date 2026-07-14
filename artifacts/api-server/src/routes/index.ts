@@ -21,6 +21,7 @@ import adminPaymentsRouter from "./admin-payments";
 import advertisementsRouter from "./advertisements";
 import adminProfileRouter from "./admin-profile";
 import adminMembersRouter from "./admin-members";
+import adminAuditLogRouter from "./admin-audit-log";
 
 const router: IRouter = Router();
 
@@ -46,5 +47,6 @@ router.use(webhookRouter);
 router.use(adminPaymentsRouter);
 router.use(adminProfileRouter);
 router.use(adminMembersRouter);
+router.use(adminAuditLogRouter);
 
 export default router;

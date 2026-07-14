@@ -1128,6 +1128,67 @@ paths:
               schema:
                 $ref: "#/components/schemas/ImpersonationResult"
 
+  /admin/audit-log:
+    get:
+      operationId: adminListAuditLog
+      tags: [admin]
+      summary: Root - list/filter the audit log of admin & root actions
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: actorId
+          in: query
+          schema:
+            type: string
+        - name: action
+          in: query
+          schema:
+            type: string
+        - name: targetType
+          in: query
+          schema:
+            type: string
+        - name: dateFrom
+          in: query
+          schema:
+            type: string
+        - name: dateTo
+          in: query
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+        - name: limit
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Paginated audit log entries
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuditLogList"
+
+  /admin/audit-log/actions:
+    get:
+      operationId: adminListAuditLogActions
+      tags: [admin]
+      summary: Root - list distinct action types recorded in the audit log
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Distinct action types
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+
   /admin/login:
     post:
       operationId: adminLogin
@@ -1799,6 +1860,47 @@ components:
           type: string
         user:
           $ref: "#/components/schemas/UserProfile"
+
+    AuditLogEntry:
+      type: object
+      required: [id, actorId, actorRole, actorLabel, action, targetType, summary, createdAt]
+      properties:
+        id:
+          type: integer
+        actorId:
+          type: string
+        actorRole:
+          type: string
+          enum: [root, admin]
+        actorLabel:
+          type: string
+        action:
+          type: string
+        targetType:
+          type: string
+        targetId:
+          type: ["string", "null"]
+        summary:
+          type: string
+        metadata:
+          nullable: true
+        createdAt:
+          type: string
+
+    AuditLogList:
+      type: object
+      required: [rows, total, page, limit]
+      properties:
+        rows:
+          type: array
+          items:
+            $ref: "#/components/schemas/AuditLogEntry"
+        total:
+          type: integer
+        page:
+          type: integer
+        limit:
+          type: integer
 
   securitySchemes:
     bearerAuth:

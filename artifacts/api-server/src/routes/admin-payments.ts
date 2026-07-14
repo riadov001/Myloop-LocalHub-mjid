@@ -2,6 +2,7 @@ import { Router } from "express";
 import { db, subscriptionsTable, donationsTable, usersTable, plansTable } from "@workspace/db";
 import { eq, desc, count, sum } from "drizzle-orm";
 import { adminAuth } from "../middleware/adminAuth.js";
+import { recordAuditLog } from "../lib/auditLog.js";
 import { z } from "zod/v4";
 
 const router = Router();
@@ -82,6 +83,14 @@ router.patch("/admin/payments/subscriptions/:id", adminAuth, async (req, res) =>
       .returning();
 
     if (!sub) { res.status(404).json({ error: "Abonnement introuvable." }); return; }
+    await recordAuditLog({
+      req,
+      action: "payments.subscription_status_update",
+      targetType: "subscription",
+      targetId: id,
+      summary: `Statut de l'abonnement #${id} changé en "${status}"`,
+      metadata: { status },
+    });
     res.json(sub);
   } catch (err) {
     req.log.error(err);
@@ -94,6 +103,13 @@ router.delete("/admin/payments/subscriptions/:id", adminAuth, async (req, res) =
   try {
     const id = Number(req.params.id);
     await db.delete(subscriptionsTable).where(eq(subscriptionsTable.id, id));
+    await recordAuditLog({
+      req,
+      action: "payments.subscription_delete",
+      targetType: "subscription",
+      targetId: id,
+      summary: `Abonnement #${id} supprimé`,
+    });
     res.status(204).end();
   } catch (err) {
     req.log.error(err);
@@ -155,6 +171,14 @@ router.patch("/admin/payments/donations/:id", adminAuth, async (req, res) => {
       .where(eq(donationsTable.id, id))
       .returning();
     if (!don) { res.status(404).json({ error: "Don introuvable." }); return; }
+    await recordAuditLog({
+      req,
+      action: "payments.donation_status_update",
+      targetType: "donation",
+      targetId: id,
+      summary: `Statut du don #${id} changé en "${status}"`,
+      metadata: { status },
+    });
     res.json(don);
   } catch (err) {
     req.log.error(err);
@@ -167,6 +191,13 @@ router.delete("/admin/payments/donations/:id", adminAuth, async (req, res) => {
   try {
     const id = Number(req.params.id);
     await db.delete(donationsTable).where(eq(donationsTable.id, id));
+    await recordAuditLog({
+      req,
+      action: "payments.donation_delete",
+      targetType: "donation",
+      targetId: id,
+      summary: `Don #${id} supprimé`,
+    });
     res.status(204).end();
   } catch (err) {
     req.log.error(err);

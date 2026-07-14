@@ -16,6 +16,7 @@ import {
 } from "@workspace/api-zod";
 import { adminAuth } from "../middleware/adminAuth";
 import { userAuth, requireRole, type AuthRequest } from "../middleware/userAuth.js";
+import { recordAuditLog } from "../lib/auditLog.js";
 import { z } from "zod/v4";
 
 const BulkAdActionSchema = z.object({
@@ -181,6 +182,14 @@ router.patch("/admin/ads/:id/status", adminAuth, async (req, res) => {
       .where(eq(adsTable.id, id))
       .returning();
     if (!updated) { res.status(404).json({ error: "Ad not found" }); return; }
+    await recordAuditLog({
+      req,
+      action: "ads.status_update",
+      targetType: "ad",
+      targetId: updated.id,
+      summary: `Statut de l'annonce "${updated.title}" changé en "${updated.status}"`,
+      metadata: { status: updated.status },
+    });
     res.json({ ...updated, createdAt: updated.createdAt.toISOString() });
   } catch (err) {
     req.log.error(err);
@@ -213,6 +222,14 @@ router.patch("/admin/ads/:id", adminAuth, async (req, res) => {
       .where(eq(adsTable.id, id))
       .returning();
     if (!updated) { res.status(404).json({ error: "Ad not found" }); return; }
+    await recordAuditLog({
+      req,
+      action: "ads.update",
+      targetType: "ad",
+      targetId: updated.id,
+      summary: `Annonce "${updated.title}" modifiée (${Object.keys(body).join(", ")})`,
+      metadata: { changedFields: Object.keys(body) },
+    });
     res.json({
       ...updated,
       createdAt: updated.createdAt.toISOString(),
@@ -229,6 +246,13 @@ router.delete("/admin/ads/:id", adminAuth, async (req, res) => {
   try {
     const { id } = DeleteAdParams.parse(req.params);
     await db.delete(adsTable).where(eq(adsTable.id, id));
+    await recordAuditLog({
+      req,
+      action: "ads.delete",
+      targetType: "ad",
+      targetId: id,
+      summary: `Annonce #${id} supprimée`,
+    });
     res.status(204).send();
   } catch (err) {
     req.log.error(err);
@@ -262,6 +286,13 @@ router.post("/admin/ads/bulk", adminAuth, async (req, res) => {
         .returning({ id: adsTable.id });
       affected = rows.length;
     }
+    await recordAuditLog({
+      req,
+      action: "ads.bulk_action",
+      targetType: "ad",
+      summary: `Action groupée "${action}" appliquée à ${affected} annonce(s)`,
+      metadata: { action, ids, affected },
+    });
     res.json({ affected });
   } catch (err) {
     req.log.error(err);
