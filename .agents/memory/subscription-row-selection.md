@@ -17,3 +17,9 @@ checkout attempt rather than being upserted in place.
 **How to apply:** Filter explicitly before ordering by recency — e.g. `isNotNull(stripeCustomerId)` for
 customer reuse, and an active-like status set (`active`, `trialing`, `past_due`) for "does this user have a
 subscription" checks — rather than relying on `orderBy(createdAt desc).limit(1)` alone.
+
+**Corollary for manually-granted (non-Stripe) subscriptions:** any admin "grant subscription" override that
+inserts a row without a real `stripeCustomerId` will be invisible to every one of those `isNotNull` checks
+(ad quota enforcement, billing portal, checkout customer reuse) unless it's given a synthetic
+`stripeCustomerId` (e.g. `manual-override-<userId>-<timestamp>`) so it satisfies the same filter as a real
+Stripe-backed row.

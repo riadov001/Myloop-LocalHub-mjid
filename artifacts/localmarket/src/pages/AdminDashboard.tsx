@@ -36,7 +36,7 @@ import {
   Share2, Wrench, Key, ChevronDown, ChevronRight, CreditCard, Heart, RefreshCw,
   Megaphone, Image, Video, Link2, ArrowUp, ArrowDown, ExternalLink,
   UserCircle, Phone, Lock, Mail, UsersRound, Search, Ban, LogIn,
-  ScrollText, ChevronLeft, X,
+  ScrollText, ChevronLeft, X, Download, Gift, ShieldOff,
 } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -827,15 +827,18 @@ function AnnoncesTab() {
         title="Gestion des annonces"
         description="Validez, rejetez ou supprimez les annonces soumises par les utilisateurs."
         action={
-          <Select value={statusFilter} onValueChange={(v) => { setStatusFilter(v); setSelected(new Set()); }}>
-            <SelectTrigger className="w-52"><SelectValue placeholder="Filtrer par statut" /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Toutes les annonces</SelectItem>
-              <SelectItem value="pending">En attente</SelectItem>
-              <SelectItem value="published">Publiées</SelectItem>
-              <SelectItem value="rejected">Rejetées</SelectItem>
-            </SelectContent>
-          </Select>
+          <div className="flex items-center gap-2">
+            <ExportButton path="/api/admin/export/ads" filename="annonces.csv" label="Exporter" />
+            <Select value={statusFilter} onValueChange={(v) => { setStatusFilter(v); setSelected(new Set()); }}>
+              <SelectTrigger className="w-52"><SelectValue placeholder="Filtrer par statut" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Toutes les annonces</SelectItem>
+                <SelectItem value="pending">En attente</SelectItem>
+                <SelectItem value="published">Publiées</SelectItem>
+                <SelectItem value="rejected">Rejetées</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         }
       />
 
@@ -2166,9 +2169,12 @@ function MembresTab() {
         title="Membres"
         description="Gérez les clients et marchands inscrits sur la plateforme."
         action={
-          <Button size="sm" className="gap-1.5" onClick={openCreate}>
-            <Plus className="h-4 w-4" /> Nouveau membre
-          </Button>
+          <div className="flex items-center gap-2">
+            <ExportButton path="/api/admin/export/users" filename="utilisateurs.csv" label="Exporter" />
+            <Button size="sm" className="gap-1.5" onClick={openCreate}>
+              <Plus className="h-4 w-4" /> Nouveau membre
+            </Button>
+          </div>
         }
       />
 
@@ -2318,6 +2324,43 @@ function getAdminHeaders() {
   };
 }
 
+/** Télécharge un export CSV protégé (nécessite le token admin dans les headers, donc pas un simple <a href>). */
+async function downloadCsvExport(path: string, filename: string, onError: () => void) {
+  try {
+    const res = await fetch(`${API_BASE}${path}`, { headers: { "x-admin-token": localStorage.getItem("adminToken") ?? "" } });
+    if (!res.ok) throw new Error();
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  } catch {
+    onError();
+  }
+}
+
+function ExportButton({ path, filename, label }: { path: string; filename: string; label: string }) {
+  const { toast } = useToast();
+  const [loading, setLoading] = useState(false);
+  return (
+    <Button
+      variant="outline" size="sm" className="gap-1.5"
+      disabled={loading}
+      onClick={async () => {
+        setLoading(true);
+        await downloadCsvExport(path, filename, () => toast({ title: "Erreur lors de l'export", variant: "destructive" }));
+        setLoading(false);
+      }}
+    >
+      {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />} {label}
+    </Button>
+  );
+}
+
 type SubStatus = "active" | "cancelled" | "past_due" | "trialing" | "expired" | "pending";
 type DonStatus = "pending" | "completed" | "failed" | "refunded";
 
@@ -2357,6 +2400,106 @@ function DonStatusBadge({ status }: { status: DonStatus }) {
   return <Badge className={cls}>{label}</Badge>;
 }
 
+interface PlanOption { id: number; name: string; }
+interface MemberOption { id: number; name: string; email: string; }
+
+function GrantSubscriptionDialog({ open, onOpenChange, onGranted }: { open: boolean; onOpenChange: (v: boolean) => void; onGranted: () => void }) {
+  const { toast } = useToast();
+  const [plans, setPlans] = useState<PlanOption[]>([]);
+  const [members, setMembers] = useState<MemberOption[]>([]);
+  const [userId, setUserId] = useState("");
+  const [planId, setPlanId] = useState("");
+  const [status, setStatus] = useState<SubStatus>("active");
+  const [periodEnd, setPeriodEnd] = useState("");
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    if (!open) return;
+    (async () => {
+      try {
+        const [plansRes, membersRes] = await Promise.all([
+          fetch(`${API_BASE}/api/admin/plans`, { headers: getAdminHeaders() }),
+          fetch(`${API_BASE}/api/admin/members`, { headers: getAdminHeaders() }),
+        ]);
+        setPlans(await plansRes.json());
+        setMembers(await membersRes.json());
+      } catch { toast({ title: "Erreur lors du chargement des plans/membres", variant: "destructive" }); }
+    })();
+  }, [open]);
+
+  const handleGrant = async () => {
+    if (!userId || !planId) { toast({ title: "Sélectionnez un membre et un plan", variant: "destructive" }); return; }
+    setSaving(true);
+    try {
+      const res = await fetch(`${API_BASE}/api/admin/payments/subscriptions/grant`, {
+        method: "POST", headers: getAdminHeaders(),
+        body: JSON.stringify({
+          userId: Number(userId), planId: Number(planId), status,
+          ...(periodEnd ? { currentPeriodEnd: new Date(periodEnd).toISOString() } : {}),
+        }),
+      });
+      if (!res.ok) throw new Error();
+      toast({ title: "Abonnement accordé manuellement" });
+      onOpenChange(false);
+      setUserId(""); setPlanId(""); setStatus("active"); setPeriodEnd("");
+      onGranted();
+    } catch { toast({ title: "Erreur lors de l'octroi de l'abonnement", variant: "destructive" }); }
+    finally { setSaving(false); }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Accorder un abonnement manuellement</DialogTitle>
+          <DialogDescription>Attribue un abonnement à un membre sans passer par Stripe. Utile pour corriger un problème de paiement ou offrir un accès.</DialogDescription>
+        </DialogHeader>
+        <div className="space-y-4">
+          <div>
+            <Label>Membre</Label>
+            <Select value={userId} onValueChange={setUserId}>
+              <SelectTrigger className="mt-1"><SelectValue placeholder="Choisir un membre" /></SelectTrigger>
+              <SelectContent>
+                {members.map(m => <SelectItem key={m.id} value={String(m.id)}>{m.name} ({m.email})</SelectItem>)}
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <Label>Plan</Label>
+            <Select value={planId} onValueChange={setPlanId}>
+              <SelectTrigger className="mt-1"><SelectValue placeholder="Choisir un plan" /></SelectTrigger>
+              <SelectContent>
+                {plans.map(p => <SelectItem key={p.id} value={String(p.id)}>{p.name}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <Label>Statut</Label>
+            <Select value={status} onValueChange={(v) => setStatus(v as SubStatus)}>
+              <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {(["active", "trialing", "past_due", "pending"] as SubStatus[]).map(s => (
+                  <SelectItem key={s} value={s}>{s}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <Label>Fin de période (optionnel)</Label>
+            <Input type="date" value={periodEnd} onChange={e => setPeriodEnd(e.target.value)} className="mt-1" />
+          </div>
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>Annuler</Button>
+          <Button onClick={handleGrant} disabled={saving} className="gap-1.5">
+            {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Gift className="h-4 w-4" />} Accorder
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 function PaiementsTab() {
   const { toast } = useToast();
   const [activeSection, setActiveSection] = useState<"subscriptions" | "donations">("subscriptions");
@@ -2365,6 +2508,7 @@ function PaiementsTab() {
   const [subStats, setSubStats] = useState<{ total: number; active: number; cancelled: number; pastDue: number } | null>(null);
   const [donTotal, setDonTotal] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [grantOpen, setGrantOpen] = useState(false);
 
   const load = async () => {
     setLoading(true);
@@ -2408,6 +2552,26 @@ function PaiementsTab() {
     } catch { toast({ title: "Erreur", variant: "destructive" }); }
   };
 
+  const revokeSub = async (id: number) => {
+    if (!confirm("Révoquer cet abonnement ? Le membre perdra immédiatement son accès.")) return;
+    try {
+      const res = await fetch(`${API_BASE}/api/admin/payments/subscriptions/${id}/revoke`, { method: "POST", headers: getAdminHeaders() });
+      if (!res.ok) throw new Error();
+      const updated = await res.json();
+      setSubs(prev => prev.map(s => s.id === id ? { ...s, status: updated.status, cancelAtPeriodEnd: updated.cancelAtPeriodEnd } : s));
+      toast({ title: "Abonnement révoqué" });
+    } catch { toast({ title: "Erreur", variant: "destructive" }); }
+  };
+
+  const markDonPaid = async (id: number) => {
+    try {
+      const res = await fetch(`${API_BASE}/api/admin/payments/donations/${id}/mark-paid`, { method: "POST", headers: getAdminHeaders() });
+      if (!res.ok) throw new Error();
+      setDons(prev => prev.map(d => d.id === id ? { ...d, status: "completed" } : d));
+      toast({ title: "Don marqué comme payé" });
+    } catch { toast({ title: "Erreur", variant: "destructive" }); }
+  };
+
   const updateDonStatus = async (id: number, status: DonStatus) => {
     try {
       const res = await fetch(`${API_BASE}/api/admin/payments/donations/${id}`, {
@@ -2430,13 +2594,26 @@ function PaiementsTab() {
 
   return (
     <div>
+      <GrantSubscriptionDialog open={grantOpen} onOpenChange={setGrantOpen} onGranted={load} />
       <TabHeader
         title="Paiements"
         description="Gérez les abonnements et les dons de la plateforme."
         action={
-          <Button variant="outline" size="sm" onClick={load} className="gap-1.5">
-            <RefreshCw className="h-4 w-4" /> Actualiser
-          </Button>
+          <div className="flex items-center gap-2">
+            <ExportButton
+              path={activeSection === "subscriptions" ? "/api/admin/export/subscriptions" : "/api/admin/export/donations"}
+              filename={activeSection === "subscriptions" ? "abonnements.csv" : "dons.csv"}
+              label="Exporter"
+            />
+            {activeSection === "subscriptions" && (
+              <Button size="sm" className="gap-1.5" onClick={() => setGrantOpen(true)}>
+                <Gift className="h-4 w-4" /> Accorder un abonnement
+              </Button>
+            )}
+            <Button variant="outline" size="sm" onClick={load} className="gap-1.5">
+              <RefreshCw className="h-4 w-4" /> Actualiser
+            </Button>
+          </div>
         }
       />
 
@@ -2530,6 +2707,11 @@ function PaiementsTab() {
                             ))}
                           </SelectContent>
                         </Select>
+                        {sub.status !== "cancelled" && (
+                          <Button variant="ghost" size="icon" className="h-7 w-7 text-amber-600 hover:text-amber-700" title="Révoquer" onClick={() => revokeSub(sub.id)}>
+                            <ShieldOff className="h-3.5 w-3.5" />
+                          </Button>
+                        )}
                         <Button variant="ghost" size="icon" className="h-7 w-7 text-red-500 hover:text-red-600" onClick={() => deleteSub(sub.id)}>
                           <Trash2 className="h-3.5 w-3.5" />
                         </Button>
@@ -2584,6 +2766,11 @@ function PaiementsTab() {
                             ))}
                           </SelectContent>
                         </Select>
+                        {don.status !== "completed" && (
+                          <Button variant="ghost" size="icon" className="h-7 w-7 text-green-600 hover:text-green-700" title="Marquer comme payé" onClick={() => markDonPaid(don.id)}>
+                            <CheckCircle2 className="h-3.5 w-3.5" />
+                          </Button>
+                        )}
                         <Button variant="ghost" size="icon" className="h-7 w-7 text-red-500 hover:text-red-600" onClick={() => deleteDon(don.id)}>
                           <Trash2 className="h-3.5 w-3.5" />
                         </Button>

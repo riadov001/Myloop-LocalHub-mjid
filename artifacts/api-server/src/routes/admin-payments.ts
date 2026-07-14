@@ -7,6 +7,98 @@ import { z } from "zod/v4";
 
 const router = Router();
 
+// ── Overrides manuels (bypass Stripe) ───────────────────────────
+
+/**
+ * POST /admin/payments/subscriptions/grant — Root/admin accorde manuellement un abonnement
+ * à un utilisateur sans passer par Stripe. On renseigne un stripeCustomerId synthétique
+ * ("manual-override-…") car plusieurs vérifications métier (limite d'annonces, portail
+ * Stripe) filtrent les abonnements sur `isNotNull(stripeCustomerId)` — sans ce marqueur,
+ * l'override serait ignoré par ces contrôles et n'aurait aucun effet réel sur le compte.
+ */
+router.post("/admin/payments/subscriptions/grant", adminAuth, async (req, res) => {
+  try {
+    const { userId, planId, status, currentPeriodEnd } = z.object({
+      userId: z.number().int().positive(),
+      planId: z.number().int().positive(),
+      status: z.enum(["active", "cancelled", "past_due", "trialing", "expired", "pending"]).default("active"),
+      currentPeriodEnd: z.string().datetime().optional(),
+    }).parse(req.body);
+
+    const [user] = await db.select().from(usersTable).where(eq(usersTable.id, userId)).limit(1);
+    if (!user) { res.status(404).json({ error: "Utilisateur introuvable." }); return; }
+    const [plan] = await db.select().from(plansTable).where(eq(plansTable.id, planId)).limit(1);
+    if (!plan) { res.status(404).json({ error: "Plan introuvable." }); return; }
+
+    const [sub] = await db.insert(subscriptionsTable).values({
+      userId,
+      planId,
+      status,
+      stripeCustomerId: `manual-override-${userId}-${Date.now()}`,
+      currentPeriodEnd: currentPeriodEnd ? new Date(currentPeriodEnd) : null,
+    }).returning();
+
+    await recordAuditLog({
+      req,
+      action: "payments.subscription_manual_grant",
+      targetType: "subscription",
+      targetId: sub.id,
+      summary: `Abonnement au plan "${plan.name}" accordé manuellement à "${user.name}" (${user.email})`,
+      metadata: { userId, planId, status },
+    });
+    res.status(201).json(sub);
+  } catch (err) {
+    req.log.error(err);
+    res.status(400).json({ error: "Données invalides." });
+  }
+});
+
+/** POST /admin/payments/subscriptions/:id/revoke — révoque manuellement un abonnement (bypass Stripe) */
+router.post("/admin/payments/subscriptions/:id/revoke", adminAuth, async (req, res) => {
+  try {
+    const id = Number(req.params.id);
+    const [sub] = await db.update(subscriptionsTable)
+      .set({ status: "cancelled", cancelAtPeriodEnd: true, updatedAt: new Date() })
+      .where(eq(subscriptionsTable.id, id))
+      .returning();
+    if (!sub) { res.status(404).json({ error: "Abonnement introuvable." }); return; }
+    await recordAuditLog({
+      req,
+      action: "payments.subscription_manual_revoke",
+      targetType: "subscription",
+      targetId: id,
+      summary: `Abonnement #${id} révoqué manuellement`,
+    });
+    res.json(sub);
+  } catch (err) {
+    req.log.error(err);
+    res.status(400).json({ error: "Données invalides." });
+  }
+});
+
+/** POST /admin/payments/donations/:id/mark-paid — marque manuellement un don comme payé (bypass Stripe) */
+router.post("/admin/payments/donations/:id/mark-paid", adminAuth, async (req, res) => {
+  try {
+    const id = Number(req.params.id);
+    const [don] = await db.update(donationsTable)
+      .set({ status: "completed" })
+      .where(eq(donationsTable.id, id))
+      .returning();
+    if (!don) { res.status(404).json({ error: "Don introuvable." }); return; }
+    await recordAuditLog({
+      req,
+      action: "payments.donation_manual_mark_paid",
+      targetType: "donation",
+      targetId: id,
+      summary: `Don #${id} marqué manuellement comme payé`,
+    });
+    res.json(don);
+  } catch (err) {
+    req.log.error(err);
+    res.status(400).json({ error: "Données invalides." });
+  }
+});
+
 // ── Abonnements ──────────────────────────────────────────────
 
 /** GET /admin/payments/subscriptions — liste tous les abonnements */

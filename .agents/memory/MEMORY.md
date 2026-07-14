@@ -16,3 +16,4 @@
 - [Root credentials fully secret-backed](root-credentials-secret-backed.md) — Both `ROOT_ADMIN_EMAIL` and `ROOT_ADMIN_PASSWORD` are required production secrets; no root identity is hardcoded in source.
 - [Impersonation session pattern](impersonation-session-pattern.md) — Root-issued user JWT carries `impersonatedByRoot` claim; frontend backs up the admin token and shows a banner while impersonating.
 - [Admin audit log](admin-audit-log.md) — every admin/root write calls `recordAuditLog`; never log full API response bodies that echo back ROOT_ADMIN_EMAIL during testing.
+- [audit_logs table can be missing](audit-log-table-missing.md) — recordAuditLog swallows DB errors, so a missing audit_logs table silently kills all audit logging; check with psql, fix via `drizzle-kit push`.
