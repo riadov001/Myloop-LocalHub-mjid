@@ -1,11 +1,70 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
-import { Menu, Activity, Heart, LogOut, User, X, ShieldAlert } from "lucide-react";
+import { Menu, Activity, Heart, LogOut, User, X, ShieldAlert, AlertTriangle, CheckCircle2, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { useHealthCheck } from "@workspace/api-client-react";
+import { useHealthCheck, useListActiveAnnouncements } from "@workspace/api-client-react";
 import { useTranslation } from "react-i18next";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+
+const ANNOUNCEMENT_STYLES: Record<string, { icon: typeof Info; classes: string }> = {
+  info: { icon: Info, classes: "bg-blue-600 text-white" },
+  warning: { icon: AlertTriangle, classes: "bg-amber-500 text-white" },
+  success: { icon: CheckCircle2, classes: "bg-emerald-600 text-white" },
+};
+
+const DISMISSED_ANNOUNCEMENTS_KEY = "dismissedAnnouncementIds";
+
+function useDismissedAnnouncements() {
+  const [dismissed, setDismissed] = useState<number[]>(() => {
+    if (typeof window === "undefined") return [];
+    try {
+      return JSON.parse(localStorage.getItem(DISMISSED_ANNOUNCEMENTS_KEY) ?? "[]");
+    } catch {
+      return [];
+    }
+  });
+
+  const dismiss = (id: number) => {
+    const next = [...dismissed, id];
+    setDismissed(next);
+    localStorage.setItem(DISMISSED_ANNOUNCEMENTS_KEY, JSON.stringify(next));
+  };
+
+  return { dismissed, dismiss };
+}
+
+function AnnouncementBanner() {
+  const { data: announcements } = useListActiveAnnouncements();
+  const { dismissed, dismiss } = useDismissedAnnouncements();
+
+  const visible = announcements?.filter(a => !dismissed.includes(a.id)) ?? [];
+  if (visible.length === 0) return null;
+
+  return (
+    <div className="flex flex-col">
+      {visible.map(a => {
+        const style = ANNOUNCEMENT_STYLES[a.style] ?? ANNOUNCEMENT_STYLES.info;
+        const Icon = style.icon;
+        return (
+          <div key={a.id} className={`px-4 py-2.5 text-sm font-medium flex items-center justify-between gap-3 ${style.classes}`}>
+            <div className="flex items-center gap-2 min-w-0">
+              <Icon className="h-4 w-4 shrink-0" />
+              <span className="truncate">{a.message}</span>
+            </div>
+            <button
+              aria-label="Fermer l'annonce"
+              className="shrink-0 opacity-80 hover:opacity-100"
+              onClick={() => dismiss(a.id)}
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
 
 function parseJwtPayload(token: string): { impersonatedByRoot?: boolean; [key: string]: unknown } | null {
   try {
@@ -103,6 +162,7 @@ export function PublicLayout({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="min-h-[100dvh] flex flex-col bg-background font-sans text-foreground">
+      <AnnouncementBanner />
       <header
         className={`sticky top-0 z-50 w-full border-b transition-all duration-200 ${
           scrolled

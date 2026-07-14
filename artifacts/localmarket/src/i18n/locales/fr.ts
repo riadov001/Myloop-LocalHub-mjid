@@ -472,6 +472,7 @@ const fr = {
       audit_log: "Journal d'audit",
       members: "Membres",
       profile: "Mon profil",
+      announcements: "Annonces du site",
     },
     header: {
       title: "Cockpit Admin",

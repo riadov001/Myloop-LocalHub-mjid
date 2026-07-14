@@ -21,6 +21,8 @@ tags:
     description: Categories
   - name: units
     description: Units of measure
+  - name: announcements
+    description: Site-wide announcement banners
 paths:
   /healthz:
     get:
@@ -1189,6 +1191,99 @@ paths:
                 items:
                   type: string
 
+  /admin/announcements:
+    get:
+      operationId: adminListAnnouncements
+      tags: [announcements]
+      summary: Admin - list all announcements
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: All announcements
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Announcement"
+    post:
+      operationId: adminCreateAnnouncement
+      tags: [announcements]
+      summary: Admin - create an announcement
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AnnouncementInput"
+      responses:
+        "201":
+          description: Created announcement
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Announcement"
+
+  /admin/announcements/{id}:
+    put:
+      operationId: adminUpdateAnnouncement
+      tags: [announcements]
+      summary: Admin - update an announcement
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AnnouncementInput"
+      responses:
+        "200":
+          description: Updated announcement
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Announcement"
+    delete:
+      operationId: adminDeleteAnnouncement
+      tags: [announcements]
+      summary: Admin - delete an announcement
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /announcements/active:
+    get:
+      operationId: listActiveAnnouncements
+      tags: [announcements]
+      summary: Public - currently active announcements
+      responses:
+        "200":
+          description: Active announcements
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Announcement"
+
   /admin/login:
     post:
       operationId: adminLogin
@@ -1586,6 +1681,52 @@ components:
       properties:
         value:
           type: string
+
+    Announcement:
+      type: object
+      required: [id, message, style, isActive, createdBy, createdAt, updatedAt]
+      properties:
+        id:
+          type: integer
+        message:
+          type: string
+        style:
+          type: string
+          enum: [info, warning, success]
+        isActive:
+          type: boolean
+        startsAt:
+          type: ["string", "null"]
+          format: date-time
+        endsAt:
+          type: ["string", "null"]
+          format: date-time
+        createdBy:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    AnnouncementInput:
+      type: object
+      required: [message]
+      properties:
+        message:
+          type: string
+        style:
+          type: string
+          enum: [info, warning, success]
+        isActive:
+          type: boolean
+        startsAt:
+          type: ["string", "null"]
+          format: date-time
+        endsAt:
+          type: ["string", "null"]
+          format: date-time
 
     AdminCredentials:
       type: object

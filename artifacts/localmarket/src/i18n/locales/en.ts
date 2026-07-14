@@ -472,6 +472,7 @@ const en = {
       audit_log: "Audit log",
       members: "Members",
       profile: "My profile",
+      announcements: "Site announcements",
     },
     header: {
       title: "Admin Cockpit",

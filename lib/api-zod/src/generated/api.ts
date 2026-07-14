@@ -1115,6 +1115,88 @@ export const AdminListAuditLogActionsResponse = zod.array(AdminListAuditLogActio
 
 
 /**
+ * @summary Admin - list all announcements
+ */
+export const AdminListAnnouncementsResponseItem = zod.object({
+  "id": zod.number(),
+  "message": zod.string(),
+  "style": zod.enum(['info', 'warning', 'success']),
+  "isActive": zod.boolean(),
+  "startsAt": zod.coerce.date().nullish(),
+  "endsAt": zod.coerce.date().nullish(),
+  "createdBy": zod.string(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date()
+})
+export const AdminListAnnouncementsResponse = zod.array(AdminListAnnouncementsResponseItem)
+
+
+/**
+ * @summary Admin - create an announcement
+ */
+export const AdminCreateAnnouncementBody = zod.object({
+  "message": zod.string(),
+  "style": zod.enum(['info', 'warning', 'success']).optional(),
+  "isActive": zod.boolean().optional(),
+  "startsAt": zod.coerce.date().nullish(),
+  "endsAt": zod.coerce.date().nullish()
+})
+
+
+/**
+ * @summary Admin - update an announcement
+ */
+export const AdminUpdateAnnouncementParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const AdminUpdateAnnouncementBody = zod.object({
+  "message": zod.string(),
+  "style": zod.enum(['info', 'warning', 'success']).optional(),
+  "isActive": zod.boolean().optional(),
+  "startsAt": zod.coerce.date().nullish(),
+  "endsAt": zod.coerce.date().nullish()
+})
+
+export const AdminUpdateAnnouncementResponse = zod.object({
+  "id": zod.number(),
+  "message": zod.string(),
+  "style": zod.enum(['info', 'warning', 'success']),
+  "isActive": zod.boolean(),
+  "startsAt": zod.coerce.date().nullish(),
+  "endsAt": zod.coerce.date().nullish(),
+  "createdBy": zod.string(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date()
+})
+
+
+/**
+ * @summary Admin - delete an announcement
+ */
+export const AdminDeleteAnnouncementParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+
+/**
+ * @summary Public - currently active announcements
+ */
+export const ListActiveAnnouncementsResponseItem = zod.object({
+  "id": zod.number(),
+  "message": zod.string(),
+  "style": zod.enum(['info', 'warning', 'success']),
+  "isActive": zod.boolean(),
+  "startsAt": zod.coerce.date().nullish(),
+  "endsAt": zod.coerce.date().nullish(),
+  "createdBy": zod.string(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date()
+})
+export const ListActiveAnnouncementsResponse = zod.array(ListActiveAnnouncementsResponseItem)
+
+
+/**
  * @summary Admin login
  */
 export const AdminLoginBody = zod.object({

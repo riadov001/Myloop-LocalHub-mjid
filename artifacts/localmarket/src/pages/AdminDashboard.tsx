@@ -27,6 +27,8 @@ import {
   useAdminListMembers, useAdminCreateMember, useAdminUpdateMember, useAdminDeleteMember,
   useAdminSuspendMember, useAdminUnsuspendMember, useAdminImpersonateMember,
   useAdminListAuditLog, useAdminListAuditLogActions,
+  useAdminListAnnouncements, useAdminCreateAnnouncement, useAdminUpdateAnnouncement, useAdminDeleteAnnouncement,
+  type Announcement,
 } from "@workspace/api-client-react";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -36,7 +38,7 @@ import {
   Share2, Wrench, Key, ChevronDown, ChevronRight, CreditCard, Heart, RefreshCw,
   Megaphone, Image, Video, Link2, ArrowUp, ArrowDown, ExternalLink,
   UserCircle, Phone, Lock, Mail, UsersRound, Search, Ban, LogIn,
-  ScrollText, ChevronLeft, X, Download, Gift, ShieldOff,
+  ScrollText, ChevronLeft, X, Download, Gift, ShieldOff, Radio, Calendar,
 } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -74,6 +76,8 @@ export default function AdminDashboard() {
         {activeTab === "admins" && role !== "root" && <RootOnlyNotice />}
         {activeTab === "audit-log" && role === "root" && <AuditLogTab />}
         {activeTab === "audit-log" && role !== "root" && <RootOnlyNotice />}
+        {activeTab === "announcements" && role === "root" && <AnnouncementsTab />}
+        {activeTab === "announcements" && role !== "root" && <RootOnlyNotice />}
       </div>
     </AdminLayout>
   );
@@ -318,6 +322,236 @@ function ModesTab() {
           })}
         </div>
       )}
+    </div>
+  );
+}
+
+const ANNOUNCEMENT_STYLES: { value: "info" | "warning" | "success"; label: string }[] = [
+  { value: "info", label: "Information" },
+  { value: "warning", label: "Avertissement" },
+  { value: "success", label: "Succès" },
+];
+
+function AnnouncementsTab() {
+  const { toast } = useToast();
+  const { data: announcements, isLoading, refetch } = useAdminListAnnouncements();
+  const createAnnouncement = useAdminCreateAnnouncement();
+  const updateAnnouncement = useAdminUpdateAnnouncement();
+  const deleteAnnouncement = useAdminDeleteAnnouncement();
+
+  const emptyForm = {
+    message: "",
+    style: "info" as "info" | "warning" | "success",
+    isActive: true,
+    startsAt: "",
+    endsAt: "",
+  };
+  const [showForm, setShowForm] = useState(false);
+  const [form, setForm] = useState(emptyForm);
+  const [editingId, setEditingId] = useState<number | null>(null);
+
+  const setField = <K extends keyof typeof emptyForm>(k: K, v: typeof emptyForm[K]) =>
+    setForm(f => ({ ...f, [k]: v }));
+
+  const cancel = () => { setEditingId(null); setForm(emptyForm); setShowForm(false); };
+
+  const buildPayload = () => ({
+    message: form.message,
+    style: form.style,
+    isActive: form.isActive,
+    startsAt: form.startsAt ? new Date(form.startsAt).toISOString() : null,
+    endsAt: form.endsAt ? new Date(form.endsAt).toISOString() : null,
+  });
+
+  const handleCreate = () => {
+    if (!form.message.trim()) return;
+    createAnnouncement.mutate(
+      { data: buildPayload() },
+      {
+        onSuccess: () => { toast({ title: "Annonce créée." }); cancel(); refetch(); },
+        onError: () => toast({ title: "Erreur lors de la création", variant: "destructive" }),
+      }
+    );
+  };
+
+  const startEdit = (a: Announcement) => {
+    setEditingId(a.id);
+    setForm({
+      message: a.message,
+      style: a.style,
+      isActive: a.isActive,
+      startsAt: a.startsAt ? a.startsAt.slice(0, 16) : "",
+      endsAt: a.endsAt ? a.endsAt.slice(0, 16) : "",
+    });
+    setShowForm(true);
+  };
+
+  const handleUpdate = () => {
+    if (!editingId) return;
+    updateAnnouncement.mutate(
+      { id: editingId, data: buildPayload() },
+      {
+        onSuccess: () => { toast({ title: "Annonce mise à jour." }); cancel(); refetch(); },
+        onError: () => toast({ title: "Erreur lors de la mise à jour", variant: "destructive" }),
+      }
+    );
+  };
+
+  const handleDelete = (id: number) => {
+    if (!confirm("Supprimer cette annonce ?")) return;
+    deleteAnnouncement.mutate(
+      { id },
+      {
+        onSuccess: () => { toast({ title: "Annonce supprimée." }); refetch(); },
+        onError: () => toast({ title: "Erreur lors de la suppression", variant: "destructive" }),
+      }
+    );
+  };
+
+  const handleToggleActive = (a: Announcement) => {
+    updateAnnouncement.mutate(
+      {
+        id: a.id,
+        data: {
+          message: a.message,
+          style: a.style,
+          isActive: !a.isActive,
+          startsAt: a.startsAt,
+          endsAt: a.endsAt,
+        },
+      },
+      {
+        onSuccess: () => { toast({ title: a.isActive ? "Annonce désactivée." : "Annonce activée." }); refetch(); },
+        onError: () => toast({ title: "Erreur", variant: "destructive" }),
+      }
+    );
+  };
+
+  const styleBadge = (style: string) => {
+    if (style === "warning") return <Badge variant="outline" className="text-amber-600 border-amber-300 text-xs gap-1"><AlertTriangle className="h-3 w-3" /> Avertissement</Badge>;
+    if (style === "success") return <Badge variant="outline" className="text-green-600 border-green-300 text-xs gap-1"><CheckCircle2 className="h-3 w-3" /> Succès</Badge>;
+    return <Badge variant="outline" className="text-blue-600 border-blue-300 text-xs gap-1"><Radio className="h-3 w-3" /> Information</Badge>;
+  };
+
+  return (
+    <div className="space-y-6">
+      <TabHeader
+        title="Annonces du site"
+        description="Diffusez une bannière visible par tous les visiteurs pour communiquer une information importante (maintenance, nouveauté, changement de politique...)."
+        action={
+          <Button onClick={() => { cancel(); setShowForm(true); }} className="gap-2">
+            <Plus className="h-4 w-4" /> Nouvelle annonce
+          </Button>
+        }
+      />
+
+      {showForm && (
+        <Card className="border-primary/20">
+          <CardHeader className="bg-muted/30 border-b pb-4">
+            <CardTitle className="text-base">{editingId ? "Modifier l'annonce" : "Nouvelle annonce"}</CardTitle>
+          </CardHeader>
+          <CardContent className="pt-5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-1 sm:col-span-2">
+                <Label>Message *</Label>
+                <Textarea
+                  placeholder="La plateforme sera en maintenance le 20 juillet de 2h à 4h."
+                  value={form.message}
+                  onChange={e => setField("message", e.target.value)}
+                  rows={3}
+                />
+              </div>
+              <div className="space-y-1">
+                <Label>Type</Label>
+                <Select value={form.style} onValueChange={(v: "info" | "warning" | "success") => setField("style", v)}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {ANNOUNCEMENT_STYLES.map(s => (
+                      <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex items-center gap-2 pt-6">
+                <Switch checked={form.isActive} onCheckedChange={v => setField("isActive", v)} />
+                <Label>Annonce active</Label>
+              </div>
+              <div className="space-y-1">
+                <Label>Début (optionnel)</Label>
+                <Input type="datetime-local" value={form.startsAt} onChange={e => setField("startsAt", e.target.value)} />
+              </div>
+              <div className="space-y-1">
+                <Label>Fin (optionnel)</Label>
+                <Input type="datetime-local" value={form.endsAt} onChange={e => setField("endsAt", e.target.value)} />
+              </div>
+            </div>
+            <p className="text-xs text-muted-foreground mt-2">
+              Sans dates, l'annonce reste visible tant qu'elle est active. Avec des dates, elle ne s'affiche automatiquement que pendant cette période.
+            </p>
+            <div className="flex gap-2 mt-5">
+              <Button onClick={editingId ? handleUpdate : handleCreate} disabled={createAnnouncement.isPending || updateAnnouncement.isPending}>
+                {editingId ? "Enregistrer" : "Créer l'annonce"}
+              </Button>
+              <Button variant="ghost" onClick={cancel}>Annuler</Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      <Card className="border-border/50">
+        <CardContent className="p-0 overflow-x-auto">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Message</TableHead>
+                <TableHead>Type</TableHead>
+                <TableHead>Période</TableHead>
+                <TableHead>Statut</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {isLoading ? (
+                <TableRow><TableCell colSpan={5} className="text-center py-8"><Loader2 className="h-5 w-5 animate-spin inline" /></TableCell></TableRow>
+              ) : announcements?.length ? announcements.map((a) => (
+                <TableRow key={a.id}>
+                  <TableCell className="max-w-[320px] truncate" title={a.message}>{a.message}</TableCell>
+                  <TableCell>{styleBadge(a.style)}</TableCell>
+                  <TableCell className="text-xs text-muted-foreground">
+                    {a.startsAt || a.endsAt ? (
+                      <span className="flex items-center gap-1">
+                        <Calendar className="h-3 w-3 shrink-0" />
+                        {a.startsAt ? format(new Date(a.startsAt), "dd MMM yyyy HH:mm", { locale: fr }) : "…"}
+                        {" → "}
+                        {a.endsAt ? format(new Date(a.endsAt), "dd MMM yyyy HH:mm", { locale: fr }) : "…"}
+                      </span>
+                    ) : "Sans limite"}
+                  </TableCell>
+                  <TableCell>
+                    <button onClick={() => handleToggleActive(a)}>
+                      {a.isActive ? (
+                        <Badge variant="outline" className="text-green-600 border-green-300 text-xs">Active</Badge>
+                      ) : (
+                        <Badge variant="outline" className="text-muted-foreground text-xs">Inactive</Badge>
+                      )}
+                    </button>
+                  </TableCell>
+                  <TableCell className="text-right space-x-2">
+                    <Button size="icon" variant="outline" className="h-8 w-8" onClick={() => startEdit(a)}>
+                      <Pencil className="h-3 w-3" />
+                    </Button>
+                    <Button size="icon" variant="outline" className="h-8 w-8 text-destructive hover:bg-destructive/10" onClick={() => handleDelete(a.id)}>
+                      <Trash2 className="h-3 w-3" />
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              )) : (
+                <TableRow><TableCell colSpan={5} className="text-center py-10 text-muted-foreground">Aucune annonce créée pour le moment.</TableCell></TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
     </div>
   );
 }

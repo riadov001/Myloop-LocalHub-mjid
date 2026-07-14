@@ -23,6 +23,7 @@ import adminProfileRouter from "./admin-profile";
 import adminMembersRouter from "./admin-members";
 import adminAuditLogRouter from "./admin-audit-log";
 import adminExportRouter from "./admin-export";
+import announcementsRouter from "./announcements";
 
 const router: IRouter = Router();
 
@@ -50,5 +51,6 @@ router.use(adminProfileRouter);
 router.use(adminMembersRouter);
 router.use(adminAuditLogRouter);
 router.use(adminExportRouter);
+router.use(announcementsRouter);
 
 export default router;

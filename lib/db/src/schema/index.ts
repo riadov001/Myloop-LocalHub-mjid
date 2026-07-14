@@ -12,3 +12,4 @@ export * from "./donations";
 export * from "./ad-views";
 export * from "./advertisements";
 export * from "./audit-log";
+export * from "./announcements";

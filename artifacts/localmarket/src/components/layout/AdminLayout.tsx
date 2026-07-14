@@ -3,7 +3,7 @@ import { Link, useLocation } from "wouter";
 import {
   LayoutDashboard, LogOut, Settings, Palette, List, Tag, Scale,
   Star, Users, Shield, ToggleLeft, ChevronRight, Menu, CreditCard, Megaphone, UserCircle, UsersRound,
-  ScrollText,
+  ScrollText, Radio,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -44,6 +44,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
     { tab: "publicites", label: t("admin.nav.ads_promo"), icon: Megaphone, roles: ["root", "admin"] },
     { tab: "plans", label: t("admin.nav.plans"), icon: Star, roles: ["root", "admin"] },
     { tab: "modes", label: t("admin.nav.modes"), icon: ToggleLeft, roles: ["root", "admin"] },
+    { tab: "announcements", label: t("admin.nav.announcements"), icon: Radio, roles: ["root"] },
     { tab: "categories", label: t("admin.nav.categories"), icon: Tag, roles: ["root", "admin"] },
     { tab: "unites", label: t("admin.nav.units"), icon: Scale, roles: ["root", "admin"] },
     { tab: "branding", label: t("admin.nav.branding"), icon: Palette, roles: ["root", "admin"] },
@@ -96,7 +97,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
             >
               <item.icon className={cn("h-4 w-4 shrink-0", isActive ? "text-primary-foreground" : "text-sidebar-foreground/50 group-hover:text-sidebar-accent-foreground")} />
               <span className="flex-1 text-left">{item.label}</span>
-              {(item.tab === "admins" || item.tab === "audit-log") && (
+              {(item.tab === "admins" || item.tab === "audit-log" || item.tab === "announcements") && (
                 <Shield className="h-3 w-3 text-amber-400 shrink-0" />
               )}
               {isActive && <ChevronRight className="h-3 w-3 shrink-0 opacity-60" />}

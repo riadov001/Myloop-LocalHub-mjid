@@ -307,6 +307,48 @@ export interface PlatformConfigInput {
   value: string;
 }
 
+export type AnnouncementStyle = typeof AnnouncementStyle[keyof typeof AnnouncementStyle];
+
+
+export const AnnouncementStyle = {
+  info: 'info',
+  warning: 'warning',
+  success: 'success',
+} as const;
+
+export interface Announcement {
+  id: number;
+  message: string;
+  style: AnnouncementStyle;
+  isActive: boolean;
+  /** @nullable */
+  startsAt?: string | null;
+  /** @nullable */
+  endsAt?: string | null;
+  createdBy: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type AnnouncementInputStyle = typeof AnnouncementInputStyle[keyof typeof AnnouncementInputStyle];
+
+
+export const AnnouncementInputStyle = {
+  info: 'info',
+  warning: 'warning',
+  success: 'success',
+} as const;
+
+export interface AnnouncementInput {
+  message: string;
+  style?: AnnouncementInputStyle;
+  isActive?: boolean;
+  /** @nullable */
+  startsAt?: string | null;
+  /** @nullable */
+  endsAt?: string | null;
+}
+
 export interface AdminCredentials {
   email: string;
   password: string;
