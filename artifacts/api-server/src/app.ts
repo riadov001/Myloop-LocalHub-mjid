@@ -2,6 +2,8 @@ import express, { type Express } from "express";
 import cors from "cors";
 import compression from "compression";
 import pinoHttp from "pino-http";
+import path from "path";
+import { fileURLToPath } from "url";
 import router from "./routes";
 import { logger } from "./lib/logger";
 
@@ -49,5 +51,17 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use("/api", router);
+
+// In production, serve the compiled frontend from dist/public/
+// The build script copies the Vite output there alongside this bundle.
+if (process.env.NODE_ENV === "production") {
+  const __dirname = path.dirname(fileURLToPath(import.meta.url));
+  const publicDir = path.join(__dirname, "public");
+  app.use(express.static(publicDir));
+  // SPA fallback: every non-API route returns index.html
+  app.get("*", (_req, res) => {
+    res.sendFile(path.join(publicDir, "index.html"));
+  });
+}
 
 export default app;
