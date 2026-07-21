@@ -17,3 +17,4 @@
 - [Impersonation session pattern](impersonation-session-pattern.md) — Root-issued user JWT carries `impersonatedByRoot` claim; frontend backs up the admin token and shows a banner while impersonating.
 - [Admin audit log](admin-audit-log.md) — every admin/root write calls `recordAuditLog`; never log full API response bodies that echo back ROOT_ADMIN_EMAIL during testing.
 - [audit_logs table can be missing](audit-log-table-missing.md) — recordAuditLog swallows DB errors, so a missing audit_logs table silently kills all audit logging; check with psql, fix via `drizzle-kit push`.
+- [Supabase migration](supabase-migration.md) — project mfystptkbirotqpeyxfr (eu-west-1); URL sanitizer in lib/db handles encoding; Express 5 SPA wildcard must be `"(.*)"` not `"*"`.

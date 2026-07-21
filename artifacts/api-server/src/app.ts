@@ -59,7 +59,8 @@ if (process.env.NODE_ENV === "production") {
   const publicDir = path.join(__dirname, "public");
   app.use(express.static(publicDir));
   // SPA fallback: every non-API route returns index.html
-  app.get("*", (_req, res) => {
+  // Express 5 / path-to-regexp v8 requires a named wildcard, not bare "*"
+  app.get("(.*)", (_req, res) => {
     res.sendFile(path.join(publicDir, "index.html"));
   });
 }
