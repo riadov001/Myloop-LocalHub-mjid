@@ -18,3 +18,4 @@
 - [Admin audit log](admin-audit-log.md) — every admin/root write calls `recordAuditLog`; never log full API response bodies that echo back ROOT_ADMIN_EMAIL during testing.
 - [audit_logs table can be missing](audit-log-table-missing.md) — recordAuditLog swallows DB errors, so a missing audit_logs table silently kills all audit logging; check with psql, fix via `drizzle-kit push`.
 - [Supabase migration](supabase-migration.md) — project mfystptkbirotqpeyxfr (eu-west-1); URL sanitizer in lib/db handles encoding; Express 5 SPA wildcard must be `"(.*)"` not `"*"`.
+- [Supabase drizzle-kit SSL](supabase-drizzle-kit-ssl.md) — drizzle-kit push needs NODE_TLS_REJECT_UNAUTHORIZED=0 + session pooler (port 5432); direct host is IPv6-only/unreachable; SUPABASE_DATABASE_URL must be the pooler URL.
