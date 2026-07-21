@@ -39,6 +39,7 @@ channel = "stable-25_05"
 
 [userenv.shared]
 RESEND_FROM_EMAIL = "Contact@jatek.app"
+VITE_SUPABASE_URL = "https://mfystptkbirotqpeyxfr.supabase.co"
 
 [objectStorage]
 defaultBucketID = "replit-objstore-58cd32a4-2845-4fcc-8012-f156cd1436dc"
