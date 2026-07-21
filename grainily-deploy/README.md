@@ -23,20 +23,41 @@
    postgresql://postgres.VOTRE_REF:MOT_DE_PASSE@aws-0-eu-west-1.pooler.supabase.com:5432/postgres
    ```
 
-### 1c. Appliquer le schéma
-Depuis ce projet Replit (une seule fois), avec `SUPABASE_DATABASE_URL` pointant vers Supabase :
+### 1c. Appliquer le schéma et migrer les données
+
+Un script dédié automatise le push du schéma Drizzle **et** la migration des données :
+
 ```bash
-cd lib/db
-SUPABASE_DATABASE_URL="postgresql://..." pnpm run push
+# Depuis la racine du projet Replit
+SUPABASE_DATABASE_URL="postgresql://postgres.REF:PASS@aws-0-eu-west-1.pooler.supabase.com:5432/postgres" \
+  bash scripts/migrate-to-supabase.sh
 ```
 
-### 1d. Migrer les données existantes (si besoin)
-```bash
-# Exporter depuis Replit Postgres
-pg_dump "$DATABASE_URL" --no-owner --no-acl -f backup.sql
+Le script (`scripts/migrate-to-supabase.sh`) :
+1. Vérifie la connectivité aux deux bases
+2. Exécute `drizzle-kit push` vers Supabase (idempotent)
+3. Exporte les données depuis Replit Postgres (`pg_dump --data-only`)
+4. Tronque toutes les tables Supabase (CASCADE) pour éviter les doublons
+5. Importe les données
+6. Affiche les nombres de lignes source vs. destination pour validation
 
-# Importer dans Supabase
-psql "postgresql://postgres.REF:PASS@aws-0-eu-west-1.pooler.supabase.com:5432/postgres" -f backup.sql
+> **Important** : `SUPABASE_DATABASE_URL` doit pointer vers l'URL **Session-mode pooler** (port 5432).
+> Le host direct `db.xxx.supabase.co:5432` est injoignable depuis Replit (IPv6 uniquement).
+
+### Validation post-migration
+
+```bash
+# Vérifier la connectivité et le schéma
+psql "$SUPABASE_DATABASE_URL" -c "SELECT version();"
+
+# Compter les lignes dans les tables principales
+psql "$SUPABASE_DATABASE_URL" -c "
+SELECT 'users' AS tbl, COUNT(*) FROM users
+UNION ALL SELECT 'admin_users', COUNT(*) FROM admin_users
+UNION ALL SELECT 'ads', COUNT(*) FROM ads
+UNION ALL SELECT 'platform_config', COUNT(*) FROM platform_config
+ORDER BY tbl;
+"
 ```
 
 ---

@@ -60,7 +60,7 @@ if (process.env.NODE_ENV === "production") {
   app.use(express.static(publicDir));
   // SPA fallback: every non-API route returns index.html
   // Express 5 / path-to-regexp v8 requires a named wildcard, not bare "*"
-  app.get("(.*)", (_req, res) => {
+  app.get("/{*splat}", (_req, res) => {
     res.sendFile(path.join(publicDir, "index.html"));
   });
 }
